@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy-900: #101827;
+  --color-navy-800: #1a2332;
+  --color-navy-700: #243044;
+  --color-navy-600: #2e3d55;
+  --color-gold-500: #D6AD60;
+  --color-gold-400: #e0be78;
+  --color-gold-300: #ebd09a;
+  --color-gold-600: #c49a3c;
+  --color-cream: #FFF8F0;
+  --color-cream-dark: #f0e6d6;
+
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-navy-900 text-cream font-sans antialiased;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .btn-gold {
+    @apply bg-gold-500 text-navy-900 font-semibold px-6 py-3 rounded-lg
+           hover:bg-gold-400 transition-all duration-200 active:scale-95;
+  }
+
+  .btn-outline {
+    @apply border border-gold-500/30 text-gold-300 px-6 py-3 rounded-lg
+           hover:bg-gold-500/10 transition-all duration-200 active:scale-95;
+  }
+
+  .card {
+    @apply bg-navy-800 border border-gold-500/10 rounded-xl p-6;
+  }
+
+  .verse-number {
+    @apply text-gold-500 text-xs font-sans font-bold align-super mr-1 select-none;
+  }
+
+  .verse-text {
+    @apply text-cream/90 leading-relaxed;
+  }
+
+  .verse-highlight {
+    @apply bg-gold-500/15 rounded px-1 -mx-1;
+  }
+
+  .nav-link {
+    @apply text-cream/60 hover:text-gold-400 transition-colors duration-200 text-sm font-medium;
+  }
+
+  .nav-link-active {
+    @apply text-gold-400;
+  }
+}
