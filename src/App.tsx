@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import LibraryPage from './pages/LibraryPage';
 import ReadPage from './pages/ReadPage';
 import MemorizePage from './pages/MemorizePage';
+import MyVersesPage from './pages/MyVersesPage';
 import ProgressPage from './pages/ProgressPage';
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
           <Route path='/library' element={<LibraryPage />} />
           <Route path='/read/:chapter' element={<ReadPage />} />
           <Route path='/memorize' element={<MemorizePage />} />
+          <Route path='/my-verses' element={<MyVersesPage />} />
           <Route path='/progress' element={<ProgressPage />} />
         </Routes>
       </Layout>

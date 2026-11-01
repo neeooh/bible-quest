@@ -5,7 +5,8 @@ import { BookOpen, Menu, X } from 'lucide-react';
 const links = [
   { to: '/', label: 'Home' },
   { to: '/library', label: 'Library' },
-  { to: '/memorize', label: 'Memorize' },
+  { to: '/memorize', label: 'Memorise' },
+  { to: '/my-verses', label: 'My Verses' },
   { to: '/progress', label: 'Progress' },
 ];
 

@@ -8,12 +8,13 @@ export interface CompareResult {
   words: WordResult[];
 }
 
-/** Lowercase the word and strip leading/trailing punctuation. */
+/** Lowercase the word, normalise apostrophes, and strip leading/trailing punctuation. */
 export function normalizeWord(word: string): string {
   return word
     .toLowerCase()
-    .replace(/^[^a-z0-9]+/, '')
-    .replace(/[^a-z0-9]+$/, '');
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u0060\u00B4]/g, "'")
+    .replace(/^[^a-z0-9']+/, '')
+    .replace(/[^a-z0-9']+$/, '');
 }
 
 /**

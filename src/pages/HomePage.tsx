@@ -3,30 +3,37 @@ import { Link } from 'react-router-dom';
 import { BookOpen, Flame, Trophy, Star, Copy, ArrowRight, Check } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
 import { useProgress } from '../hooks/useProgress';
+import { showToast } from '../components/Toast';
 
 export default function HomePage() {
   const daily = getDailyVerse();
   const { progress } = useProgress();
   const [copied, setCopied] = useState(false);
 
+  const hasAnyData =
+    progress.totalXp > 0 ||
+    progress.dailyStreak > 0 ||
+    progress.chaptersExplored.length > 0;
+
   function handleCopy() {
     const text = `"${daily.text}" — ${daily.reference} (WEB)`;
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
+      showToast('Verse copied to clipboard', 'success');
       setTimeout(() => setCopied(false), 2000);
     });
   }
 
   return (
-    <div className="py-12 space-y-12">
+    <div className="py-6 space-y-12">
       {/* Hero */}
-      <section className="text-center space-y-4 pt-8 pb-4">
-        <div className="flex justify-center mb-6">
+      <section className="text-center space-y-4 pb-2">
+        <div className="flex justify-center">
           <div className="w-16 h-16 rounded-2xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center">
             <BookOpen className="w-8 h-8 text-gold-500" />
           </div>
         </div>
-        <h1 className="text-5xl md:text-6xl font-serif font-bold tracking-tight bg-gradient-to-r from-gold-300 via-gold-500 to-gold-300 bg-clip-text text-transparent">
+        <h1 className="text-5xl md:text-6xl font-serif font-bold tracking-tight bg-gradient-to-r from-gold-300 via-gold-500 to-gold-300 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(214,173,96,0.3)]">
           BibleQuest
         </h1>
         <p className="text-cream/50 text-lg md:text-xl font-light tracking-wide">
@@ -50,7 +57,7 @@ export default function HomePage() {
             className="btn-gold inline-flex items-center gap-2 text-sm"
           >
             <BookOpen className="w-4 h-4" />
-            Memorize This
+            Memorise This
           </Link>
           <button
             type="button"
@@ -63,47 +70,55 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Quick Stats */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-        <div className="card flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
-            <Trophy className="w-5 h-5 text-gold-500" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-cream">{progress.totalXp}</p>
-            <p className="text-cream/40 text-xs">Total XP</p>
-          </div>
-        </div>
-        <div className="card flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
-            <Flame className="w-5 h-5 text-gold-500" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-cream">{progress.dailyStreak}</p>
-            <p className="text-cream/40 text-xs">Day Streak</p>
-          </div>
-        </div>
-        <div className="card flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
-            <BookOpen className="w-5 h-5 text-gold-500" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-cream">{progress.chaptersExplored.length}</p>
-            <p className="text-cream/40 text-xs">Chapters Explored</p>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
+      {/* CTA — moved before stats */}
       <section className="text-center">
         <Link
           to="/library"
           className="btn-gold inline-flex items-center gap-2 text-base px-8 py-3.5"
         >
-          Start Memorizing
+          Start Memorising
           <ArrowRight className="w-5 h-5" />
         </Link>
       </section>
+
+      {/* Quick Stats — conditional */}
+      {hasAnyData ? (
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+          <div className="card flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
+              <Trophy className="w-5 h-5 text-gold-500" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-cream">{progress.totalXp}</p>
+              <p className="text-cream/40 text-xs">Total XP</p>
+            </div>
+          </div>
+          <div className="card flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
+              <Flame className="w-5 h-5 text-gold-500" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-cream">{progress.dailyStreak}</p>
+              <p className="text-cream/40 text-xs">Day Streak</p>
+            </div>
+          </div>
+          <div className="card flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
+              <BookOpen className="w-5 h-5 text-gold-500" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-cream">{progress.chaptersExplored.length}</p>
+              <p className="text-cream/40 text-xs">Chapters Explored</p>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="max-w-2xl mx-auto">
+          <div className="card text-center text-cream/50 text-sm py-6">
+            Complete your first exercise to start tracking progress.
+          </div>
+        </section>
+      )}
     </div>
   );
 }

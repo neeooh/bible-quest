@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
-import { RotateCcw, ChevronRight, Eye, CheckCircle } from 'lucide-react';
+import { RotateCcw, Eye, CheckCircle } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
-import { normalizeWord, getRandomIndices } from '../../lib/word-compare';
+import { normalizeWord } from '../../lib/word-compare';
 import { formatReference } from '../../lib/bible';
 
 interface WordEntry {
@@ -11,6 +11,28 @@ interface WordEntry {
   isFirstInVerse: boolean;
 }
 
+const FILLER_WORDS = new Set([
+  'the', 'a', 'an', 'of', 'in', 'to', 'for', 'and', 'but', 'or',
+  'is', 'was', 'are', 'were', 'be', 'been', 'being',
+  'that', 'this', 'these', 'those', 'it', 'its',
+  'he', 'his', 'him', 'she', 'her', 'they', 'them', 'their',
+  'you', 'your', 'we', 'our', 'us', 'me', 'my', 'i',
+  'with', 'from', 'by', 'at', 'on', 'as', 'so', 'if', 'when',
+  'not', 'no', 'nor', 'have', 'has', 'had', 'will', 'shall',
+  'do', 'did', 'does', 'may', 'might', 'can', 'could', 'would', 'should',
+  'who', 'whom', 'which', 'what', 'where', 'how', 'why',
+  'all', 'also', 'than', 'then', 'into', 'up', 'out', 'about',
+]);
+
+function shuffle(arr: number[]): number[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 export default function MissingWords({
   verses,
   chapter,
@@ -18,12 +40,12 @@ export default function MissingWords({
   endVerse,
   onComplete,
 }: ExerciseProps) {
-  const [round, setRound] = useState(1);
+  const [hidePercent, setHidePercent] = useState(0.45);
+  const [attempt, setAttempt] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [checked, setChecked] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [accuracy, setAccuracy] = useState<number | null>(null);
-  const [wrongIndices, setWrongIndices] = useState<Set<number>>(new Set());
 
   /* ---- build a flat word list from all verses -------------------- */
   const words: WordEntry[] = useMemo(() => {
@@ -40,16 +62,30 @@ export default function MissingWords({
   }, [verses]);
 
   const totalWords = words.length;
-
-  /* ---- hide percentage: 30 % base + 15 % per round, max 95 % ---- */
-  const hidePercent = Math.min(0.3 + (round - 1) * 0.15, 0.95);
   const hideCount = Math.max(1, Math.round(totalWords * hidePercent));
 
-  /* ---- stable random indices that change per round --------------- */
+  /* ---- hidden indices: prefer content words over fillers ---------- */
   const hiddenSet = useMemo(() => {
-    return new Set(getRandomIndices(totalWords, hideCount));
+    const contentIndices: number[] = [];
+    const fillerIndices: number[] = [];
+
+    for (const entry of words) {
+      const norm = normalizeWord(entry.word);
+      if (FILLER_WORDS.has(norm)) {
+        fillerIndices.push(entry.globalIndex);
+      } else {
+        contentIndices.push(entry.globalIndex);
+      }
+    }
+
+    const picked = [
+      ...shuffle(contentIndices).slice(0, hideCount),
+      ...shuffle(fillerIndices).slice(0, Math.max(0, hideCount - contentIndices.length)),
+    ];
+
+    return new Set(picked.slice(0, hideCount));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [round, totalWords, hideCount]);
+  }, [attempt, words, hideCount]);
 
   const reference = formatReference(
     chapter,
@@ -57,15 +93,43 @@ export default function MissingWords({
     startVerse !== endVerse ? endVerse : undefined,
   );
 
+  /* ---- sorted hidden indices for keyboard navigation ------------- */
+  const sortedHiddenIndices = useMemo(
+    () => Array.from(hiddenSet).sort((a, b) => a - b),
+    [hiddenSet],
+  );
+
+  /* ---- live progress counter ------------------------------------- */
+  const filledCount = Array.from(hiddenSet).filter(
+    (i) => (answers[i] ?? '').trim().length > 0,
+  ).length;
+  const allFilled = filledCount === hiddenSet.size;
+
   /* ---- handlers -------------------------------------------------- */
   const handleChange = useCallback((index: number, value: string) => {
     setAnswers((prev) => ({ ...prev, [index]: value }));
   }, []);
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>, globalIndex: number) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const currentPos = sortedHiddenIndices.indexOf(globalIndex);
+        if (currentPos < sortedHiddenIndices.length - 1) {
+          const nextIndex = sortedHiddenIndices[currentPos + 1];
+          const nextInput = document.querySelector<HTMLInputElement>(
+            `[data-blank-index="${nextIndex}"]`,
+          );
+          nextInput?.focus();
+        }
+      }
+    },
+    [sortedHiddenIndices],
+  );
+
   const handleCheck = useCallback(() => {
     let correct = 0;
     let total = 0;
-    const newWrong = new Set(wrongIndices);
 
     for (const entry of words) {
       if (!hiddenSet.has(entry.globalIndex)) continue;
@@ -73,39 +137,37 @@ export default function MissingWords({
       const answer = answers[entry.globalIndex] ?? '';
       if (normalizeWord(answer) === normalizeWord(entry.word)) {
         correct++;
-      } else {
-        newWrong.add(entry.globalIndex);
       }
     }
 
     const acc = total > 0 ? correct / total : 1;
     setAccuracy(acc);
     setChecked(true);
-    setWrongIndices(newWrong);
     onComplete(acc);
-  }, [words, hiddenSet, answers, wrongIndices, onComplete]);
+  }, [words, hiddenSet, answers, onComplete]);
 
   const handleReveal = useCallback(() => {
     setRevealed(true);
     const filled: Record<number, string> = {};
     for (const entry of words) {
       if (hiddenSet.has(entry.globalIndex)) {
-        // Strip trailing punctuation so the reveal looks clean in the input.
-        filled[entry.globalIndex] = entry.word.replace(/[.,;:!?"'()]+$/, '');
+        filled[entry.globalIndex] = entry.word.replace(/[.,;:!?"'\u2018\u2019()]+$/, '');
       }
     }
     setAnswers(filled);
   }, [words, hiddenSet]);
 
   const handleTryAgain = useCallback(() => {
+    setAttempt((a) => a + 1);
     setAnswers({});
     setChecked(false);
     setRevealed(false);
     setAccuracy(null);
   }, []);
 
-  const handleNextRound = useCallback(() => {
-    setRound((r) => r + 1);
+  const handleDifficultyChange = useCallback((percent: number) => {
+    setHidePercent(percent);
+    setAttempt((a) => a + 1);
     setAnswers({});
     setChecked(false);
     setRevealed(false);
@@ -131,24 +193,54 @@ export default function MissingWords({
           : 'bg-red-500'
       : '';
 
-  const canAdvance = hidePercent < 0.95;
-
   return (
     <div className="space-y-6">
-      {/* ---- header ---- */}
+      {/* ---- header with difficulty selector ---- */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h3 className="text-lg font-serif font-semibold text-cream">
             Missing Words
           </h3>
           <p className="text-cream/40 text-sm">
-            {reference} · Round {round} ·{' '}
-            {Math.round(hidePercent * 100)}% hidden
+            {reference} · {Math.round(hidePercent * 100)}% hidden
           </p>
         </div>
-        <span className="text-xs text-cream/30 bg-navy-700 px-3 py-1 rounded-full">
-          {hiddenSet.size} blank{hiddenSet.size !== 1 ? 's' : ''}
+        <span
+          className={`text-xs px-3 py-1 rounded-full ${
+            allFilled
+              ? 'text-gold-400 bg-gold-500/15'
+              : 'text-cream/30 bg-navy-700'
+          }`}
+        >
+          {filledCount}/{hiddenSet.size} filled
         </span>
+      </div>
+
+      {/* ---- difficulty slider ---- */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label htmlFor="difficulty-slider" className="text-xs text-cream/40">
+            Difficulty
+          </label>
+          <span className="text-xs text-gold-400 font-medium">
+            {hidePercent <= 0.25
+              ? 'Easy'
+              : hidePercent <= 0.5
+                ? 'Medium'
+                : 'Hard'}{' '}
+            {Math.round(hidePercent * 100)}%
+          </span>
+        </div>
+        <input
+          id="difficulty-slider"
+          type="range"
+          min={10}
+          max={80}
+          step={5}
+          value={Math.round(hidePercent * 100)}
+          onChange={(e) => handleDifficultyChange(Number(e.target.value) / 100)}
+          className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-navy-700 accent-gold-500"
+        />
       </div>
 
       {/* ---- passage with inline inputs ---- */}
@@ -163,7 +255,6 @@ export default function MissingWords({
 
           return (
             <span key={entry.globalIndex}>
-              {/* verse superscript */}
               {entry.isFirstInVerse && (
                 <sup className="text-gold-500 text-xs font-sans font-bold mr-0.5 select-none">
                   {entry.verseNum}
@@ -178,19 +269,21 @@ export default function MissingWords({
                     onChange={(e) =>
                       handleChange(entry.globalIndex, e.target.value)
                     }
+                    onKeyDown={(e) => handleKeyDown(e, entry.globalIndex)}
                     disabled={checked || revealed}
+                    data-blank-index={entry.globalIndex}
                     className={[
                       'text-center text-base font-serif px-1 py-0.5 rounded border',
-                      'bg-navy-700 focus:outline-none focus:ring-1 transition-colors',
+                      'focus:outline-none focus:ring-1 transition-colors',
                       checked || revealed
                         ? isCorrect
                           ? 'border-green-500/60 text-green-400 bg-green-500/10'
                           : 'border-red-500/60 text-red-400 bg-red-500/10'
                         : isCorrect
-                          ? 'border-green-500/60 text-green-400 focus:ring-green-500/40'
+                          ? 'border-green-500/60 text-green-400 bg-navy-700 focus:ring-green-500/40'
                           : isWrong
-                            ? 'border-red-500/40 text-cream focus:ring-red-500/30'
-                            : 'border-gold-500/30 text-cream focus:ring-gold-500/30',
+                            ? 'border-red-500/40 text-cream bg-navy-700 focus:ring-red-500/30'
+                            : 'border-gold-500/40 bg-navy-600/50 text-cream placeholder:text-gold-500/50 focus:ring-gold-500/30',
                     ].join(' ')}
                     style={{
                       width: `${Math.max(entry.word.length + 2, 4)}ch`,
@@ -199,7 +292,6 @@ export default function MissingWords({
                     autoComplete="off"
                     spellCheck={false}
                   />
-                  {/* show correct word next to wrong answers after check */}
                   {checked && !isCorrect && (
                     <span className="text-gold-400 text-xs font-sans whitespace-nowrap">
                       {entry.word}
@@ -228,20 +320,13 @@ export default function MissingWords({
               {Math.round(accuracy * 100)}%
             </span>
           </div>
-          {wrongIndices.size > 0 && (
-            <p className="text-cream/30 text-xs">
-              {wrongIndices.size} word{wrongIndices.size !== 1 ? 's' : ''}{' '}
-              marked for practice across all rounds.
-            </p>
-          )}
         </div>
       )}
 
       {/* ---- revealed notice ---- */}
       {revealed && !checked && (
         <p className="text-cream/40 text-sm italic">
-          Answers revealed. Use Try Again to test yourself, or advance to the
-          next round.
+          Answers revealed. Press Try Again to test yourself with new words.
         </p>
       )}
 
@@ -269,26 +354,14 @@ export default function MissingWords({
         )}
 
         {(checked || revealed) && (
-          <>
-            <button
-              type="button"
-              onClick={handleTryAgain}
-              className="btn-outline text-sm inline-flex items-center gap-2"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Try Again
-            </button>
-            {canAdvance && (
-              <button
-                type="button"
-                onClick={handleNextRound}
-                className="btn-gold text-sm inline-flex items-center gap-2"
-              >
-                <ChevronRight className="w-4 h-4" />
-                Next Round
-              </button>
-            )}
-          </>
+          <button
+            type="button"
+            onClick={handleTryAgain}
+            className="btn-outline text-sm inline-flex items-center gap-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Try Again
+          </button>
         )}
       </div>
     </div>

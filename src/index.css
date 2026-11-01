@@ -59,6 +59,126 @@
   }
 
   .nav-link-active {
-    @apply text-gold-400;
+    @apply text-gold-400 border-b-2 border-gold-500 pb-0.5;
   }
+
+  .page-enter {
+    animation: fadeIn 150ms ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: toastIn 200ms ease-out, toastOut 200ms ease-in 2.8s forwards;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toast-success {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #86efac;
+}
+
+.toast-info {
+  background: rgba(214, 173, 96, 0.15);
+  border: 1px solid rgba(214, 173, 96, 0.3);
+  color: #ebd09a;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+.verse-flash {
+  animation: verseFlash 3s ease-out;
+}
+
+@keyframes verseFlash {
+  0% { background-color: rgba(214, 173, 96, 0.35); }
+  100% { background-color: transparent; }
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: #243044;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #D6AD60;
+  margin-top: -6px;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(214, 173, 96, 0.3);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: #243044;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #D6AD60;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(214, 173, 96, 0.3);
 }

@@ -1,17 +1,49 @@
-import { useState, useMemo } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Minus, Plus, BookOpen } from 'lucide-react';
 import { getChapter, bibleData } from '../lib/bible';
+import { useProgress } from '../hooks/useProgress';
+import { showToast } from '../components/Toast';
 
 export default function ReadPage() {
   const { chapter: chapterParam } = useParams<{ chapter: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const targetVerse = searchParams.get('verse');
   const num = Number(chapterParam) || 1;
   const chapter = getChapter(num);
   const total = bibleData.chapters.length;
 
   const [fontSize, setFontSize] = useState(18);
   const [selectedVerses, setSelectedVerses] = useState<Set<number>>(new Set());
+
+  const { markChapterExplored, progress } = useProgress();
+  const toastedChapterRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const alreadyExplored = progress.chaptersExplored.includes(num);
+    markChapterExplored(num);
+    if (!alreadyExplored && toastedChapterRef.current !== num) {
+      toastedChapterRef.current = num;
+      showToast(`Chapter ${num} explored!`, 'info');
+    }
+  }, [num]);
+
+  useEffect(() => {
+    if (!targetVerse) return;
+    const verseNum = Number(targetVerse);
+    if (!verseNum) return;
+    // Small delay to let the DOM render
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`verse-${verseNum}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('verse-flash');
+        setTimeout(() => el.classList.remove('verse-flash'), 3000);
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [targetVerse]);
 
   const { startV, endV } = useMemo(() => {
     if (selectedVerses.size === 0) return { startV: 0, endV: 0 };
@@ -69,11 +101,13 @@ export default function ReadPage() {
 
         {/* Font size controls */}
         <div className="flex items-center gap-2">
+          <span className="text-cream/40 text-xs font-medium tracking-wide mr-1">Aa</span>
           <button
             type="button"
             onClick={decreaseFont}
-            className="w-8 h-8 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+            className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
             aria-label="Decrease font size"
+            title="Decrease text size"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -81,8 +115,9 @@ export default function ReadPage() {
           <button
             type="button"
             onClick={increaseFont}
-            className="w-8 h-8 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+            className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
             aria-label="Increase font size"
+            title="Increase text size"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -91,7 +126,7 @@ export default function ReadPage() {
 
       {/* Selection hint */}
       <p className="text-cream/30 text-xs">
-        Tap any verse to select it for memorization.
+        Tap any verse to select it for memorisation.
       </p>
 
       {/* Verses */}
@@ -102,25 +137,29 @@ export default function ReadPage() {
         {chapter.verses.map(v => {
           const isSelected = selectedVerses.has(v.verse);
           return (
-            <span
-              key={v.verse}
-              role="button"
-              tabIndex={0}
-              onClick={() => toggleVerse(v.verse)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  toggleVerse(v.verse);
-                }
-              }}
-              className={`inline cursor-pointer rounded px-0.5 -mx-0.5 transition-colors ${
-                isSelected
-                  ? 'bg-gold-500/20 text-cream'
-                  : 'hover:bg-navy-700'
-              }`}
-            >
-              <sup className="verse-number">{v.verse}</sup>
-              <span className="verse-text">{v.text} </span>
+            <span key={v.verse}>
+              {/* Paragraph break every 6 verses */}
+              {v.verse > 1 && v.verse % 6 === 1 && <span className="block mt-5" />}
+              <span
+                id={`verse-${v.verse}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => toggleVerse(v.verse)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleVerse(v.verse);
+                  }
+                }}
+                className={`inline cursor-pointer rounded px-0.5 -mx-0.5 transition-colors ${
+                  isSelected
+                    ? 'bg-gold-500/20 text-cream'
+                    : 'hover:bg-gold-500/10'
+                }`}
+              >
+                <sup className="verse-number">{v.verse}</sup>
+                <span className="verse-text">{v.text} </span>
+              </span>
             </span>
           );
         })}
@@ -168,8 +207,15 @@ export default function ReadPage() {
             className="btn-gold inline-flex items-center gap-2 shadow-lg shadow-navy-900/50 text-sm"
           >
             <BookOpen className="w-4 h-4" />
-            Memorize Selected ({selectedVerses.size} verse{selectedVerses.size > 1 ? 's' : ''})
+            Memorise Selected ({selectedVerses.size} verse{selectedVerses.size > 1 ? 's' : ''})
           </Link>
+        </div>
+      )}
+
+      {/* Sticky memorize hint bar */}
+      {selectedVerses.size === 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-navy-800/90 backdrop-blur-sm border-t border-gold-500/10 py-3 text-center z-30">
+          <p className="text-cream/40 text-sm">Select verses above to start memorising</p>
         </div>
       )}
     </div>

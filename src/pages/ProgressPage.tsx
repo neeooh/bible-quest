@@ -1,4 +1,5 @@
-import { Trophy, Flame, BookOpen, Brain, Target, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Trophy, Flame, BookOpen, Brain, Target, Star, ArrowRight } from 'lucide-react';
 import { useProgress } from '../hooks/useProgress';
 
 const exerciseLabels: Record<string, string> = {
@@ -25,8 +26,8 @@ export default function ProgressPage() {
       <section className="card space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gold-500/10 border-2 border-gold-500/40 flex items-center justify-center">
-              <span className="text-gold-400 font-bold text-lg">{level.level}</span>
+            <div className="w-16 h-16 rounded-full bg-gold-500/10 border-2 border-gold-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(214,173,96,0.2)]">
+              <span className="text-gold-400 font-bold text-2xl">{level.level}</span>
             </div>
             <div>
               <p className="text-cream font-semibold">Level {level.level}</p>
@@ -55,7 +56,7 @@ export default function ProgressPage() {
         <StatCard icon={<Trophy className="w-5 h-5 text-gold-500" />} value={progress.totalXp} label="Total XP" />
         <StatCard icon={<Flame className="w-5 h-5 text-gold-500" />} value={progress.dailyStreak} label="Day Streak" />
         <StatCard icon={<BookOpen className="w-5 h-5 text-gold-500" />} value={progress.chaptersExplored.length} label="Chapters Explored" />
-        <StatCard icon={<Brain className="w-5 h-5 text-gold-500" />} value={progress.passagesMemorized.length} label="Passages Memorized" />
+        <StatCard icon={<Brain className="w-5 h-5 text-gold-500" />} value={progress.passagesMemorized.length} label="Passages Memorised" />
         <StatCard icon={<Target className="w-5 h-5 text-gold-500" />} value={`${Math.round(progress.bestAccuracy * 100)}%`} label="Best Accuracy" />
       </section>
 
@@ -67,8 +68,15 @@ export default function ProgressPage() {
             <BookOpen className="w-8 h-8 text-cream/20 mx-auto mb-3" />
             <p className="text-cream/40">No exercises completed yet.</p>
             <p className="text-cream/25 text-sm mt-1">
-              Start memorizing to build your history.
+              Start memorising to build your history.
             </p>
+            <Link
+              to="/memorize"
+              className="btn-gold inline-flex items-center gap-2 mt-4"
+            >
+              Start your first exercise
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         ) : (
           <div className="space-y-2">
@@ -122,7 +130,7 @@ function StatCard({
 }) {
   return (
     <div className="card flex flex-col items-center text-center gap-2 py-5">
-      <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center">
+      <div className="w-12 h-12 rounded-full bg-gold-500/10 flex items-center justify-center">
         {icon}
       </div>
       <p className="text-xl font-bold text-cream">{value}</p>

@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BookOpen, Puzzle, Layers, Mic, AlignLeft } from 'lucide-react';
+import { BookOpen, Puzzle, Layers, Mic, AlignLeft, Eye } from 'lucide-react';
 import { getChapter, bibleData, getVerses } from '../lib/bible';
 import { useProgress } from '../hooks/useProgress';
+import { showToast } from '../components/Toast';
 import type { Verse, ExerciseResult } from '../lib/types';
 import MissingWords from '../components/memorize/MissingWords';
 import Progressive from '../components/memorize/Progressive';
@@ -61,7 +62,21 @@ export default function MemorizePage() {
     return getVerses(selectedChapter, startVerse, endVerse);
   }, [selectedChapter, startVerse, endVerse]);
 
+  const [peeking, setPeeking] = useState(false);
+
+  const passageText = useMemo(
+    () => verses.map(v => v.text).join(' '),
+    [verses],
+  );
+
   const passageSelected = selectedChapter > 0 && verses.length > 0;
+
+  const XP_TABLE: Record<TabKey, number> = {
+    'missing-words': 20,
+    progressive: 30,
+    recitation: 50,
+    voice: 40,
+  };
 
   const handleComplete = useCallback(
     (accuracy: number) => {
@@ -75,6 +90,12 @@ export default function MemorizePage() {
         timestamp: Date.now(),
       };
       recordExercise(result);
+
+      const base = XP_TABLE[activeTab] ?? 0;
+      const bonus = accuracy > 0.9 ? 10 : 0;
+      const xp = base + bonus;
+      const pct = Math.round(accuracy * 100);
+      showToast(`+${xp} XP earned! (${pct}% accuracy)`, 'success');
     },
     [activeTab, selectedChapter, startVerse, endVerse, recordExercise],
   );
@@ -84,7 +105,7 @@ export default function MemorizePage() {
       {/* Title */}
       <div className="flex items-center gap-3">
         <BookOpen className="w-6 h-6 text-gold-500" />
-        <h1 className="text-3xl font-serif font-bold text-cream">Memorize</h1>
+        <h1 className="text-3xl font-serif font-bold text-cream">Memorise</h1>
       </div>
 
       {/* Passage Selector */}
@@ -154,19 +175,38 @@ export default function MemorizePage() {
           </div>
         </div>
 
-        {/* Preview */}
+        {/* Preview — hold to peek */}
         {passageSelected && (
-          <div className="pt-2 border-t border-gold-500/10">
-            <p className="text-gold-400 text-sm font-medium mb-2">
+          <div className="pt-2 border-t border-gold-500/10 space-y-3">
+            <p className="text-gold-400 text-sm font-medium">
               Matthew {selectedChapter}:{startVerse}
               {startVerse !== endVerse && `–${endVerse}`}
               <span className="text-cream/30 ml-2">
                 ({verses.length} verse{verses.length > 1 ? 's' : ''})
               </span>
             </p>
-            <p className="text-cream/50 text-sm leading-relaxed line-clamp-3">
-              {verses.map(v => v.text).join(' ')}
+            <p
+              className="text-cream/60 text-sm leading-relaxed line-clamp-3 font-serif transition-[filter] duration-200 select-none"
+              style={{ filter: peeking ? 'none' : 'blur(6px)' }}
+            >
+              {passageText}
             </p>
+            <div className="text-center">
+              <button
+                type="button"
+                onPointerDown={() => setPeeking(true)}
+                onPointerUp={() => setPeeking(false)}
+                onPointerLeave={() => setPeeking(false)}
+                className={`inline-flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg border transition-colors select-none ${
+                  peeking
+                    ? 'border-gold-500/40 bg-gold-500/10 text-gold-400'
+                    : 'border-gold-500/20 text-cream/40 hover:text-cream/60'
+                }`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                {peeking ? 'Peeking…' : 'Hold to Peek'}
+              </button>
+            </div>
           </div>
         )}
       </section>
@@ -176,21 +216,28 @@ export default function MemorizePage() {
         <section className="space-y-6">
           {/* Tabs */}
           <div className="flex flex-wrap gap-2">
-            {tabs.map(tab => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === tab.key
-                    ? 'bg-gold-500 text-navy-900'
-                    : 'bg-navy-800 text-cream/50 border border-gold-500/10 hover:border-gold-500/30 hover:text-cream'
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
+            {tabs.map(tab => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-gold-500 text-navy-900'
+                      : 'bg-navy-800 border border-gold-500/10 hover:border-gold-500/30 hover:text-cream'
+                  }`}
+                >
+                  <span className={isActive ? '' : 'text-gold-500'}>
+                    {tab.icon}
+                  </span>
+                  <span className={isActive ? '' : 'text-cream/50'}>
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Active exercise */}
