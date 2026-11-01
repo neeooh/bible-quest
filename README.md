@@ -1,32 +1,39 @@
-# React + TypeScript + Vite
+# BibleQuest
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+> Hide the words. Learn the Word.
 
-Currently, two official plugins are available:
+A mobile-first Bible memorization app. Read, study, and memorize Scripture through interactive exercises and speech recognition. Launches with the complete Gospel of Matthew (28 chapters, World English Bible).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Bible Library** — Browse all 28 chapters. Select individual verses or ranges.
+- **Reading Mode** — Clean Scripture view with verse numbers, adjustable font size, and verse highlighting.
+- **Missing Words** — Random words are hidden. Type them back to test recall.
+- **Progressive Memorization** — The passage gradually disappears across five phases until you recite it from memory.
+- **Full Recitation** — Type an entire passage from memory. Color-coded diff shows what you got right.
+- **Voice Recitation** — Speak the passage aloud. The browser Speech API transcribes and scores your accuracy.
+- **Progress Tracking** — XP, daily streaks, accuracy history, and a level system. All stored in LocalStorage.
+- **Daily Verse** — A featured verse on the homepage with copy and memorize buttons.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the Oxlint configuration
+React, TypeScript, Vite, Tailwind CSS, Lucide icons. No backend. No external APIs. Works offline after initial load.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Getting Started
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Production build:
+
+```bash
+npm run build
+```
+
+Output goes to `dist/`. Deploy as a static site.
+
+## Bible Text
+
+The app bundles the complete Gospel of Matthew from the [World English Bible](https://worldenglishbible.org/) (public domain). The text is stored in `src/data/matthew.json`.
