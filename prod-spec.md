@@ -12,7 +12,7 @@ The priority is to produce a working, deployable MVP as quickly as possible.
 
 * React + Vite
 * TypeScript
-* Tailwind CSS
+* Tailwind CSS and ShadCN library
 * Browser Web Speech API for speech recognition
 * LocalStorage for user progress
 * Lucide icons
