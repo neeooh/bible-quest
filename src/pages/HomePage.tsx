@@ -1,0 +1,109 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { BookOpen, Flame, Trophy, Star, Copy, ArrowRight, Check } from 'lucide-react';
+import { getDailyVerse } from '../lib/bible';
+import { useProgress } from '../hooks/useProgress';
+
+export default function HomePage() {
+  const daily = getDailyVerse();
+  const { progress } = useProgress();
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    const text = `"${daily.text}" — ${daily.reference} (WEB)`;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div className="py-12 space-y-12">
+      {/* Hero */}
+      <section className="text-center space-y-4 pt-8 pb-4">
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center">
+            <BookOpen className="w-8 h-8 text-gold-500" />
+          </div>
+        </div>
+        <h1 className="text-5xl md:text-6xl font-serif font-bold tracking-tight bg-gradient-to-r from-gold-300 via-gold-500 to-gold-300 bg-clip-text text-transparent">
+          BibleQuest
+        </h1>
+        <p className="text-cream/50 text-lg md:text-xl font-light tracking-wide">
+          Hide the words. Learn the Word.
+        </p>
+      </section>
+
+      {/* Daily Verse */}
+      <section className="card max-w-2xl mx-auto space-y-5">
+        <div className="flex items-center gap-2 text-gold-500 text-sm font-medium">
+          <Star className="w-4 h-4" />
+          <span>Verse of the Day</span>
+        </div>
+        <blockquote className="text-cream/90 text-lg leading-relaxed font-serif italic">
+          &ldquo;{daily.text}&rdquo;
+        </blockquote>
+        <p className="text-gold-400 text-sm font-medium">{daily.reference}</p>
+        <div className="flex flex-wrap gap-3 pt-1">
+          <Link
+            to={`/memorize?chapter=${daily.chapter}&start=${daily.verse}&end=${daily.verse}`}
+            className="btn-gold inline-flex items-center gap-2 text-sm"
+          >
+            <BookOpen className="w-4 h-4" />
+            Memorize This
+          </Link>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="btn-outline inline-flex items-center gap-2 text-sm"
+          >
+            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
+      </section>
+
+      {/* Quick Stats */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+        <div className="card flex items-center gap-4">
+          <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
+            <Trophy className="w-5 h-5 text-gold-500" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-cream">{progress.totalXp}</p>
+            <p className="text-cream/40 text-xs">Total XP</p>
+          </div>
+        </div>
+        <div className="card flex items-center gap-4">
+          <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
+            <Flame className="w-5 h-5 text-gold-500" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-cream">{progress.dailyStreak}</p>
+            <p className="text-cream/40 text-xs">Day Streak</p>
+          </div>
+        </div>
+        <div className="card flex items-center gap-4">
+          <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
+            <BookOpen className="w-5 h-5 text-gold-500" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-cream">{progress.chaptersExplored.length}</p>
+            <p className="text-cream/40 text-xs">Chapters Explored</p>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="text-center">
+        <Link
+          to="/library"
+          className="btn-gold inline-flex items-center gap-2 text-base px-8 py-3.5"
+        >
+          Start Memorizing
+          <ArrowRight className="w-5 h-5" />
+        </Link>
+      </section>
+    </div>
+  );
+}
