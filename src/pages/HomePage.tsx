@@ -25,7 +25,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="py-6 space-y-12">
+    <div className="min-h-[calc(100vh-7rem)] flex flex-col justify-center space-y-12">
       {/* Hero */}
       <section className="text-center space-y-4 pb-2">
         <div className="flex justify-center">
