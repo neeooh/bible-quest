@@ -225,11 +225,6 @@ export default function ReadPage() {
         </div>
       </div>
 
-      {/* Selection hint */}
-      <p className="text-cream/30 text-xs">
-        Tap any verse to select it for memorisation.
-      </p>
-
       {/* Verses */}
       <div
         className="space-y-1 leading-relaxed"
