@@ -93,9 +93,12 @@ export default function HomePage() {
             <blockquote className="text-cream/90 text-lg leading-relaxed font-serif italic">
               &ldquo;{daily.text}&rdquo;
             </blockquote>
-            <p className="text-gold-400 text-sm font-medium">
+            <Link
+              to={`/read/${daily.book}/${daily.chapter}?verse=${daily.verse}`}
+              className="text-gold-400 text-sm font-medium hover:text-gold-300 hover:underline transition-colors"
+            >
               {daily.reference}
-            </p>
+            </Link>
             <div className="flex flex-wrap gap-3 pt-1">
               <Link
                 to={`/memorize?book=${daily.book}&chapter=${daily.chapter}&start=${daily.verse}&end=${daily.verse}`}
