@@ -7,7 +7,7 @@ const links = [
   { to: '/library', label: 'Library' },
   { to: '/memorize', label: 'Memorise' },
   { to: '/my-verses', label: 'My Verses' },
-  { to: '/progress', label: 'Progress' },
+  { to: '/progress', label: 'My Progress' },
 ];
 
 export default function Navbar() {
