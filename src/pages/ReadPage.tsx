@@ -189,11 +189,12 @@ export default function ReadPage() {
                 showToast(`Position saved: ${bookName} ${num}`, 'success');
               }
             }}
-            className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
+            className="rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center gap-1.5 px-3 py-2 text-xs"
             aria-label="Save reading position"
             title="Save reading position"
           >
             <BookmarkPlus className="w-4 h-4" />
+            Mark Position
           </button>
 
           {/* Font size controls */}
