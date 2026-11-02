@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import Navbar from './Navbar';
 import ToastContainer from '../Toast';
+import { useTheme } from '../../hooks/useTheme';
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const { theme, toggle } = useTheme();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -17,7 +19,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-navy-900">
-      <Navbar />
+      <Navbar theme={theme} onToggleTheme={toggle} />
       <main key={location.pathname} className="page-enter pt-16 max-w-5xl mx-auto px-4 pb-12">
         {children}
       </main>

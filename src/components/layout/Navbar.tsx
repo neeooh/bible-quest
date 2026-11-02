@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { BookOpen, Menu, X } from 'lucide-react';
+import { BookOpen, Menu, X, Sun, Moon } from 'lucide-react';
 
 const links = [
   { to: '/', label: 'Home' },
@@ -10,7 +10,12 @@ const links = [
   { to: '/progress', label: 'My Progress' },
 ];
 
-export default function Navbar() {
+interface NavbarProps {
+  theme: 'dark' | 'light';
+  onToggleTheme: () => void;
+}
+
+export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -23,7 +28,7 @@ export default function Navbar() {
           </span>
         </NavLink>
 
-        {/* Desktop links */}
+        {/* Desktop links + theme toggle */}
         <div className="hidden md:flex items-center gap-8">
           {links.map(link => (
             <NavLink
@@ -37,17 +42,36 @@ export default function Navbar() {
               {link.label}
             </NavLink>
           ))}
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            className="text-cream/50 hover:text-gold-400 transition-colors"
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          >
+            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          type="button"
-          className="md:hidden text-cream/70 hover:text-gold-400 transition-colors"
-          onClick={() => setMenuOpen(prev => !prev)}
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-        >
-          {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile: theme toggle + hamburger */}
+        <div className="md:hidden flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            className="text-cream/50 hover:text-gold-400 transition-colors"
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          >
+            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+          <button
+            type="button"
+            className="text-cream/70 hover:text-gold-400 transition-colors"
+            onClick={() => setMenuOpen(prev => !prev)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}

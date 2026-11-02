@@ -1,16 +1,54 @@
 @import "tailwindcss";
 
+/* ----- Dark theme (default) ----- */
+:root {
+  --bg-primary: #101827;
+  --bg-secondary: #1a2332;
+  --bg-tertiary: #243044;
+  --bg-quaternary: #2e3d55;
+  --text-primary: #FFF8F0;
+  --text-secondary: #f0e6d6;
+  --gold-500: #D6AD60;
+  --gold-400: #e0be78;
+  --gold-300: #ebd09a;
+  --gold-600: #c49a3c;
+  --border-alpha: rgba(214, 173, 96, 0.1);
+  --border-alpha-hover: rgba(214, 173, 96, 0.3);
+  --toast-success-bg: rgb(20, 45, 30);
+  --toast-info-bg: rgb(40, 35, 20);
+  --range-track: #243044;
+}
+
+/* ----- Light theme ----- */
+[data-theme="light"] {
+  --bg-primary: #f5f0e8;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #ebe4d8;
+  --bg-quaternary: #ddd6c8;
+  --text-primary: #1a1510;
+  --text-secondary: #3d3528;
+  --gold-500: #b8922e;
+  --gold-400: #a07e1e;
+  --gold-300: #8a6c14;
+  --gold-600: #9a7a1a;
+  --border-alpha: rgba(160, 126, 30, 0.15);
+  --border-alpha-hover: rgba(160, 126, 30, 0.35);
+  --toast-success-bg: rgb(220, 245, 225);
+  --toast-info-bg: rgb(250, 243, 225);
+  --range-track: #ddd6c8;
+}
+
 @theme {
-  --color-navy-900: #101827;
-  --color-navy-800: #1a2332;
-  --color-navy-700: #243044;
-  --color-navy-600: #2e3d55;
-  --color-gold-500: #D6AD60;
-  --color-gold-400: #e0be78;
-  --color-gold-300: #ebd09a;
-  --color-gold-600: #c49a3c;
-  --color-cream: #FFF8F0;
-  --color-cream-dark: #f0e6d6;
+  --color-navy-900: var(--bg-primary);
+  --color-navy-800: var(--bg-secondary);
+  --color-navy-700: var(--bg-tertiary);
+  --color-navy-600: var(--bg-quaternary);
+  --color-gold-500: var(--gold-500);
+  --color-gold-400: var(--gold-400);
+  --color-gold-300: var(--gold-300);
+  --color-gold-600: var(--gold-600);
+  --color-cream: var(--text-primary);
+  --color-cream-dark: var(--text-secondary);
 
   --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
@@ -102,15 +140,23 @@
 }
 
 .toast-success {
-  background: rgb(20, 45, 30);
+  background: var(--toast-success-bg);
   border: 1px solid rgba(34, 197, 94, 0.3);
   color: #86efac;
 }
 
+[data-theme="light"] .toast-success {
+  color: #166534;
+}
+
 .toast-info {
-  background: rgb(40, 35, 20);
+  background: var(--toast-info-bg);
   border: 1px solid rgba(214, 173, 96, 0.3);
   color: #ebd09a;
+}
+
+[data-theme="light"] .toast-info {
+  color: #78570a;
 }
 
 @keyframes toastIn {
@@ -152,7 +198,7 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-runnable-track {
   height: 6px;
   border-radius: 9999px;
-  background: #243044;
+  background: var(--range-track);
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -161,7 +207,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
   border-radius: 9999px;
-  background: #D6AD60;
+  background: var(--gold-500);
   margin-top: -6px;
   cursor: pointer;
   box-shadow: 0 0 8px rgba(214, 173, 96, 0.3);
@@ -170,14 +216,14 @@ input[type="range"]::-webkit-slider-thumb {
 input[type="range"]::-moz-range-track {
   height: 6px;
   border-radius: 9999px;
-  background: #243044;
+  background: var(--range-track);
 }
 
 input[type="range"]::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border-radius: 9999px;
-  background: #D6AD60;
+  background: var(--gold-500);
   border: none;
   cursor: pointer;
   box-shadow: 0 0 8px rgba(214, 173, 96, 0.3);
