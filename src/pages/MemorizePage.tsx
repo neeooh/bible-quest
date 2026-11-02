@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BookOpen, Puzzle, Layers, Mic, AlignLeft, Eye, Loader2 } from 'lucide-react';
+import { Puzzle, Layers, Mic, AlignLeft, Eye, Loader2, Brain } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import {
   getBookBySlug,
@@ -142,7 +142,7 @@ export default function MemorizePage() {
   return (
     <div className="py-10 space-y-8">
       <div className="flex items-center gap-3">
-        <BookOpen className="w-6 h-6 text-gold-500" />
+        <Brain className="w-6 h-6 text-gold-500" />
         <h1 className="text-3xl font-serif font-bold text-cream">Memorise</h1>
       </div>
 
