@@ -143,7 +143,7 @@ export default function HomePage() {
           to="/library"
           className="btn-gold inline-flex items-center gap-2 text-base px-8 py-3.5"
         >
-          Start Reading
+          Explore the Bible
           <ArrowRight className="w-5 h-5" />
         </Link>
         {lastRead && (
