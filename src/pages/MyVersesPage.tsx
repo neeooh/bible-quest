@@ -70,6 +70,9 @@ export default function MyVersesPage() {
         existing.bestAccuracy = Math.max(existing.bestAccuracy, exercise.accuracy);
         existing.lastPractised = Math.max(existing.lastPractised, exercise.timestamp);
         existing.timesCompleted += 1;
+        if (!existing.text && exercise.passageText) {
+          existing.text = exercise.passageText;
+        }
       } else {
         const ref =
           exercise.startVerse === exercise.endVerse
@@ -84,7 +87,7 @@ export default function MyVersesPage() {
           startVerse: exercise.startVerse,
           endVerse: exercise.endVerse,
           reference: ref,
-          text: '',
+          text: exercise.passageText ?? '',
           isFavourite: false,
           bestAccuracy: exercise.accuracy,
           lastPractised: exercise.timestamp,

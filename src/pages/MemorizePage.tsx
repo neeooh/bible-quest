@@ -117,6 +117,7 @@ export default function MemorizePage() {
         accuracy,
         xpEarned: 0,
         timestamp: Date.now(),
+        passageText: passageText.slice(0, 200),
       };
       recordExercise(result);
 

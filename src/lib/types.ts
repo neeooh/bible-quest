@@ -29,6 +29,7 @@ export interface ExerciseResult {
   accuracy: number;
   xpEarned: number;
   timestamp: number;
+  passageText?: string;
 }
 
 export interface UserProgress {
