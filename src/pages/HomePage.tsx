@@ -95,11 +95,11 @@ export default function HomePage() {
             </blockquote>
             <Link
               to={`/read/${daily.book}/${daily.chapter}?verse=${daily.verse}`}
-              className="text-gold-400 text-sm font-medium hover:text-gold-300 hover:underline transition-colors"
+              className="text-gold-400 text-sm font-medium hover:text-gold-300 hover:underline transition-colors -mt-3 block"
             >
               {daily.reference}
             </Link>
-            <div className="flex flex-wrap gap-3 pt-1">
+            <div className="flex flex-wrap gap-3 pt-2">
               <Link
                 to={`/memorize?book=${daily.book}&chapter=${daily.chapter}&start=${daily.verse}&end=${daily.verse}`}
                 className="btn-gold inline-flex items-center gap-2 text-sm"
