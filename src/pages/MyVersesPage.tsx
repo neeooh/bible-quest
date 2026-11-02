@@ -119,7 +119,7 @@ export default function MyVersesPage() {
                     &ldquo;{sv.text}&rdquo;
                   </p>
                 </div>
-                <div className="flex flex-col gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                   <Link
                     to={`/memorize?book=${sv.book}&chapter=${sv.chapter}&start=${sv.verse}&end=${sv.verse}`}
                     className="btn-gold text-sm inline-flex items-center gap-1.5"
@@ -129,13 +129,16 @@ export default function MyVersesPage() {
                   </Link>
                   <button
                     type="button"
-                    onClick={() =>
-                      removeVerse(sv.book, sv.chapter, sv.verse)
-                    }
-                    className="btn-outline text-sm inline-flex items-center gap-1.5 justify-center"
+                    onClick={() => {
+                      if (window.confirm(`Remove ${sv.reference} from saved verses?`)) {
+                        removeVerse(sv.book, sv.chapter, sv.verse);
+                      }
+                    }}
+                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-red-400 hover:border-red-400/40 transition-colors flex items-center justify-center"
+                    aria-label={`Remove ${sv.reference}`}
+                    title="Remove"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    Remove
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
