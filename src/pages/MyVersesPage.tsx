@@ -11,6 +11,7 @@ import {
   ArrowRight,
   Clock,
   Target,
+  Trash2,
 } from 'lucide-react';
 
 function timeAgo(timestamp: number): string {
@@ -293,6 +294,27 @@ export default function MyVersesPage() {
                     className="w-4 h-4"
                     fill={entry.isFavourite ? 'currentColor' : 'none'}
                   />
+                </button>
+                {/* Delete: unfavourites if favourited; only removes favourites-only entries fully */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(`Remove ${entry.reference} from your list?`)) {
+                      // Unfavourite if needed
+                      if (entry.isFavourite) {
+                        for (let v = entry.startVerse; v <= entry.endVerse; v++) {
+                          if (isSaved(entry.book, entry.chapterNumber, v)) {
+                            removeVerse(entry.book, entry.chapterNumber, v);
+                          }
+                        }
+                      }
+                    }
+                  }}
+                  className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40 transition-colors flex items-center justify-center"
+                  aria-label={`Remove ${entry.reference}`}
+                  title="Remove"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
