@@ -228,3 +228,26 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
   box-shadow: 0 0 8px rgba(214, 173, 96, 0.3);
 }
+
+/* Themed scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-quaternary) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--bg-quaternary);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-500);
+}
