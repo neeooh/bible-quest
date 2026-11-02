@@ -149,7 +149,7 @@ export default function MyVersesPage() {
         return list;
       case 'lowest-score':
         list = list
-          .filter((e) => e.timesCompleted > 0)
+          .filter((e) => e.timesCompleted > 0 && e.bestAccuracy < 0.99)
           .sort((a, b) => a.bestAccuracy - b.bestAccuracy);
         return list;
       case 'perfect':
