@@ -9,6 +9,7 @@ import {
   Heart,
   Check,
   Loader2,
+  X,
 } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import { getBookBySlug } from '../lib/book-metadata';
@@ -297,6 +298,14 @@ export default function ReadPage() {
               <Heart className="w-4 h-4" />
             )}
             {allSelectedSaved ? 'Saved' : 'Add to My Verses'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedVerses(new Set())}
+            className="btn-outline inline-flex items-center gap-2 text-sm"
+          >
+            <X className="w-4 h-4" />
+            Clear
           </button>
         </div>
       )}
