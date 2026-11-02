@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import Navbar from './Navbar';
+import InstallBanner from './InstallBanner';
 import ToastContainer from '../Toast';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -24,6 +25,7 @@ export default function Layout({ children }: LayoutProps) {
         {children}
       </main>
       <ToastContainer />
+      <InstallBanner />
     </div>
   );
 }
