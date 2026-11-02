@@ -4,6 +4,7 @@ import { useSavedVerses } from '../hooks/useSavedVerses';
 import { getBookBySlug } from '../lib/book-metadata';
 import {
   BookOpen,
+  Bookmark,
   Heart,
   ArrowRight,
   Clock,
@@ -87,7 +88,7 @@ export default function MyVersesPage() {
     <div className="py-10 space-y-6">
       <div>
         <h1 className="text-3xl font-serif font-bold text-cream flex items-center gap-3">
-          <Heart className="w-8 h-8 text-gold-400" />
+          <Bookmark className="w-8 h-8 text-gold-400" />
           My Verses
         </h1>
         <p className="text-cream/40 mt-1">
