@@ -57,7 +57,7 @@ export default function HomePage() {
       text: daily.text,
       reference: daily.reference,
     });
-    showToast('Added to My Verses', 'success');
+    showToast('Added to favourites', 'success');
   }
 
   return (
@@ -118,7 +118,7 @@ export default function HomePage() {
                 ) : (
                   <Heart className="w-4 h-4" />
                 )}
-                {dailySaved ? 'Saved' : 'Add to My Verses'}
+                {dailySaved ? 'Saved' : 'Favourite'}
               </button>
               <button
                 type="button"

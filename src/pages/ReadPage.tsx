@@ -156,7 +156,7 @@ export default function ReadPage() {
     addVerses(versesToAdd);
     const count = versesToAdd.length;
     showToast(
-      `Added ${count} verse${count > 1 ? 's' : ''} to My Verses`,
+      `Added ${count} verse${count > 1 ? 's' : ''} to favourites`,
       'success',
     );
   }
@@ -317,7 +317,7 @@ export default function ReadPage() {
             ) : (
               <Heart className="w-4 h-4" />
             )}
-            {allSelectedSaved ? 'Saved' : 'Add to My Verses'}
+            {allSelectedSaved ? 'Saved' : 'Favourite'}
           </button>
           <button
             type="button"

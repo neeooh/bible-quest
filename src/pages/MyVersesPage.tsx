@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
@@ -10,7 +11,6 @@ import {
   ArrowRight,
   Clock,
   Target,
-  Trash2,
 } from 'lucide-react';
 
 function timeAgo(timestamp: number): string {
@@ -24,13 +24,26 @@ function timeAgo(timestamp: number): string {
   return `${days}d ago`;
 }
 
-interface PassageSummary {
+type Filter = 'all' | 'favourites' | 'least-practised' | 'lowest-score' | 'perfect';
+
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'favourites', label: 'Favourites' },
+  { key: 'least-practised', label: 'Least Practised' },
+  { key: 'lowest-score', label: 'Lowest Score' },
+  { key: 'perfect', label: '100% Score' },
+];
+
+interface UnifiedEntry {
+  key: string;
   book: string;
   bookName: string;
   chapterNumber: number;
   startVerse: number;
   endVerse: number;
   reference: string;
+  text: string;
+  isFavourite: boolean;
   bestAccuracy: number;
   lastPractised: number;
   timesCompleted: number;
@@ -38,27 +51,23 @@ interface PassageSummary {
 
 export default function MyVersesPage() {
   const { progress } = useProgress();
-  const { savedVerses, removeVerse } = useSavedVerses();
+  const { savedVerses, addVerse, removeVerse, isSaved } = useSavedVerses();
+  const [filter, setFilter] = useState<Filter>('all');
 
-  const passages: PassageSummary[] = (() => {
-    const grouped = new Map<string, PassageSummary>();
+  const entries: UnifiedEntry[] = useMemo(() => {
+    const map = new Map<string, UnifiedEntry>();
 
+    // Add practised passages
     for (const exercise of progress.exerciseHistory) {
       const bookSlug = exercise.book ?? 'matthew';
       const bookMeta = getBookBySlug(bookSlug);
       const bookName = bookMeta?.name ?? bookSlug;
       const key = `${bookSlug}:${exercise.chapterNumber}:${exercise.startVerse}-${exercise.endVerse}`;
 
-      const existing = grouped.get(key);
+      const existing = map.get(key);
       if (existing) {
-        existing.bestAccuracy = Math.max(
-          existing.bestAccuracy,
-          exercise.accuracy,
-        );
-        existing.lastPractised = Math.max(
-          existing.lastPractised,
-          exercise.timestamp,
-        );
+        existing.bestAccuracy = Math.max(existing.bestAccuracy, exercise.accuracy);
+        existing.lastPractised = Math.max(existing.lastPractised, exercise.timestamp);
         existing.timesCompleted += 1;
       } else {
         const ref =
@@ -66,13 +75,16 @@ export default function MyVersesPage() {
             ? `${bookName} ${exercise.chapterNumber}:${exercise.startVerse}`
             : `${bookName} ${exercise.chapterNumber}:${exercise.startVerse}–${exercise.endVerse}`;
 
-        grouped.set(key, {
+        map.set(key, {
+          key,
           book: bookSlug,
           bookName,
           chapterNumber: exercise.chapterNumber,
           startVerse: exercise.startVerse,
           endVerse: exercise.endVerse,
           reference: ref,
+          text: '',
+          isFavourite: false,
           bestAccuracy: exercise.accuracy,
           lastPractised: exercise.timestamp,
           timesCompleted: 1,
@@ -80,10 +92,91 @@ export default function MyVersesPage() {
       }
     }
 
-    return Array.from(grouped.values()).sort(
-      (a, b) => b.lastPractised - a.lastPractised,
-    );
-  })();
+    // Add favourites (merge or create new entries)
+    for (const sv of savedVerses) {
+      const key = `${sv.book}:${sv.chapter}:${sv.verse}-${sv.verse}`;
+      const existing = map.get(key);
+      if (existing) {
+        existing.isFavourite = true;
+        if (!existing.text) existing.text = sv.text;
+      } else {
+        map.set(key, {
+          key,
+          book: sv.book,
+          bookName: getBookBySlug(sv.book)?.name ?? sv.book,
+          chapterNumber: sv.chapter,
+          startVerse: sv.verse,
+          endVerse: sv.verse,
+          reference: sv.reference,
+          text: sv.text,
+          isFavourite: true,
+          bestAccuracy: 0,
+          lastPractised: sv.savedAt,
+          timesCompleted: 0,
+        });
+      }
+    }
+
+    // Also mark favourite status for multi-verse passages by checking each verse
+    for (const entry of map.values()) {
+      if (!entry.isFavourite) {
+        // Check if any verse in the range is saved
+        for (let v = entry.startVerse; v <= entry.endVerse; v++) {
+          if (isSaved(entry.book, entry.chapterNumber, v)) {
+            entry.isFavourite = true;
+            break;
+          }
+        }
+      }
+    }
+
+    return Array.from(map.values());
+  }, [progress.exerciseHistory, savedVerses, isSaved]);
+
+  const filtered = useMemo(() => {
+    let list = [...entries];
+
+    switch (filter) {
+      case 'favourites':
+        list = list.filter((e) => e.isFavourite);
+        break;
+      case 'least-practised':
+        list = list.sort((a, b) => a.timesCompleted - b.timesCompleted);
+        return list;
+      case 'lowest-score':
+        list = list
+          .filter((e) => e.timesCompleted > 0)
+          .sort((a, b) => a.bestAccuracy - b.bestAccuracy);
+        return list;
+      case 'perfect':
+        list = list.filter(
+          (e) => e.timesCompleted > 0 && e.bestAccuracy >= 0.99,
+        );
+        break;
+    }
+
+    return list.sort((a, b) => b.lastPractised - a.lastPractised);
+  }, [entries, filter]);
+
+  function toggleFavourite(entry: UnifiedEntry) {
+    if (entry.isFavourite) {
+      // Remove all verses in the range from favourites
+      for (let v = entry.startVerse; v <= entry.endVerse; v++) {
+        if (isSaved(entry.book, entry.chapterNumber, v)) {
+          removeVerse(entry.book, entry.chapterNumber, v);
+        }
+      }
+    } else {
+      // Add the first verse as favourite (we may not have text for ranges)
+      addVerse({
+        book: entry.book,
+        chapter: entry.chapterNumber,
+        verse: entry.startVerse,
+        text: entry.text,
+        reference: entry.reference,
+      });
+    }
+  }
 
   return (
     <div className="py-10 space-y-6">
@@ -93,74 +186,39 @@ export default function MyVersesPage() {
           My Verses
         </h1>
         <p className="text-cream/40 mt-1">
-          Saved verses and passages you have practised
+          Your favourites and practised passages
         </p>
       </div>
 
-      {/* Saved Verses */}
-      {savedVerses.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-lg font-serif font-semibold text-cream flex items-center gap-2">
-            <Heart className="w-5 h-5 text-gold-400" />
-            Saved Verses
-          </h2>
-          {[...savedVerses]
-            .sort((a, b) => b.savedAt - a.savedAt)
-            .map((sv) => (
-              <div
-                key={`${sv.book}:${sv.chapter}:${sv.verse}`}
-                className="card flex items-start justify-between gap-4"
-              >
-                <div className="min-w-0">
-                  <p className="text-gold-400 font-serif font-semibold text-sm">
-                    {sv.reference}
-                  </p>
-                  <p className="text-cream/70 text-sm mt-1 italic leading-relaxed">
-                    &ldquo;{sv.text}&rdquo;
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Link
-                    to={`/memorize?book=${sv.book}&chapter=${sv.chapter}&start=${sv.verse}&end=${sv.verse}`}
-                    className="btn-gold text-sm inline-flex items-center gap-1.5"
-                  >
-                    <Brain className="w-3.5 h-3.5" />
-                    Practise
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (window.confirm(`Remove ${sv.reference} from saved verses?`)) {
-                        removeVerse(sv.book, sv.chapter, sv.verse);
-                      }
-                    }}
-                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-red-400 hover:border-red-400/40 transition-colors flex items-center justify-center"
-                    aria-label={`Remove ${sv.reference}`}
-                    title="Remove"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+      {/* Filters */}
+      {entries.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setFilter(f.key)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                filter === f.key
+                  ? 'bg-gold-500 text-navy-900'
+                  : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
       )}
 
-      {/* Practised Passages */}
-      {passages.length > 0 && (
-        <h2 className="text-lg font-serif font-semibold text-cream mt-4">
-          Practised Passages
-        </h2>
-      )}
-
-      {passages.length === 0 && savedVerses.length === 0 ? (
+      {/* Empty state */}
+      {entries.length === 0 ? (
         <div className="card flex flex-col items-center text-center py-12 space-y-4">
           <BookOpen className="w-12 h-12 text-cream/25" />
           <p className="text-cream text-lg font-semibold">
-            No passages practised yet.
+            No verses yet.
           </p>
           <p className="text-cream/40 text-sm">
-            Head to the Library to start reading and memorising.
+            Favourite verses or complete exercises to build your collection.
           </p>
           <Link
             to="/library"
@@ -170,42 +228,72 @@ export default function MyVersesPage() {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="card text-center py-8">
+          <p className="text-cream/40 text-sm">
+            No verses match this filter.
+          </p>
+        </div>
       ) : (
         <div className="space-y-3">
-          {passages.map((passage) => (
+          {filtered.map((entry) => (
             <div
-              key={`${passage.book}:${passage.chapterNumber}:${passage.startVerse}-${passage.endVerse}`}
-              className="card flex items-center justify-between gap-4"
+              key={entry.key}
+              className="card flex items-start justify-between gap-4"
             >
               <div className="min-w-0">
                 <p className="text-gold-400 font-serif font-semibold">
-                  {passage.reference}
+                  {entry.reference}
                 </p>
-                <p className="text-cream/40 text-xs mt-1 flex items-center gap-1">
-                  <Target className="w-3 h-3" />
-                  Best: {Math.round(passage.bestAccuracy * 100)}% · {passage.timesCompleted}{' '}
-                  sessions
-                </p>
-                <p className="text-cream/25 text-xs mt-0.5 flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  Last practised {timeAgo(passage.lastPractised)}
-                </p>
+                {entry.text && (
+                  <p className="text-cream/60 text-sm mt-1 italic leading-relaxed line-clamp-2">
+                    &ldquo;{entry.text}&rdquo;
+                  </p>
+                )}
+                {entry.timesCompleted > 0 && (
+                  <p className="text-cream/40 text-xs mt-1.5 flex items-center gap-1">
+                    <Target className="w-3 h-3" />
+                    Best: {Math.round(entry.bestAccuracy * 100)}% &middot;{' '}
+                    {entry.timesCompleted} session
+                    {entry.timesCompleted > 1 ? 's' : ''}
+                  </p>
+                )}
+                {entry.lastPractised > 0 && entry.timesCompleted > 0 && (
+                  <p className="text-cream/25 text-xs mt-0.5 flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    Last practised {timeAgo(entry.lastPractised)}
+                  </p>
+                )}
               </div>
 
-              <div className="flex flex-col gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 <Link
-                  to={`/memorize?book=${passage.book}&chapter=${passage.chapterNumber}&start=${passage.startVerse}&end=${passage.endVerse}`}
+                  to={`/memorize?book=${entry.book}&chapter=${entry.chapterNumber}&start=${entry.startVerse}&end=${entry.endVerse}`}
                   className="btn-gold text-sm inline-flex items-center gap-1.5"
                 >
                   <Brain className="w-3.5 h-3.5" />
                   Practise
                 </Link>
-                <Link
-                  to={`/read/${passage.book}/${passage.chapterNumber}?verse=${passage.startVerse}`}
-                  className="btn-outline text-sm"
+                <button
+                  type="button"
+                  onClick={() => toggleFavourite(entry)}
+                  className={`w-9 h-9 rounded-lg border transition-colors flex items-center justify-center ${
+                    entry.isFavourite
+                      ? 'border-gold-500/30 text-red-400 hover:text-red-300'
+                      : 'border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40'
+                  }`}
+                  aria-label={
+                    entry.isFavourite
+                      ? `Remove ${entry.reference} from favourites`
+                      : `Add ${entry.reference} to favourites`
+                  }
+                  title={entry.isFavourite ? 'Remove from favourites' : 'Add to favourites'}
                 >
-                  Read
-                </Link>
+                  <Heart
+                    className="w-4 h-4"
+                    fill={entry.isFavourite ? 'currentColor' : 'none'}
+                  />
+                </button>
               </div>
             </div>
           ))}
