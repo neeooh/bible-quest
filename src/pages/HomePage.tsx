@@ -159,8 +159,8 @@ export default function HomePage() {
 
       {/* Quick Stats */}
       {hasAnyData ? (
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-          <div className="card flex items-center gap-4">
+        <Link to="/progress" className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto group">
+          <div className="card flex items-center gap-4 group-hover:border-gold-500/30 transition-colors">
             <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
               <Trophy className="w-5 h-5 text-gold-500" />
             </div>
@@ -169,7 +169,7 @@ export default function HomePage() {
               <p className="text-cream/40 text-xs">Total XP</p>
             </div>
           </div>
-          <div className="card flex items-center gap-4">
+          <div className="card flex items-center gap-4 group-hover:border-gold-500/30 transition-colors">
             <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
               <Flame className="w-5 h-5 text-gold-500" />
             </div>
@@ -180,7 +180,7 @@ export default function HomePage() {
               <p className="text-cream/40 text-xs">Day Streak</p>
             </div>
           </div>
-          <div className="card flex items-center gap-4">
+          <div className="card flex items-center gap-4 group-hover:border-gold-500/30 transition-colors">
             <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
               <BookOpen className="w-5 h-5 text-gold-500" />
             </div>
@@ -191,7 +191,7 @@ export default function HomePage() {
               <p className="text-cream/40 text-xs">Chapters Explored</p>
             </div>
           </div>
-        </section>
+        </Link>
       ) : null}
     </div>
   );
