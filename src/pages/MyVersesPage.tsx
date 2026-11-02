@@ -183,7 +183,7 @@ export default function MyVersesPage() {
                 </p>
                 <p className="text-cream/40 text-xs mt-1 flex items-center gap-1">
                   <Target className="w-3 h-3" />
-                  Best: {passage.bestAccuracy}% · {passage.timesCompleted}{' '}
+                  Best: {Math.round(passage.bestAccuracy * 100)}% · {passage.timesCompleted}{' '}
                   sessions
                 </p>
                 <p className="text-cream/25 text-xs mt-0.5 flex items-center gap-1">
