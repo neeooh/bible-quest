@@ -147,7 +147,7 @@ export default function LibraryPage() {
                 <p className="text-cream/40 text-sm">No verses found.</p>
               </div>
             ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+              <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
                 {searchResults.map((r) => (
                   <Link
                     key={`${r.book}:${r.chapter}:${r.verse}`}
