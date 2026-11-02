@@ -192,13 +192,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-      ) : (
-        <section className="max-w-2xl mx-auto">
-          <div className="card text-center text-cream/50 text-sm py-6">
-            Complete your first exercise to start tracking progress.
-          </div>
-        </section>
-      )}
+      ) : null}
     </div>
   );
 }
