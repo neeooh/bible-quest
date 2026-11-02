@@ -10,8 +10,10 @@ import {
   Check,
   Heart,
   Loader2,
+  BookMarked,
 } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
+import { getLastRead } from '../lib/last-read';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
 import { showToast } from '../components/Toast';
@@ -22,6 +24,7 @@ export default function HomePage() {
   const { addVerse, isSaved } = useSavedVerses();
   const [copied, setCopied] = useState(false);
   const [daily, setDaily] = useState<DailyVerse | null>(null);
+  const lastRead = getLastRead();
 
   useEffect(() => {
     getDailyVerse().then(setDaily);
@@ -130,6 +133,27 @@ export default function HomePage() {
           </>
         )}
       </section>
+
+      {/* Continue Reading */}
+      {lastRead && (
+        <section className="max-w-2xl mx-auto">
+          <Link
+            to={`/read/${lastRead.book}/${lastRead.chapter}`}
+            className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
+          >
+            <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0 group-hover:bg-gold-500/20 transition-colors">
+              <BookMarked className="w-5 h-5 text-gold-500" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-cream/50 text-xs font-medium">Continue Reading</p>
+              <p className="text-cream font-serif font-semibold group-hover:text-gold-400 transition-colors">
+                {lastRead.bookName} {lastRead.chapter}
+              </p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-cream/30 ml-auto shrink-0 group-hover:text-gold-400 transition-colors" />
+          </Link>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="text-center">

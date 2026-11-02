@@ -14,6 +14,7 @@ import { loadBook, formatReference } from '../lib/bible';
 import { getBookBySlug } from '../lib/book-metadata';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
+import { saveLastRead } from '../lib/last-read';
 import { showToast } from '../components/Toast';
 import type { BibleData } from '../lib/types';
 
@@ -51,12 +52,13 @@ export default function ReadPage() {
   const chapter = bookData?.chapters.find((ch) => ch.chapter === num);
   const total = bookData?.chapters.length ?? 0;
 
-  // Mark chapter explored
+  // Mark chapter explored and save reading position
   useEffect(() => {
     if (!bookSlug || !chapter) return;
     const key = `${bookSlug}:${num}`;
     const alreadyExplored = progress.chaptersExplored.includes(key);
     markChapterExplored(bookSlug, num);
+    saveLastRead(bookSlug, bookName, num);
     if (!alreadyExplored && toastedChapterRef.current !== key) {
       toastedChapterRef.current = key;
       showToast(`${bookName} ${num} explored!`, 'info');
