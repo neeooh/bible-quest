@@ -90,7 +90,7 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            <blockquote className="text-cream/90 text-lg leading-relaxed font-serif italic">
+            <blockquote className="text-cream/90 text-xl md:text-2xl leading-relaxed font-serif">
               &ldquo;{daily.text}&rdquo;
             </blockquote>
             <Link
