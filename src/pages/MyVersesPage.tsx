@@ -5,6 +5,7 @@ import { getBookBySlug } from '../lib/book-metadata';
 import {
   BookOpen,
   Bookmark,
+  Brain,
   Heart,
   ArrowRight,
   Clock,
@@ -121,8 +122,9 @@ export default function MyVersesPage() {
                 <div className="flex flex-col gap-2 shrink-0">
                   <Link
                     to={`/memorize?book=${sv.book}&chapter=${sv.chapter}&start=${sv.verse}&end=${sv.verse}`}
-                    className="btn-gold text-sm"
+                    className="btn-gold text-sm inline-flex items-center gap-1.5"
                   >
+                    <Brain className="w-3.5 h-3.5" />
                     Practise
                   </Link>
                   <button
@@ -190,8 +192,9 @@ export default function MyVersesPage() {
               <div className="flex flex-col gap-2 shrink-0">
                 <Link
                   to={`/memorize?book=${passage.book}&chapter=${passage.chapterNumber}&start=${passage.startVerse}&end=${passage.endVerse}`}
-                  className="btn-gold text-sm"
+                  className="btn-gold text-sm inline-flex items-center gap-1.5"
                 >
+                  <Brain className="w-3.5 h-3.5" />
                   Practise
                 </Link>
                 <Link
