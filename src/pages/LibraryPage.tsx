@@ -70,27 +70,6 @@ export default function LibraryPage() {
         </p>
       </div>
 
-      {/* Continue Reading */}
-      {lastRead && (
-        <div className="max-w-2xl mx-auto">
-          <Link
-            to={`/read/${lastRead.book}/${lastRead.chapter}`}
-            className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
-          >
-            <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0 group-hover:bg-gold-500/20 transition-colors">
-              <BookMarked className="w-5 h-5 text-gold-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-cream/50 text-xs font-medium">Continue Reading</p>
-              <p className="text-cream font-serif font-semibold group-hover:text-gold-400 transition-colors">
-                {lastRead.bookName} {lastRead.chapter}
-              </p>
-            </div>
-            <ArrowRight className="w-5 h-5 text-cream/30 ml-auto shrink-0 group-hover:text-gold-400 transition-colors" />
-          </Link>
-        </div>
-      )}
-
       {/* Testament Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
         <Link
@@ -119,6 +98,27 @@ export default function LibraryPage() {
           <p className="text-cream/40 text-sm">{ntBooks.length} books</p>
         </Link>
       </div>
+
+      {/* Continue Reading */}
+      {lastRead && (
+        <div className="max-w-2xl mx-auto">
+          <Link
+            to={`/read/${lastRead.book}/${lastRead.chapter}`}
+            className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
+          >
+            <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0 group-hover:bg-gold-500/20 transition-colors">
+              <BookMarked className="w-5 h-5 text-gold-500" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-cream/50 text-xs font-medium">Continue Reading</p>
+              <p className="text-cream font-serif font-semibold group-hover:text-gold-400 transition-colors">
+                {lastRead.bookName} {lastRead.chapter}
+              </p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-cream/30 ml-auto shrink-0 group-hover:text-gold-400 transition-colors" />
+          </Link>
+        </div>
+      )}
 
       {/* Go to a Passage */}
       <section className="card space-y-4 max-w-2xl mx-auto">
