@@ -85,7 +85,7 @@ export default function MyVersesPage() {
   })();
 
   return (
-    <div className="space-y-6">
+    <div className="py-10 space-y-6">
       <div>
         <h1 className="text-3xl font-serif font-bold text-cream flex items-center gap-3">
           <Brain className="w-8 h-8 text-gold-400" />
