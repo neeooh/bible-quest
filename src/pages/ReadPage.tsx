@@ -186,7 +186,7 @@ export default function ReadPage() {
             onClick={() => {
               if (bookSlug) {
                 saveLastRead(bookSlug, bookName, num);
-                showToast(`Position saved: ${bookName} ${num}`, 'success');
+                showToast(`Place saved: ${bookName} ${num}`, 'success');
               }
             }}
             className="rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center gap-1.5 px-3 py-2 text-xs"
@@ -194,7 +194,7 @@ export default function ReadPage() {
             title="Save reading position"
           >
             <BookmarkPlus className="w-4 h-4" />
-            Mark Position
+            Save Place
           </button>
 
           {/* Font size controls */}
