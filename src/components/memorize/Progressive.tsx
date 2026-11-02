@@ -9,6 +9,7 @@ const PHASE_HIDE = [0, 0.25, 0.5, 0.75, 1.0];
 
 export default function Progressive({
   verses,
+  bookName,
   chapter,
   startVerse,
   endVerse,
@@ -32,6 +33,7 @@ export default function Progressive({
   const totalWords = allWords.length;
 
   const reference = formatReference(
+    bookName,
     chapter,
     startVerse,
     startVerse !== endVerse ? endVerse : undefined,

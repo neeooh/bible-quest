@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import LibraryPage from './pages/LibraryPage';
+import BookChaptersPage from './pages/BookChaptersPage';
 import ReadPage from './pages/ReadPage';
 import MemorizePage from './pages/MemorizePage';
 import MyVersesPage from './pages/MyVersesPage';
@@ -12,12 +13,13 @@ export default function App() {
     <BrowserRouter>
       <Layout>
         <Routes>
-          <Route path='/' element={<HomePage />} />
-          <Route path='/library' element={<LibraryPage />} />
-          <Route path='/read/:chapter' element={<ReadPage />} />
-          <Route path='/memorize' element={<MemorizePage />} />
-          <Route path='/my-verses' element={<MyVersesPage />} />
-          <Route path='/progress' element={<ProgressPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/library" element={<LibraryPage />} />
+          <Route path="/library/:book" element={<BookChaptersPage />} />
+          <Route path="/read/:book/:chapter" element={<ReadPage />} />
+          <Route path="/memorize" element={<MemorizePage />} />
+          <Route path="/my-verses" element={<MyVersesPage />} />
+          <Route path="/progress" element={<ProgressPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>

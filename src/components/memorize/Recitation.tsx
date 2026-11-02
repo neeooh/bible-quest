@@ -6,6 +6,7 @@ import { formatReference } from '../../lib/bible';
 
 export default function Recitation({
   verses,
+  bookName,
   chapter,
   startVerse,
   endVerse,
@@ -21,6 +22,7 @@ export default function Recitation({
   );
 
   const reference = formatReference(
+    bookName,
     chapter,
     startVerse,
     startVerse !== endVerse ? endVerse : undefined,

@@ -35,6 +35,7 @@ function shuffle(arr: number[]): number[] {
 
 export default function MissingWords({
   verses,
+  bookName,
   chapter,
   startVerse,
   endVerse,
@@ -88,6 +89,7 @@ export default function MissingWords({
   }, [attempt, words, hideCount]);
 
   const reference = formatReference(
+    bookName,
     chapter,
     startVerse,
     startVerse !== endVerse ? endVerse : undefined,

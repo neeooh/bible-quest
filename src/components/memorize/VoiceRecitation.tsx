@@ -7,6 +7,7 @@ import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
 export default function VoiceRecitation({
   verses,
+  bookName,
   chapter,
   startVerse,
   endVerse,
@@ -31,6 +32,7 @@ export default function VoiceRecitation({
   );
 
   const reference = formatReference(
+    bookName,
     chapter,
     startVerse,
     startVerse !== endVerse ? endVerse : undefined,

@@ -1,10 +1,15 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BookOpen, Puzzle, Layers, Mic, AlignLeft, Eye } from 'lucide-react';
-import { getChapter, bibleData, getVerses } from '../lib/bible';
+import { BookOpen, Puzzle, Layers, Mic, AlignLeft, Eye, Loader2 } from 'lucide-react';
+import { loadBook, formatReference } from '../lib/bible';
+import {
+  getBookBySlug,
+  getOldTestamentBooks,
+  getNewTestamentBooks,
+} from '../lib/book-metadata';
 import { useProgress } from '../hooks/useProgress';
 import { showToast } from '../components/Toast';
-import type { Verse, ExerciseResult } from '../lib/types';
+import type { Verse, ExerciseResult, BibleData } from '../lib/types';
 import MissingWords from '../components/memorize/MissingWords';
 import Progressive from '../components/memorize/Progressive';
 import Recitation from '../components/memorize/Recitation';
@@ -22,11 +27,15 @@ const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
 export default function MemorizePage() {
   const [searchParams] = useSearchParams();
   const { recordExercise } = useProgress();
-  const allChapters = bibleData.chapters;
 
+  const paramBook = searchParams.get('book');
   const paramChapter = searchParams.get('chapter');
   const paramStart = searchParams.get('start');
   const paramEnd = searchParams.get('end');
+
+  const [selectedBook, setSelectedBook] = useState<string>(paramBook ?? '');
+  const [bookData, setBookData] = useState<BibleData | null>(null);
+  const [bookLoading, setBookLoading] = useState(false);
 
   const [selectedChapter, setSelectedChapter] = useState<number>(
     paramChapter ? Number(paramChapter) : 0,
@@ -38,8 +47,27 @@ export default function MemorizePage() {
     paramEnd ? Number(paramEnd) : 1,
   );
   const [activeTab, setActiveTab] = useState<TabKey>('missing-words');
+  const [peeking, setPeeking] = useState(false);
 
-  const chapter = selectedChapter ? getChapter(selectedChapter) : undefined;
+  const bookMeta = selectedBook ? getBookBySlug(selectedBook) : undefined;
+  const bookName = bookMeta?.name ?? '';
+
+  // Load book data when selection changes
+  useEffect(() => {
+    if (!selectedBook) {
+      setBookData(null);
+      return;
+    }
+    setBookLoading(true);
+    loadBook(selectedBook)
+      .then(setBookData)
+      .finally(() => setBookLoading(false));
+  }, [selectedBook]);
+
+  const allChapters = bookData?.chapters ?? [];
+  const chapter = selectedChapter
+    ? allChapters.find((c) => c.chapter === selectedChapter)
+    : undefined;
   const maxVerse = chapter ? chapter.verses.length : 1;
 
   // Set defaults when chapter changes without URL params
@@ -58,18 +86,18 @@ export default function MemorizePage() {
   }, [startVerse, endVerse]);
 
   const verses: Verse[] = useMemo(() => {
-    if (!selectedChapter) return [];
-    return getVerses(selectedChapter, startVerse, endVerse);
-  }, [selectedChapter, startVerse, endVerse]);
-
-  const [peeking, setPeeking] = useState(false);
+    if (!chapter) return [];
+    return chapter.verses.filter(
+      (v) => v.verse >= startVerse && v.verse <= endVerse,
+    );
+  }, [chapter, startVerse, endVerse]);
 
   const passageText = useMemo(
-    () => verses.map(v => v.text).join(' '),
+    () => verses.map((v) => v.text).join(' '),
     [verses],
   );
 
-  const passageSelected = selectedChapter > 0 && verses.length > 0;
+  const passageSelected = selectedBook && selectedChapter > 0 && verses.length > 0;
 
   const XP_TABLE: Record<TabKey, number> = {
     'missing-words': 20,
@@ -82,6 +110,7 @@ export default function MemorizePage() {
     (accuracy: number) => {
       const result: ExerciseResult = {
         type: activeTab,
+        book: selectedBook,
         chapterNumber: selectedChapter,
         startVerse,
         endVerse,
@@ -97,12 +126,21 @@ export default function MemorizePage() {
       const pct = Math.round(accuracy * 100);
       showToast(`+${xp} XP earned! (${pct}% accuracy)`, 'success');
     },
-    [activeTab, selectedChapter, startVerse, endVerse, recordExercise],
+    [activeTab, selectedBook, selectedChapter, startVerse, endVerse, recordExercise],
   );
+
+  const otBooks = getOldTestamentBooks();
+  const ntBooks = getNewTestamentBooks();
+
+  function handleBookChange(slug: string) {
+    setSelectedBook(slug);
+    setSelectedChapter(0);
+    setStartVerse(1);
+    setEndVerse(1);
+  }
 
   return (
     <div className="py-10 space-y-8">
-      {/* Title */}
       <div className="flex items-center gap-3">
         <BookOpen className="w-6 h-6 text-gold-500" />
         <h1 className="text-3xl font-serif font-bold text-cream">Memorise</h1>
@@ -111,7 +149,36 @@ export default function MemorizePage() {
       {/* Passage Selector */}
       <section className="card space-y-4">
         <h2 className="text-sm font-medium text-cream/50">Select a Passage</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Book */}
+          <div className="space-y-1.5">
+            <label htmlFor="book-select" className="text-xs text-cream/40">
+              Book
+            </label>
+            <select
+              id="book-select"
+              value={selectedBook}
+              onChange={(e) => handleBookChange(e.target.value)}
+              className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50"
+            >
+              <option value="">Select book</option>
+              <optgroup label="Old Testament">
+                {otBooks.map((b) => (
+                  <option key={b.slug} value={b.slug}>
+                    {b.name}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="New Testament">
+                {ntBooks.map((b) => (
+                  <option key={b.slug} value={b.slug}>
+                    {b.name}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+
           {/* Chapter */}
           <div className="space-y-1.5">
             <label htmlFor="chapter-select" className="text-xs text-cream/40">
@@ -120,13 +187,14 @@ export default function MemorizePage() {
             <select
               id="chapter-select"
               value={selectedChapter}
-              onChange={e => setSelectedChapter(Number(e.target.value))}
-              className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50"
+              onChange={(e) => setSelectedChapter(Number(e.target.value))}
+              disabled={!selectedBook || bookLoading}
+              className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50 disabled:opacity-40"
             >
               <option value={0}>Select chapter</option>
-              {allChapters.map(ch => (
+              {allChapters.map((ch) => (
                 <option key={ch.chapter} value={ch.chapter}>
-                  Matthew {ch.chapter}
+                  {bookName} {ch.chapter}
                 </option>
               ))}
             </select>
@@ -140,11 +208,11 @@ export default function MemorizePage() {
             <select
               id="start-verse"
               value={startVerse}
-              onChange={e => setStartVerse(Number(e.target.value))}
+              onChange={(e) => setStartVerse(Number(e.target.value))}
               disabled={!selectedChapter}
               className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50 disabled:opacity-40"
             >
-              {Array.from({ length: maxVerse }, (_, i) => i + 1).map(v => (
+              {Array.from({ length: maxVerse }, (_, i) => i + 1).map((v) => (
                 <option key={v} value={v}>
                   Verse {v}
                 </option>
@@ -160,27 +228,34 @@ export default function MemorizePage() {
             <select
               id="end-verse"
               value={endVerse}
-              onChange={e => setEndVerse(Number(e.target.value))}
+              onChange={(e) => setEndVerse(Number(e.target.value))}
               disabled={!selectedChapter}
               className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50 disabled:opacity-40"
             >
-              {Array.from({ length: maxVerse - startVerse + 1 }, (_, i) => startVerse + i).map(
-                v => (
-                  <option key={v} value={v}>
-                    Verse {v}
-                  </option>
-                ),
-              )}
+              {Array.from(
+                { length: maxVerse - startVerse + 1 },
+                (_, i) => startVerse + i,
+              ).map((v) => (
+                <option key={v} value={v}>
+                  Verse {v}
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
-        {/* Preview — hold to peek */}
+        {bookLoading && (
+          <div className="flex items-center gap-2 text-cream/40 text-sm">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading book data…
+          </div>
+        )}
+
+        {/* Preview */}
         {passageSelected && (
           <div className="pt-2 border-t border-gold-500/10 space-y-3">
             <p className="text-gold-400 text-sm font-medium">
-              Matthew {selectedChapter}:{startVerse}
-              {startVerse !== endVerse && `–${endVerse}`}
+              {formatReference(bookName, selectedChapter, startVerse, endVerse !== startVerse ? endVerse : undefined)}
               <span className="text-cream/30 ml-2">
                 ({verses.length} verse{verses.length > 1 ? 's' : ''})
               </span>
@@ -214,9 +289,8 @@ export default function MemorizePage() {
       {/* Exercise Area */}
       {passageSelected && (
         <section className="space-y-6">
-          {/* Tabs */}
           <div className="flex flex-wrap gap-2">
-            {tabs.map(tab => {
+            {tabs.map((tab) => {
               const isActive = activeTab === tab.key;
               return (
                 <button
@@ -240,11 +314,11 @@ export default function MemorizePage() {
             })}
           </div>
 
-          {/* Active exercise */}
           <div className="card">
             {activeTab === 'missing-words' && (
               <MissingWords
                 verses={verses}
+                bookName={bookName}
                 chapter={selectedChapter}
                 startVerse={startVerse}
                 endVerse={endVerse}
@@ -254,6 +328,7 @@ export default function MemorizePage() {
             {activeTab === 'progressive' && (
               <Progressive
                 verses={verses}
+                bookName={bookName}
                 chapter={selectedChapter}
                 startVerse={startVerse}
                 endVerse={endVerse}
@@ -263,6 +338,7 @@ export default function MemorizePage() {
             {activeTab === 'recitation' && (
               <Recitation
                 verses={verses}
+                bookName={bookName}
                 chapter={selectedChapter}
                 startVerse={startVerse}
                 endVerse={endVerse}
@@ -272,6 +348,7 @@ export default function MemorizePage() {
             {activeTab === 'voice' && (
               <VoiceRecitation
                 verses={verses}
+                bookName={bookName}
                 chapter={selectedChapter}
                 startVerse={startVerse}
                 endVerse={endVerse}

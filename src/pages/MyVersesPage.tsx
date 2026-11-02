@@ -1,7 +1,16 @@
 import { Link } from 'react-router-dom';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
-import { BookOpen, Brain, ArrowRight, Clock, Target, Heart, Trash2 } from 'lucide-react';
+import { getBookBySlug } from '../lib/book-metadata';
+import {
+  BookOpen,
+  Brain,
+  ArrowRight,
+  Clock,
+  Target,
+  Heart,
+  Trash2,
+} from 'lucide-react';
 
 function timeAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -15,6 +24,8 @@ function timeAgo(timestamp: number): string {
 }
 
 interface PassageSummary {
+  book: string;
+  bookName: string;
   chapterNumber: number;
   startVerse: number;
   endVerse: number;
@@ -32,20 +43,31 @@ export default function MyVersesPage() {
     const grouped = new Map<string, PassageSummary>();
 
     for (const exercise of progress.exerciseHistory) {
-      const key = `${exercise.chapterNumber}:${exercise.startVerse}-${exercise.endVerse}`;
+      const bookSlug = exercise.book ?? 'matthew';
+      const bookMeta = getBookBySlug(bookSlug);
+      const bookName = bookMeta?.name ?? bookSlug;
+      const key = `${bookSlug}:${exercise.chapterNumber}:${exercise.startVerse}-${exercise.endVerse}`;
 
       const existing = grouped.get(key);
       if (existing) {
-        existing.bestAccuracy = Math.max(existing.bestAccuracy, exercise.accuracy);
-        existing.lastPractised = Math.max(existing.lastPractised, exercise.timestamp);
+        existing.bestAccuracy = Math.max(
+          existing.bestAccuracy,
+          exercise.accuracy,
+        );
+        existing.lastPractised = Math.max(
+          existing.lastPractised,
+          exercise.timestamp,
+        );
         existing.timesCompleted += 1;
       } else {
         const ref =
           exercise.startVerse === exercise.endVerse
-            ? `Matthew ${exercise.chapterNumber}:${exercise.startVerse}`
-            : `Matthew ${exercise.chapterNumber}:${exercise.startVerse}–${exercise.endVerse}`;
+            ? `${bookName} ${exercise.chapterNumber}:${exercise.startVerse}`
+            : `${bookName} ${exercise.chapterNumber}:${exercise.startVerse}–${exercise.endVerse}`;
 
         grouped.set(key, {
+          book: bookSlug,
+          bookName,
           chapterNumber: exercise.chapterNumber,
           startVerse: exercise.startVerse,
           endVerse: exercise.endVerse,
@@ -58,7 +80,7 @@ export default function MyVersesPage() {
     }
 
     return Array.from(grouped.values()).sort(
-      (a, b) => b.lastPractised - a.lastPractised
+      (a, b) => b.lastPractised - a.lastPractised,
     );
   })();
 
@@ -69,7 +91,9 @@ export default function MyVersesPage() {
           <Brain className="w-8 h-8 text-gold-400" />
           My Verses
         </h1>
-        <p className="text-cream/40 mt-1">Passages you have practised</p>
+        <p className="text-cream/40 mt-1">
+          Saved verses and passages you have practised
+        </p>
       </div>
 
       {/* Saved Verses */}
@@ -79,37 +103,41 @@ export default function MyVersesPage() {
             <Heart className="w-5 h-5 text-gold-400" />
             Saved Verses
           </h2>
-          {[...savedVerses].sort((a, b) => b.savedAt - a.savedAt).map((sv) => (
-            <div
-              key={`${sv.chapter}:${sv.verse}`}
-              className="card flex items-start justify-between gap-4"
-            >
-              <div className="min-w-0">
-                <p className="text-gold-400 font-serif font-semibold text-sm">
-                  {sv.reference}
-                </p>
-                <p className="text-cream/70 text-sm mt-1 italic leading-relaxed">
-                  &ldquo;{sv.text}&rdquo;
-                </p>
+          {[...savedVerses]
+            .sort((a, b) => b.savedAt - a.savedAt)
+            .map((sv) => (
+              <div
+                key={`${sv.book}:${sv.chapter}:${sv.verse}`}
+                className="card flex items-start justify-between gap-4"
+              >
+                <div className="min-w-0">
+                  <p className="text-gold-400 font-serif font-semibold text-sm">
+                    {sv.reference}
+                  </p>
+                  <p className="text-cream/70 text-sm mt-1 italic leading-relaxed">
+                    &ldquo;{sv.text}&rdquo;
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 shrink-0">
+                  <Link
+                    to={`/memorize?book=${sv.book}&chapter=${sv.chapter}&start=${sv.verse}&end=${sv.verse}`}
+                    className="btn-gold text-sm"
+                  >
+                    Practise
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      removeVerse(sv.book, sv.chapter, sv.verse)
+                    }
+                    className="btn-outline text-sm inline-flex items-center gap-1.5 justify-center"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Remove
+                  </button>
+                </div>
               </div>
-              <div className="flex flex-col gap-2 shrink-0">
-                <Link
-                  to={`/memorize?chapter=${sv.chapter}&start=${sv.verse}&end=${sv.verse}`}
-                  className="btn-gold text-sm"
-                >
-                  Practise
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => removeVerse(sv.chapter, sv.verse)}
-                  className="btn-outline text-sm inline-flex items-center gap-1.5 justify-center"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  Remove
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
 
@@ -129,7 +157,10 @@ export default function MyVersesPage() {
           <p className="text-cream/40 text-sm">
             Head to the Library to start reading and memorising.
           </p>
-          <Link to="/library" className="btn-gold inline-flex items-center gap-2">
+          <Link
+            to="/library"
+            className="btn-gold inline-flex items-center gap-2"
+          >
             Browse Library
             <ArrowRight className="w-4 h-4" />
           </Link>
@@ -138,7 +169,7 @@ export default function MyVersesPage() {
         <div className="space-y-3">
           {passages.map((passage) => (
             <div
-              key={`${passage.chapterNumber}:${passage.startVerse}-${passage.endVerse}`}
+              key={`${passage.book}:${passage.chapterNumber}:${passage.startVerse}-${passage.endVerse}`}
               className="card flex items-center justify-between gap-4"
             >
               <div className="min-w-0">
@@ -147,7 +178,8 @@ export default function MyVersesPage() {
                 </p>
                 <p className="text-cream/40 text-xs mt-1 flex items-center gap-1">
                   <Target className="w-3 h-3" />
-                  Best: {passage.bestAccuracy}% · {passage.timesCompleted} sessions
+                  Best: {passage.bestAccuracy}% · {passage.timesCompleted}{' '}
+                  sessions
                 </p>
                 <p className="text-cream/25 text-xs mt-0.5 flex items-center gap-1">
                   <Clock className="w-3 h-3" />
@@ -157,13 +189,13 @@ export default function MyVersesPage() {
 
               <div className="flex flex-col gap-2 shrink-0">
                 <Link
-                  to={`/memorize?chapter=${passage.chapterNumber}&start=${passage.startVerse}&end=${passage.endVerse}`}
+                  to={`/memorize?book=${passage.book}&chapter=${passage.chapterNumber}&start=${passage.startVerse}&end=${passage.endVerse}`}
                   className="btn-gold text-sm"
                 >
                   Practise
                 </Link>
                 <Link
-                  to={`/read/${passage.chapterNumber}?verse=${passage.startVerse}`}
+                  to={`/read/${passage.book}/${passage.chapterNumber}?verse=${passage.startVerse}`}
                   className="btn-outline text-sm"
                 >
                   Read

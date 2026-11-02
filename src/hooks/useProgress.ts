@@ -6,8 +6,9 @@ export interface UseProgressReturn {
   progress: UserProgress;
   addXp: (amount: number) => void;
   recordExercise: (result: ExerciseResult) => void;
-  markChapterExplored: (chapter: number) => void;
+  markChapterExplored: (book: string, chapter: number) => void;
   markPassageMemorized: (
+    book: string,
     chapter: number,
     startVerse: number,
     endVerse: number,
@@ -21,7 +22,6 @@ export function useProgress(): UseProgressReturn {
     progressLib.getProgress,
   );
 
-  // Update the streak on mount so the UI reflects the current state.
   useEffect(() => {
     const updated = progressLib.updateStreak();
     setProgress(updated);
@@ -37,14 +37,18 @@ export function useProgress(): UseProgressReturn {
     setProgress(updated);
   }, []);
 
-  const markChapterExplored = useCallback((chapter: number) => {
-    const updated = progressLib.markChapterExplored(chapter);
-    setProgress(updated);
-  }, []);
+  const markChapterExplored = useCallback(
+    (book: string, chapter: number) => {
+      const updated = progressLib.markChapterExplored(book, chapter);
+      setProgress(updated);
+    },
+    [],
+  );
 
   const markPassageMemorized = useCallback(
-    (chapter: number, startVerse: number, endVerse: number) => {
+    (book: string, chapter: number, startVerse: number, endVerse: number) => {
       const updated = progressLib.markPassageMemorized(
+        book,
         chapter,
         startVerse,
         endVerse,

@@ -1,6 +1,6 @@
 import type { SavedVerse } from './types';
 
-const STORAGE_KEY = 'biblequest_saved_verses';
+const STORAGE_KEY = 'biblequest_saved_verses_v2';
 
 export function getSavedVerses(): SavedVerse[] {
   try {
@@ -22,7 +22,10 @@ export function addSavedVerse(
 ): SavedVerse[] {
   const current = getSavedVerses();
   const exists = current.some(
-    (v) => v.chapter === verse.chapter && v.verse === verse.verse,
+    (v) =>
+      v.book === verse.book &&
+      v.chapter === verse.chapter &&
+      v.verse === verse.verse,
   );
   if (exists) return current;
   return persist([...current, { ...verse, savedAt: Date.now() }]);
@@ -36,10 +39,16 @@ export function addSavedVerses(
 
   for (const verse of verses) {
     const alreadyStored = current.some(
-      (v) => v.chapter === verse.chapter && v.verse === verse.verse,
+      (v) =>
+        v.book === verse.book &&
+        v.chapter === verse.chapter &&
+        v.verse === verse.verse,
     );
     const alreadyQueued = toAdd.some(
-      (v) => v.chapter === verse.chapter && v.verse === verse.verse,
+      (v) =>
+        v.book === verse.book &&
+        v.chapter === verse.chapter &&
+        v.verse === verse.verse,
     );
     if (!alreadyStored && !alreadyQueued) {
       toAdd.push({ ...verse, savedAt: Date.now() });
@@ -51,11 +60,15 @@ export function addSavedVerses(
 }
 
 export function removeSavedVerse(
+  book: string,
   chapter: number,
   verse: number,
 ): SavedVerse[] {
   const current = getSavedVerses();
   return persist(
-    current.filter((v) => !(v.chapter === chapter && v.verse === verse)),
+    current.filter(
+      (v) =>
+        !(v.book === book && v.chapter === chapter && v.verse === verse),
+    ),
   );
 }

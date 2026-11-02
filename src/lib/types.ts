@@ -22,6 +22,7 @@ export interface VerseRange {
 
 export interface ExerciseResult {
   type: 'missing-words' | 'progressive' | 'recitation' | 'voice';
+  book: string;
   chapterNumber: number;
   startVerse: number;
   endVerse: number;
@@ -32,15 +33,17 @@ export interface ExerciseResult {
 
 export interface UserProgress {
   totalXp: number;
-  chaptersExplored: number[];
-  passagesMemorized: string[]; // 'ch:startV-endV'
+  /** Format: "book:chapter" e.g. "genesis:1" */
+  chaptersExplored: string[];
+  passagesMemorized: string[];
   exerciseHistory: ExerciseResult[];
   dailyStreak: number;
-  lastPracticeDate: string; // YYYY-MM-DD
+  lastPracticeDate: string;
   bestAccuracy: number;
 }
 
 export interface DailyVerse {
+  book: string;
   chapter: number;
   verse: number;
   text: string;
@@ -48,6 +51,7 @@ export interface DailyVerse {
 }
 
 export interface SavedVerse {
+  book: string;
   chapter: number;
   verse: number;
   text: string;
@@ -57,6 +61,7 @@ export interface SavedVerse {
 
 export interface ExerciseProps {
   verses: Verse[];
+  bookName: string;
   chapter: number;
   startVerse: number;
   endVerse: number;
