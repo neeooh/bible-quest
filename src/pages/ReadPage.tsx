@@ -10,6 +10,7 @@ import {
   Check,
   Loader2,
   X,
+  BookmarkPlus,
 } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import { getBookBySlug } from '../lib/book-metadata';
@@ -53,13 +54,12 @@ export default function ReadPage() {
   const chapter = bookData?.chapters.find((ch) => ch.chapter === num);
   const total = bookData?.chapters.length ?? 0;
 
-  // Mark chapter explored and save reading position
+  // Mark chapter explored
   useEffect(() => {
     if (!bookSlug || !chapter) return;
     const key = `${bookSlug}:${num}`;
     const alreadyExplored = progress.chaptersExplored.includes(key);
     markChapterExplored(bookSlug, num);
-    saveLastRead(bookSlug, bookName, num);
     if (!alreadyExplored && toastedChapterRef.current !== key) {
       toastedChapterRef.current = key;
       showToast(`${bookName} ${num} explored!`, 'info');
@@ -178,8 +178,26 @@ export default function ReadPage() {
           </h1>
         </div>
 
-        {/* Font size controls */}
-        <div className="flex items-center gap-2">
+        {/* Controls */}
+        <div className="flex items-center gap-3">
+          {/* Mark position */}
+          <button
+            type="button"
+            onClick={() => {
+              if (bookSlug) {
+                saveLastRead(bookSlug, bookName, num);
+                showToast(`Position saved: ${bookName} ${num}`, 'success');
+              }
+            }}
+            className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
+            aria-label="Save reading position"
+            title="Save reading position"
+          >
+            <BookmarkPlus className="w-4 h-4" />
+          </button>
+
+          {/* Font size controls */}
+          <div className="flex items-center gap-2">
           <span className="text-cream/40 text-xs font-medium tracking-wide mr-1">
             Aa
           </span>
@@ -202,6 +220,7 @@ export default function ReadPage() {
           >
             <Plus className="w-4 h-4" />
           </button>
+          </div>
         </div>
       </div>
 
