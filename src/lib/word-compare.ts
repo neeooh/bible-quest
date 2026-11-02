@@ -13,8 +13,9 @@ export function normalizeWord(word: string): string {
   return word
     .toLowerCase()
     .replace(/[\u2018\u2019\u201A\u201B\u2032\u0060\u00B4]/g, "'")
-    .replace(/^[^a-z0-9']+/, '')
-    .replace(/[^a-z0-9']+$/, '');
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+    .replace(/^[^a-z0-9]+/, '')
+    .replace(/[^a-z0-9]+$/, '');
 }
 
 /**
