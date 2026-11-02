@@ -1,46 +1,60 @@
-import { Link } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { BookOpen, Loader2 } from 'lucide-react';
+import { loadBook } from '../lib/bible';
 import {
   getOldTestamentBooks,
   getNewTestamentBooks,
-  type BookMeta,
+  getBookBySlug,
 } from '../lib/book-metadata';
-
-function BookGrid({
-  books,
-  label,
-}: {
-  books: BookMeta[];
-  label: string;
-}) {
-  return (
-    <section className="space-y-4">
-      <h2 className="text-xl font-serif font-semibold text-cream">{label}</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {books.map((book) => (
-          <Link
-            key={book.slug}
-            to={`/library/${book.slug}`}
-            className="card group hover:border-gold-500/30 transition-all duration-200 cursor-pointer"
-          >
-            <div className="space-y-1.5">
-              <h3 className="font-serif font-semibold text-cream group-hover:text-gold-400 transition-colors text-sm">
-                {book.name}
-              </h3>
-              <span className="text-xs text-cream/30">
-                {book.chapterCount} chapter{book.chapterCount > 1 ? 's' : ''}
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
+import type { BibleData } from '../lib/types';
 
 export default function LibraryPage() {
+  const navigate = useNavigate();
   const otBooks = getOldTestamentBooks();
   const ntBooks = getNewTestamentBooks();
+
+  const [selectedBook, setSelectedBook] = useState<string>('');
+  const [bookData, setBookData] = useState<BibleData | null>(null);
+  const [bookLoading, setBookLoading] = useState(false);
+  const [selectedChapter, setSelectedChapter] = useState<number>(0);
+  const [selectedVerse, setSelectedVerse] = useState<number>(1);
+
+  const bookMeta = selectedBook ? getBookBySlug(selectedBook) : undefined;
+  const bookName = bookMeta?.name ?? '';
+
+  useEffect(() => {
+    if (!selectedBook) {
+      setBookData(null);
+      return;
+    }
+    setBookLoading(true);
+    loadBook(selectedBook)
+      .then(setBookData)
+      .finally(() => setBookLoading(false));
+  }, [selectedBook]);
+
+  const chapters = bookData?.chapters ?? [];
+  const chapter = selectedChapter
+    ? chapters.find((c) => c.chapter === selectedChapter)
+    : undefined;
+  const maxVerse = chapter ? chapter.verses.length : 1;
+
+  function handleBookChange(slug: string) {
+    setSelectedBook(slug);
+    setSelectedChapter(0);
+    setSelectedVerse(1);
+  }
+
+  function handleChapterChange(num: number) {
+    setSelectedChapter(num);
+    setSelectedVerse(1);
+  }
+
+  function handleGo() {
+    if (!selectedBook || !selectedChapter) return;
+    navigate(`/read/${selectedBook}/${selectedChapter}?verse=${selectedVerse}`);
+  }
 
   return (
     <div className="py-10 space-y-10">
@@ -54,8 +68,125 @@ export default function LibraryPage() {
         </p>
       </div>
 
-      <BookGrid books={otBooks} label="Old Testament" />
-      <BookGrid books={ntBooks} label="New Testament" />
+      {/* Testament Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+        <Link
+          to="/library/testament/ot"
+          className="card group hover:border-gold-500/30 transition-all duration-200 cursor-pointer flex flex-col items-center text-center py-10 space-y-3"
+        >
+          <div className="w-14 h-14 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center group-hover:bg-gold-500/20 transition-colors">
+            <BookOpen className="w-7 h-7 text-gold-500" />
+          </div>
+          <h2 className="text-xl font-serif font-semibold text-cream group-hover:text-gold-400 transition-colors">
+            Old Testament
+          </h2>
+          <p className="text-cream/40 text-sm">{otBooks.length} books</p>
+        </Link>
+
+        <Link
+          to="/library/testament/nt"
+          className="card group hover:border-gold-500/30 transition-all duration-200 cursor-pointer flex flex-col items-center text-center py-10 space-y-3"
+        >
+          <div className="w-14 h-14 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center group-hover:bg-gold-500/20 transition-colors">
+            <BookOpen className="w-7 h-7 text-gold-500" />
+          </div>
+          <h2 className="text-xl font-serif font-semibold text-cream group-hover:text-gold-400 transition-colors">
+            New Testament
+          </h2>
+          <p className="text-cream/40 text-sm">{ntBooks.length} books</p>
+        </Link>
+      </div>
+
+      {/* Go to a Passage */}
+      <section className="card space-y-4 max-w-2xl mx-auto">
+        <h2 className="text-sm font-medium text-cream/50">Go to a Passage</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <div className="space-y-1.5">
+            <label htmlFor="lib-book" className="text-xs text-cream/40">
+              Book
+            </label>
+            <select
+              id="lib-book"
+              value={selectedBook}
+              onChange={(e) => handleBookChange(e.target.value)}
+              className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50"
+            >
+              <option value="">Select book</option>
+              <optgroup label="Old Testament">
+                {otBooks.map((b) => (
+                  <option key={b.slug} value={b.slug}>
+                    {b.name}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="New Testament">
+                {ntBooks.map((b) => (
+                  <option key={b.slug} value={b.slug}>
+                    {b.name}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="lib-chapter" className="text-xs text-cream/40">
+              Chapter
+            </label>
+            <select
+              id="lib-chapter"
+              value={selectedChapter}
+              onChange={(e) => handleChapterChange(Number(e.target.value))}
+              disabled={!selectedBook || bookLoading}
+              className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50 disabled:opacity-40"
+            >
+              <option value={0}>Select chapter</option>
+              {chapters.map((ch) => (
+                <option key={ch.chapter} value={ch.chapter}>
+                  {bookName} {ch.chapter}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="lib-verse" className="text-xs text-cream/40">
+              Verse
+            </label>
+            <select
+              id="lib-verse"
+              value={selectedVerse}
+              onChange={(e) => setSelectedVerse(Number(e.target.value))}
+              disabled={!selectedChapter}
+              className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50 disabled:opacity-40"
+            >
+              {Array.from({ length: maxVerse }, (_, i) => i + 1).map((v) => (
+                <option key={v} value={v}>
+                  Verse {v}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              onClick={handleGo}
+              disabled={!selectedBook || !selectedChapter}
+              className="btn-gold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Go
+            </button>
+          </div>
+        </div>
+
+        {bookLoading && (
+          <div className="flex items-center gap-2 text-cream/40 text-sm">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading book data…
+          </div>
+        )}
+      </section>
     </div>
   );
 }
