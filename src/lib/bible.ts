@@ -258,3 +258,68 @@ export async function getDailyVerse(): Promise<DailyVerse> {
     reference,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Search — loads all books on first call, then searches in-memory.
+// ---------------------------------------------------------------------------
+
+export interface SearchResult {
+  book: string;
+  bookName: string;
+  chapter: number;
+  verse: number;
+  text: string;
+  reference: string;
+}
+
+let allBooksLoaded = false;
+
+async function ensureAllBooksLoaded(): Promise<void> {
+  if (allBooksLoaded) return;
+  const slugs = Object.keys(importMap);
+  await Promise.all(slugs.map((slug) => loadBook(slug)));
+  allBooksLoaded = true;
+}
+
+/**
+ * Search all verses across the entire Bible for a keyword or phrase.
+ * Case-insensitive. Returns up to `limit` results.
+ */
+export async function searchBible(
+  query: string,
+  limit = 50,
+): Promise<SearchResult[]> {
+  if (!query.trim()) return [];
+
+  await ensureAllBooksLoaded();
+
+  const needle = query.toLowerCase();
+  const results: SearchResult[] = [];
+
+  for (const [slug, data] of bookCache.entries()) {
+    const meta = getBookBySlug(slug);
+    const bookName = meta?.name ?? slug;
+
+    for (const chapter of data.chapters) {
+      for (const verse of chapter.verses) {
+        if (verse.text.toLowerCase().includes(needle)) {
+          results.push({
+            book: slug,
+            bookName,
+            chapter: chapter.chapter,
+            verse: verse.verse,
+            text: verse.text,
+            reference: formatReference(
+              bookName,
+              chapter.chapter,
+              verse.verse,
+            ),
+          });
+          if (results.length >= limit) return results;
+        }
+      }
+    }
+  }
+
+  return results;
+}

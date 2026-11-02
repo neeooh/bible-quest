@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Loader2, BookMarked, ArrowRight } from 'lucide-react';
-import { loadBook } from '../lib/bible';
+import { BookOpen, Loader2, BookMarked, ArrowRight, Search, X } from 'lucide-react';
+import { loadBook, searchBible, type SearchResult } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
 import {
   getOldTestamentBooks,
@@ -24,6 +24,40 @@ export default function LibraryPage() {
 
   const bookMeta = selectedBook ? getBookBySlug(selectedBook) : undefined;
   const bookName = bookMeta?.name ?? '';
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (!query.trim()) {
+      setSearchResults([]);
+      setHasSearched(false);
+      setSearching(false);
+      return;
+    }
+
+    setSearching(true);
+    debounceRef.current = setTimeout(async () => {
+      const results = await searchBible(query, 50);
+      setSearchResults(results);
+      setHasSearched(true);
+      setSearching(false);
+    }, 400);
+  }, []);
+
+  function clearSearch() {
+    setSearchQuery('');
+    setSearchResults([]);
+    setHasSearched(false);
+    setSearching(false);
+  }
 
   useEffect(() => {
     if (!selectedBook) {
@@ -68,6 +102,70 @@ export default function LibraryPage() {
         <p className="text-cream/40 text-sm">
           66 books &middot; World English Bible
         </p>
+      </div>
+
+      {/* Search */}
+      <div className="max-w-2xl mx-auto space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/30" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder="Search the Bible..."
+            className="w-full bg-navy-700 border border-gold-500/20 rounded-lg pl-10 pr-10 py-3 text-cream text-sm placeholder:text-cream/30 focus:outline-none focus:border-gold-500/50 transition-colors"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/30 hover:text-cream/60 transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {searching && (
+          <div className="flex items-center gap-2 text-cream/40 text-sm">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Searching...
+          </div>
+        )}
+
+        {hasSearched && !searching && (
+          <div className="space-y-3">
+            <p className="text-cream/40 text-xs">
+              {searchResults.length === 50
+                ? '50+ results'
+                : `${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}`}
+              {' '}for &ldquo;{searchQuery}&rdquo;
+            </p>
+            {searchResults.length === 0 ? (
+              <div className="card text-center py-6">
+                <p className="text-cream/40 text-sm">No verses found.</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {searchResults.map((r) => (
+                  <Link
+                    key={`${r.book}:${r.chapter}:${r.verse}`}
+                    to={`/read/${r.book}/${r.chapter}?verse=${r.verse}`}
+                    className="card block py-4 group hover:border-gold-500/30 transition-colors"
+                  >
+                    <p className="text-gold-400 text-sm font-semibold font-serif group-hover:text-gold-300 transition-colors">
+                      {r.reference}
+                    </p>
+                    <p className="text-cream/60 text-sm mt-1 leading-relaxed line-clamp-2">
+                      {r.text}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Testament Cards */}
