@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useProgress } from '../hooks/useProgress';
-import { BookOpen, Brain, ArrowRight, Clock, Target } from 'lucide-react';
+import { useSavedVerses } from '../hooks/useSavedVerses';
+import { BookOpen, Brain, ArrowRight, Clock, Target, Heart, Trash2 } from 'lucide-react';
 
 function timeAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -25,6 +26,7 @@ interface PassageSummary {
 
 export default function MyVersesPage() {
   const { progress } = useProgress();
+  const { savedVerses, removeVerse } = useSavedVerses();
 
   const passages: PassageSummary[] = (() => {
     const grouped = new Map<string, PassageSummary>();
@@ -70,7 +72,55 @@ export default function MyVersesPage() {
         <p className="text-cream/40 mt-1">Passages you have practised</p>
       </div>
 
-      {passages.length === 0 ? (
+      {/* Saved Verses */}
+      {savedVerses.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-serif font-semibold text-cream flex items-center gap-2">
+            <Heart className="w-5 h-5 text-gold-400" />
+            Saved Verses
+          </h2>
+          {[...savedVerses].sort((a, b) => b.savedAt - a.savedAt).map((sv) => (
+            <div
+              key={`${sv.chapter}:${sv.verse}`}
+              className="card flex items-start justify-between gap-4"
+            >
+              <div className="min-w-0">
+                <p className="text-gold-400 font-serif font-semibold text-sm">
+                  {sv.reference}
+                </p>
+                <p className="text-cream/70 text-sm mt-1 italic leading-relaxed">
+                  &ldquo;{sv.text}&rdquo;
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 shrink-0">
+                <Link
+                  to={`/memorize?chapter=${sv.chapter}&start=${sv.verse}&end=${sv.verse}`}
+                  className="btn-gold text-sm"
+                >
+                  Practise
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => removeVerse(sv.chapter, sv.verse)}
+                  className="btn-outline text-sm inline-flex items-center gap-1.5 justify-center"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Practised Passages */}
+      {passages.length > 0 && (
+        <h2 className="text-lg font-serif font-semibold text-cream mt-4">
+          Practised Passages
+        </h2>
+      )}
+
+      {passages.length === 0 && savedVerses.length === 0 ? (
         <div className="card flex flex-col items-center text-center py-12 space-y-4">
           <BookOpen className="w-12 h-12 text-cream/25" />
           <p className="text-cream text-lg font-semibold">

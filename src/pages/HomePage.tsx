@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Flame, Trophy, Star, Copy, ArrowRight, Check } from 'lucide-react';
+import { BookOpen, Flame, Trophy, Star, Copy, ArrowRight, Check, Heart } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
 import { useProgress } from '../hooks/useProgress';
+import { useSavedVerses } from '../hooks/useSavedVerses';
 import { showToast } from '../components/Toast';
 
 export default function HomePage() {
   const daily = getDailyVerse();
   const { progress } = useProgress();
+  const { addVerse, isSaved } = useSavedVerses();
   const [copied, setCopied] = useState(false);
+  const dailySaved = isSaved(daily.chapter, daily.verse);
 
   const hasAnyData =
     progress.totalXp > 0 ||
@@ -22,6 +25,16 @@ export default function HomePage() {
       showToast('Verse copied to clipboard', 'success');
       setTimeout(() => setCopied(false), 2000);
     });
+  }
+
+  function handleAddToMyVerses() {
+    addVerse({
+      chapter: daily.chapter,
+      verse: daily.verse,
+      text: daily.text,
+      reference: daily.reference,
+    });
+    showToast('Added to My Verses', 'success');
   }
 
   return (
@@ -59,6 +72,15 @@ export default function HomePage() {
             <BookOpen className="w-4 h-4" />
             Memorise This
           </Link>
+          <button
+            type="button"
+            onClick={handleAddToMyVerses}
+            disabled={dailySaved}
+            className={`btn-outline inline-flex items-center gap-2 text-sm ${dailySaved ? 'opacity-50 cursor-default' : ''}`}
+          >
+            {dailySaved ? <Check className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
+            {dailySaved ? 'Saved' : 'Add to My Verses'}
+          </button>
           <button
             type="button"
             onClick={handleCopy}

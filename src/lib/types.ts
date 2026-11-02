@@ -47,6 +47,14 @@ export interface DailyVerse {
   reference: string;
 }
 
+export interface SavedVerse {
+  chapter: number;
+  verse: number;
+  text: string;
+  reference: string;
+  savedAt: number;
+}
+
 export interface ExerciseProps {
   verses: Verse[];
   chapter: number;

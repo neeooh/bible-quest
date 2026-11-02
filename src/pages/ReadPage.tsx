@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Minus, Plus, BookOpen } from 'lucide-react';
-import { getChapter, bibleData } from '../lib/bible';
+import { ChevronLeft, ChevronRight, Minus, Plus, BookOpen, Heart, Check } from 'lucide-react';
+import { getChapter, bibleData, formatReference } from '../lib/bible';
 import { useProgress } from '../hooks/useProgress';
+import { useSavedVerses } from '../hooks/useSavedVerses';
 import { showToast } from '../components/Toast';
 
 export default function ReadPage() {
@@ -18,6 +19,7 @@ export default function ReadPage() {
   const [selectedVerses, setSelectedVerses] = useState<Set<number>>(new Set());
 
   const { markChapterExplored, progress } = useProgress();
+  const { addVerses, isSaved } = useSavedVerses();
   const toastedChapterRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -51,6 +53,11 @@ export default function ReadPage() {
     return { startV: sorted[0], endV: sorted[sorted.length - 1] };
   }, [selectedVerses]);
 
+  const allSelectedSaved = useMemo(() => {
+    if (selectedVerses.size === 0) return false;
+    return Array.from(selectedVerses).every((v) => isSaved(num, v));
+  }, [selectedVerses, isSaved, num]);
+
   if (!chapter) {
     return (
       <div className="py-20 text-center space-y-4">
@@ -80,6 +87,24 @@ export default function ReadPage() {
 
   function increaseFont() {
     setFontSize(prev => Math.min(28, prev + 2));
+  }
+
+  function handleAddSelectedToMyVerses() {
+    if (!chapter) return;
+    const versesToAdd = chapter.verses
+      .filter((v) => selectedVerses.has(v.verse))
+      .map((v) => ({
+        chapter: num,
+        verse: v.verse,
+        text: v.text,
+        reference: formatReference(num, v.verse),
+      }));
+    addVerses(versesToAdd);
+    const count = versesToAdd.length;
+    showToast(
+      `Added ${count} verse${count > 1 ? 's' : ''} to My Verses`,
+      'success',
+    );
   }
 
   return (
@@ -201,7 +226,7 @@ export default function ReadPage() {
 
       {/* Floating action bar */}
       {selectedVerses.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex gap-3">
           <Link
             to={`/memorize?chapter=${num}&start=${startV}&end=${endV}`}
             className="btn-gold inline-flex items-center gap-2 shadow-lg shadow-navy-900/50 text-sm"
@@ -209,6 +234,15 @@ export default function ReadPage() {
             <BookOpen className="w-4 h-4" />
             Memorise Selected ({selectedVerses.size} verse{selectedVerses.size > 1 ? 's' : ''})
           </Link>
+          <button
+            type="button"
+            onClick={handleAddSelectedToMyVerses}
+            disabled={allSelectedSaved}
+            className={`btn-outline inline-flex items-center gap-2 shadow-lg shadow-navy-900/50 text-sm ${allSelectedSaved ? 'opacity-50 cursor-default' : ''}`}
+          >
+            {allSelectedSaved ? <Check className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
+            {allSelectedSaved ? 'Saved' : 'Add to My Verses'}
+          </button>
         </div>
       )}
 
