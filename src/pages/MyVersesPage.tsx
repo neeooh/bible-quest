@@ -278,6 +278,14 @@ export default function MyVersesPage() {
                   <Brain className="w-3.5 h-3.5" />
                   Practise
                 </Link>
+                <Link
+                  to={`/read/${entry.book}/${entry.chapterNumber}?verse=${entry.startVerse}`}
+                  className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                  aria-label={`Read ${entry.reference}`}
+                  title="Read"
+                >
+                  <BookOpen className="w-4 h-4" />
+                </Link>
                 <button
                   type="button"
                   onClick={() => toggleFavourite(entry)}
