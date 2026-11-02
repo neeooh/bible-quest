@@ -1,5 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="6" fill="#101827"/>
-  <path d="M14 6h4v20h-4z" fill="#D6AD60"/>
-  <path d="M8 12h16v4H8z" fill="#D6AD60"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#101827"/>
+  <g transform="translate(256,256)">
+    <!-- Open book -->
+    <path d="M-10,-60 Q-10,-90 -80,-90 Q-140,-90 -140,-60 L-140,70 Q-140,90 -80,80 Q-10,70 -10,70 Z" fill="#1a2332" stroke="#D6AD60" stroke-width="6"/>
+    <path d="M10,-60 Q10,-90 80,-90 Q140,-90 140,-60 L140,70 Q140,90 80,80 Q10,70 10,70 Z" fill="#1a2332" stroke="#D6AD60" stroke-width="6"/>
+    <!-- Spine -->
+    <line x1="0" y1="-90" x2="0" y2="70" stroke="#D6AD60" stroke-width="4"/>
+    <!-- Cross on right page -->
+    <line x1="75" y1="-40" x2="75" y2="30" stroke="#D6AD60" stroke-width="8" stroke-linecap="round"/>
+    <line x1="50" y1="-15" x2="100" y2="-15" stroke="#D6AD60" stroke-width="8" stroke-linecap="round"/>
+    <!-- Text lines on left page -->
+    <line x1="-115" y1="-45" x2="-35" y2="-45" stroke="#D6AD60" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+    <line x1="-115" y1="-20" x2="-45" y2="-20" stroke="#D6AD60" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+    <line x1="-115" y1="5" x2="-40" y2="5" stroke="#D6AD60" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+    <line x1="-115" y1="30" x2="-55" y2="30" stroke="#D6AD60" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+  </g>
 </svg>
