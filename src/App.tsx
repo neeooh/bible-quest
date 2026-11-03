@@ -9,6 +9,7 @@ import MemorizePage from './pages/MemorizePage';
 import MyVersesPage from './pages/MyVersesPage';
 import ProgressPage from './pages/ProgressPage';
 import AboutPage from './pages/AboutPage';
+import TopicPage from './pages/TopicPage';
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/my-verses" element={<MyVersesPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/topics/:slug" element={<TopicPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>

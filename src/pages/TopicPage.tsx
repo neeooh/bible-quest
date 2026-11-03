@@ -1,0 +1,133 @@
+import { Link, useParams } from 'react-router-dom';
+import { ChevronLeft, BookOpen, Heart, Brain } from 'lucide-react';
+import { getTopicBySlug, TOPICS } from '../lib/topics';
+import { useSavedVerses } from '../hooks/useSavedVerses';
+import { showToast } from '../components/Toast';
+
+export default function TopicPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const topic = slug ? getTopicBySlug(slug) : undefined;
+  const { addVerse, isSaved, isFavourite, setFavourite } = useSavedVerses();
+
+  if (!topic) {
+    return (
+      <div className="py-20 text-center space-y-4">
+        <p className="text-cream/50 text-lg">Topic not found.</p>
+        <Link to="/library" className="btn-outline inline-block">
+          Back to Library
+        </Link>
+      </div>
+    );
+  }
+
+  function handleToggleFavourite(passage: (typeof TOPICS)[0]['passages'][0]) {
+    const isFav = isFavourite(passage.book, passage.chapter, passage.startVerse);
+
+    if (isFav) {
+      setFavourite(passage.book, passage.chapter, passage.startVerse, false);
+      showToast('Removed from favourites', 'info');
+    } else {
+      if (isSaved(passage.book, passage.chapter, passage.startVerse)) {
+        setFavourite(passage.book, passage.chapter, passage.startVerse, true);
+      } else {
+        addVerse({
+          book: passage.book,
+          chapter: passage.chapter,
+          verse: passage.startVerse,
+          text: passage.preview,
+          reference: passage.reference,
+        });
+      }
+      showToast('Added to favourites', 'success');
+    }
+  }
+
+  return (
+    <div className="py-10 space-y-8">
+      {/* Header */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <Link
+            to="/library"
+            className="text-cream/40 hover:text-cream transition-colors"
+            aria-label="Back to library"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Link>
+          <span className="text-3xl">{topic.icon}</span>
+          <h1 className="text-3xl font-serif font-bold text-cream">
+            {topic.name}
+          </h1>
+        </div>
+        <p className="text-cream/50 text-sm leading-relaxed max-w-2xl">
+          {topic.description}
+        </p>
+      </div>
+
+      {/* Passage cards */}
+      <div className="space-y-3">
+        {topic.passages.map((passage) => {
+          const isFav = isFavourite(passage.book, passage.chapter, passage.startVerse);
+
+          return (
+            <div
+              key={`${passage.book}:${passage.chapter}:${passage.startVerse}`}
+              className="card space-y-3"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-gold-400 font-serif font-semibold">
+                    {passage.reference}
+                  </p>
+                  <p className="text-cream/60 text-sm mt-1 leading-relaxed line-clamp-2">
+                    {passage.preview}
+                  </p>
+                </div>
+                <span className="text-cream/25 text-xs shrink-0 mt-1">
+                  {passage.verseCount} verse{passage.verseCount > 1 ? 's' : ''}
+                </span>
+              </div>
+
+              <p className="text-cream/40 text-xs leading-relaxed">
+                {passage.explainer}
+              </p>
+
+              <div className="flex items-center gap-2 pt-1">
+                <Link
+                  to={`/read/${passage.book}/${passage.chapter}?verse=${passage.startVerse}`}
+                  className="btn-outline text-sm inline-flex items-center gap-1.5"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Read
+                </Link>
+                <Link
+                  to={`/memorize?book=${passage.book}&chapter=${passage.chapter}&start=${passage.startVerse}&end=${passage.endVerse}`}
+                  className="btn-gold text-sm inline-flex items-center gap-1.5"
+                >
+                  <Brain className="w-3.5 h-3.5" />
+                  Practise
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => handleToggleFavourite(passage)}
+                  className={`w-9 h-9 rounded-lg border transition-colors flex items-center justify-center ${
+                    isFav
+                      ? 'border-gold-500/30 text-red-400 hover:text-red-300'
+                      : 'border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40'
+                  }`}
+                  aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                  title={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                >
+                  <Heart
+                    className="w-4 h-4"
+                    fill={isFav ? 'currentColor' : 'none'}
+                  />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
