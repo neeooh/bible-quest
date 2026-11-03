@@ -427,13 +427,6 @@ export default function Progressive({
             All words are hidden. Type the entire passage from memory.
           </p>
 
-          <div className="bg-navy-700/50 border border-gold-500/10 rounded-lg p-5 text-center">
-            <p className="text-gold-400 font-serif text-xl font-semibold">
-              {reference}
-            </p>
-            <p className="text-cream/20 text-sm mt-1">{totalWords} words</p>
-          </div>
-
           {!phaseChecked && (
             <div className="space-y-3">
               <textarea
