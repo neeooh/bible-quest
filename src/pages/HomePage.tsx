@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BookOpen,
@@ -11,11 +11,13 @@ import {
   Heart,
   Loader2,
   BookMarked,
+  Bell,
 } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
+import { getPassageStage } from '../lib/learning-stage';
 import { showToast } from '../components/Toast';
 import type { DailyVerse } from '../lib/types';
 
@@ -37,6 +39,25 @@ export default function HomePage() {
     progress.totalXp > 0 ||
     progress.dailyStreak > 0 ||
     progress.chaptersExplored.length > 0;
+
+  const dueForReviewCount = useMemo(() => {
+    const seen = new Set<string>();
+    let count = 0;
+    for (const e of progress.exerciseHistory) {
+      const key = `${e.book ?? 'matthew'}:${e.chapterNumber}:${e.startVerse}-${e.endVerse}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const stage = getPassageStage(
+        progress.exerciseHistory,
+        e.book ?? 'matthew',
+        e.chapterNumber,
+        e.startVerse,
+        e.endVerse,
+      );
+      if (stage.dueForReview) count++;
+    }
+    return count;
+  }, [progress.exerciseHistory]);
 
   function handleCopy() {
     if (!daily) return;
@@ -144,6 +165,29 @@ export default function HomePage() {
           </>
         )}
       </section>
+
+      {/* Review nudge */}
+      {dueForReviewCount > 0 && (
+        <section className="max-w-2xl mx-auto">
+          <Link
+            to="/my-verses?filter=due-for-review"
+            className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
+          >
+            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 group-hover:bg-amber-500/20 transition-colors">
+              <Bell className="w-5 h-5 text-amber-400" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-cream font-medium text-sm">
+                {dueForReviewCount} passage{dueForReviewCount > 1 ? 's' : ''} due for review
+              </p>
+              <p className="text-cream/40 text-xs mt-0.5">
+                Keep your memory fresh — a quick review goes a long way.
+              </p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-cream/30 shrink-0 group-hover:text-amber-400 transition-colors" />
+          </Link>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="flex flex-wrap justify-center gap-4">

@@ -14,9 +14,10 @@ const links = [
 interface NavbarProps {
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
+  dueForReviewCount: number;
 }
 
-export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
+export default function Navbar({ theme, onToggleTheme, dueForReviewCount }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -37,10 +38,15 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
               to={link.to}
               end={link.to === '/'}
               className={({ isActive }) =>
-                isActive ? 'nav-link nav-link-active' : 'nav-link'
+                `relative ${isActive ? 'nav-link nav-link-active' : 'nav-link'}`
               }
             >
               {link.label}
+              {link.to === '/my-verses' && dueForReviewCount > 0 && (
+                <span className="absolute -top-2 -right-3 w-4 h-4 rounded-full bg-amber-500 text-navy-900 text-[10px] font-bold flex items-center justify-center">
+                  {dueForReviewCount}
+                </span>
+              )}
             </NavLink>
           ))}
           <button
@@ -85,7 +91,7 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                 to={link.to}
                 end={link.to === '/'}
                 className={({ isActive }) =>
-                  `block px-3 py-2.5 rounded-lg transition-colors ${
+                  `block px-3 py-2.5 rounded-lg transition-colors relative ${
                     isActive
                       ? 'text-gold-400 bg-gold-500/10'
                       : 'text-cream/60 hover:text-cream hover:bg-navy-700'
@@ -94,6 +100,11 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
+                {link.to === '/my-verses' && dueForReviewCount > 0 && (
+                  <span className="absolute top-2 right-3 w-4 h-4 rounded-full bg-amber-500 text-navy-900 text-[10px] font-bold flex items-center justify-center">
+                    {dueForReviewCount}
+                  </span>
+                )}
               </NavLink>
             ))}
           </div>
