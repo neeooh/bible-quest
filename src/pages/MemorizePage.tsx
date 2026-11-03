@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Puzzle, Layers, Mic, AlignLeft, Eye, Loader2, Brain, ChevronDown, ChevronUp, CaseSensitive, Shuffle } from 'lucide-react';
+import { Puzzle, Layers, Mic, AlignLeft, Loader2, Brain, ChevronDown, ChevronUp, CaseSensitive, Shuffle } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import {
   getBookBySlug,
@@ -181,27 +181,15 @@ export default function MemorizePage() {
             </button>
             </div>
             <p
-              className="text-cream/60 text-sm leading-relaxed line-clamp-3 font-serif transition-[filter] duration-200 select-none"
+              className="text-cream/60 text-sm leading-relaxed line-clamp-3 font-serif transition-[filter] duration-200 select-none cursor-pointer"
               style={{ filter: peeking ? 'none' : 'blur(6px)' }}
+              onPointerDown={() => setPeeking(true)}
+              onPointerUp={() => setPeeking(false)}
+              onPointerLeave={() => setPeeking(false)}
+              title="Hold to peek"
             >
               {passageText}
             </p>
-            <div className="text-center">
-              <button
-                type="button"
-                onPointerDown={() => setPeeking(true)}
-                onPointerUp={() => setPeeking(false)}
-                onPointerLeave={() => setPeeking(false)}
-                className={`inline-flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg border transition-colors select-none ${
-                  peeking
-                    ? 'border-gold-500/40 bg-gold-500/10 text-gold-400'
-                    : 'border-gold-500/20 text-cream/40 hover:text-cream/60'
-                }`}
-              >
-                <Eye className="w-3.5 h-3.5" />
-                {peeking ? 'Peeking…' : 'Hold to Peek'}
-              </button>
-            </div>
           </div>
         ) : (
           <>
@@ -331,27 +319,15 @@ export default function MemorizePage() {
               </span>
             </p>
             <p
-              className="text-cream/60 text-sm leading-relaxed line-clamp-3 font-serif transition-[filter] duration-200 select-none"
+              className="text-cream/60 text-sm leading-relaxed line-clamp-3 font-serif transition-[filter] duration-200 select-none cursor-pointer"
               style={{ filter: peeking ? 'none' : 'blur(6px)' }}
+              onPointerDown={() => setPeeking(true)}
+              onPointerUp={() => setPeeking(false)}
+              onPointerLeave={() => setPeeking(false)}
+              title="Hold to peek"
             >
               {passageText}
             </p>
-            <div className="text-center">
-              <button
-                type="button"
-                onPointerDown={() => setPeeking(true)}
-                onPointerUp={() => setPeeking(false)}
-                onPointerLeave={() => setPeeking(false)}
-                className={`inline-flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg border transition-colors select-none ${
-                  peeking
-                    ? 'border-gold-500/40 bg-gold-500/10 text-gold-400'
-                    : 'border-gold-500/20 text-cream/40 hover:text-cream/60'
-                }`}
-              >
-                <Eye className="w-3.5 h-3.5" />
-                {peeking ? 'Peeking…' : 'Hold to Peek'}
-              </button>
-            </div>
           </div>
         )}
           </>
