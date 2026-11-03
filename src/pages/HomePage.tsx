@@ -201,6 +201,13 @@ export default function HomePage() {
           </div>
         </Link>
       ) : null}
+
+      {/* About */}
+      <section className="text-center">
+        <Link to="/about" className="text-cream/20 text-xs hover:text-cream/40 transition-colors">
+          About BibleQuest
+        </Link>
+      </section>
     </div>
   );
 }
