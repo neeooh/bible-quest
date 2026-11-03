@@ -12,6 +12,7 @@ import {
   Loader2,
   BookMarked,
   Bell,
+  Share2,
 } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
@@ -161,6 +162,24 @@ export default function HomePage() {
                   <Copy className="w-4 h-4" />
                 )}
                 {copied ? 'Copied' : 'Copy'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!daily) return;
+                  const shareText = `"${daily.text}" — ${daily.reference} (WEB)`;
+                  if (navigator.share) {
+                    navigator.share({ text: shareText }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(shareText).then(() => {
+                      showToast('Copied to clipboard', 'success');
+                    });
+                  }
+                }}
+                className="btn-outline inline-flex items-center gap-2 text-sm"
+              >
+                <Share2 className="w-4 h-4" />
+                Share
               </button>
             </div>
           </>
