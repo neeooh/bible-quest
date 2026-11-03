@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { RotateCcw, Eye, CheckCircle } from 'lucide-react';
+import { RotateCcw, Eye, CheckCircle, Lightbulb } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { normalizeWord } from '../../lib/word-compare';
 import { formatReference } from '../../lib/bible';
@@ -41,12 +41,20 @@ export default function MissingWords({
   endVerse,
   onComplete,
 }: ExerciseProps) {
-  const [hidePercent, setHidePercent] = useState(0.45);
+  const [hidePercent, setHidePercent] = useState(0.15);
   const [attempt, setAttempt] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [checked, setChecked] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [accuracy, setAccuracy] = useState<number | null>(null);
+  const [hints, setHints] = useState<Set<number>>(new Set());
+
+  const DIFFICULTY_LEVELS = [
+    { label: 'Easy', percent: 0.15 },
+    { label: 'Medium', percent: 0.35 },
+    { label: 'Hard', percent: 0.60 },
+    { label: 'Expert', percent: 0.85 },
+  ] as const;
 
   /* ---- build a flat word list from all verses -------------------- */
   const words: WordEntry[] = useMemo(() => {
@@ -136,6 +144,7 @@ export default function MissingWords({
     for (const entry of words) {
       if (!hiddenSet.has(entry.globalIndex)) continue;
       total++;
+      if (hints.has(entry.globalIndex)) continue; // hinted words do not count as correct
       const answer = answers[entry.globalIndex] ?? '';
       if (normalizeWord(answer) === normalizeWord(entry.word)) {
         correct++;
@@ -146,7 +155,7 @@ export default function MissingWords({
     setAccuracy(acc);
     setChecked(true);
     onComplete(acc);
-  }, [words, hiddenSet, answers, onComplete]);
+  }, [words, hiddenSet, answers, hints, onComplete]);
 
   const handleReveal = useCallback(() => {
     setRevealed(true);
@@ -165,7 +174,17 @@ export default function MissingWords({
     setChecked(false);
     setRevealed(false);
     setAccuracy(null);
+    setHints(new Set());
   }, []);
+
+  const handleHint = useCallback(
+    (entry: WordEntry) => {
+      const cleanWord = entry.word.replace(/[.,;:!?"'\u2018\u2019()]+$/, '');
+      setAnswers((prev) => ({ ...prev, [entry.globalIndex]: cleanWord }));
+      setHints((prev) => new Set(prev).add(entry.globalIndex));
+    },
+    [],
+  );
 
   const handleDifficultyChange = useCallback((percent: number) => {
     setHidePercent(percent);
@@ -174,6 +193,7 @@ export default function MissingWords({
     setChecked(false);
     setRevealed(false);
     setAccuracy(null);
+    setHints(new Set());
   }, []);
 
   /* ---- derived display values ------------------------------------ */
@@ -204,7 +224,7 @@ export default function MissingWords({
             Missing Words
           </h3>
           <p className="text-cream/40 text-sm">
-            {reference} · {Math.round(hidePercent * 100)}% hidden
+            {reference} · {DIFFICULTY_LEVELS.find((d) => d.percent === hidePercent)?.label ?? `${Math.round(hidePercent * 100)}%`} ({Math.round(hidePercent * 100)}% hidden)
           </p>
         </div>
         <span
@@ -218,31 +238,22 @@ export default function MissingWords({
         </span>
       </div>
 
-      {/* ---- difficulty slider ---- */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <label htmlFor="difficulty-slider" className="text-xs text-cream/40">
-            Difficulty
-          </label>
-          <span className="text-xs text-gold-400 font-medium">
-            {hidePercent <= 0.25
-              ? 'Easy'
-              : hidePercent <= 0.5
-                ? 'Medium'
-                : 'Hard'}{' '}
-            {Math.round(hidePercent * 100)}%
-          </span>
-        </div>
-        <input
-          id="difficulty-slider"
-          type="range"
-          min={10}
-          max={80}
-          step={5}
-          value={Math.round(hidePercent * 100)}
-          onChange={(e) => handleDifficultyChange(Number(e.target.value) / 100)}
-          className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-navy-700 accent-gold-500"
-        />
+      {/* ---- difficulty buttons ---- */}
+      <div className="flex flex-wrap gap-2">
+        {DIFFICULTY_LEVELS.map((level) => (
+          <button
+            key={level.label}
+            type="button"
+            onClick={() => handleDifficultyChange(level.percent)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              hidePercent === level.percent
+                ? 'bg-gold-500 text-navy-900'
+                : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
+            }`}
+          >
+            {level.label}
+          </button>
+        ))}
       </div>
 
       {/* ---- passage with inline inputs ---- */}
@@ -272,20 +283,22 @@ export default function MissingWords({
                       handleChange(entry.globalIndex, e.target.value)
                     }
                     onKeyDown={(e) => handleKeyDown(e, entry.globalIndex)}
-                    disabled={checked || revealed}
+                    disabled={checked || revealed || hints.has(entry.globalIndex)}
                     data-blank-index={entry.globalIndex}
                     className={[
                       'text-center text-base font-serif px-1 py-0.5 rounded border',
                       'focus:outline-none focus:ring-1 transition-colors',
                       checked || revealed
-                        ? isCorrect
+                        ? isCorrect || hints.has(entry.globalIndex)
                           ? 'border-green-500/60 text-green-400 bg-green-500/10'
                           : 'border-red-500/60 text-red-400 bg-red-500/10'
-                        : isCorrect
-                          ? 'border-green-500/60 text-green-400 bg-navy-700 focus:ring-green-500/40'
-                          : isWrong
-                            ? 'border-red-500/40 text-cream bg-navy-700 focus:ring-red-500/30'
-                            : 'border-gold-500/40 bg-navy-600/50 text-cream placeholder:text-gold-500/50 focus:ring-gold-500/30',
+                        : hints.has(entry.globalIndex)
+                          ? 'border-gold-500/40 text-gold-400 bg-gold-500/10'
+                          : isCorrect
+                            ? 'border-green-500/60 text-green-400 bg-navy-700 focus:ring-green-500/40'
+                            : isWrong
+                              ? 'border-red-500/40 text-cream bg-navy-700 focus:ring-red-500/30'
+                              : 'border-gold-500/40 bg-navy-600/50 text-cream placeholder:text-gold-500/50 focus:ring-gold-500/30',
                     ].join(' ')}
                     style={{
                       width: `${Math.max(entry.word.length + 2, 4)}ch`,
@@ -294,7 +307,18 @@ export default function MissingWords({
                     autoComplete="off"
                     spellCheck={false}
                   />
-                  {checked && !isCorrect && (
+                  {!checked && !revealed && !hints.has(entry.globalIndex) && !isCorrect && (
+                    <button
+                      type="button"
+                      onClick={() => handleHint(entry)}
+                      className="text-cream/20 hover:text-gold-400 transition-colors"
+                      aria-label="Reveal this word"
+                      title="Hint"
+                    >
+                      <Lightbulb className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  {checked && !isCorrect && !hints.has(entry.globalIndex) && (
                     <span className="text-gold-400 text-xs font-sans whitespace-nowrap">
                       {entry.word}
                     </span>
