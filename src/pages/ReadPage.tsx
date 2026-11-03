@@ -392,10 +392,11 @@ export default function ReadPage() {
           <button
             type="button"
             onClick={() => setSelectedVerses(new Set())}
-            className="btn-outline inline-flex items-center gap-2 text-sm"
+            className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+            aria-label="Clear selection"
+            title="Clear selection"
           >
             <X className="w-4 h-4" />
-            Clear
           </button>
         </div>
       )}
