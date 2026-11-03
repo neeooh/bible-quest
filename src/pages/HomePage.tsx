@@ -38,7 +38,8 @@ export default function HomePage() {
   const hasAnyData =
     progress.totalXp > 0 ||
     progress.dailyStreak > 0 ||
-    progress.chaptersExplored.length > 0;
+    progress.chaptersExplored.length > 0 ||
+    progress.passagesMemorized.length > 0;
 
   const dueForReviewCount = useMemo(() => {
     const seen = new Set<string>();
@@ -238,9 +239,9 @@ export default function HomePage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-cream">
-                {progress.chaptersExplored.length}
+                {progress.passagesMemorized.length}
               </p>
-              <p className="text-cream/40 text-xs">Chapters Explored</p>
+              <p className="text-cream/40 text-xs">Passages Memorised</p>
             </div>
           </div>
         </Link>
