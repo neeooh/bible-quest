@@ -334,63 +334,63 @@ export default function MyVersesPage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-col gap-2 shrink-0">
                 <Link
                   to={`/memorize?book=${entry.book}&chapter=${entry.chapterNumber}&start=${entry.startVerse}&end=${entry.endVerse}`}
-                  className="btn-gold text-sm inline-flex items-center gap-1.5"
+                  className="btn-gold text-sm inline-flex items-center justify-center gap-1.5 w-full"
                 >
                   <Brain className="w-3.5 h-3.5" />
                   Practise
                 </Link>
-                <Link
-                  to={`/read/${entry.book}/${entry.chapterNumber}?verse=${entry.startVerse}`}
-                  className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
-                  aria-label={`Read ${entry.reference}`}
-                  title="Read"
-                >
-                  <BookOpen className="w-4 h-4" />
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => toggleFavourite(entry)}
-                  className={`w-9 h-9 rounded-lg border transition-colors flex items-center justify-center ${
-                    entry.isFavourite
-                      ? 'border-gold-500/30 text-red-400 hover:text-red-300'
-                      : 'border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40'
-                  }`}
-                  aria-label={
-                    entry.isFavourite
-                      ? `Remove ${entry.reference} from favourites`
-                      : `Add ${entry.reference} to favourites`
-                  }
-                  title={entry.isFavourite ? 'Remove from favourites' : 'Add to favourites'}
-                >
-                  <Heart
-                    className="w-4 h-4"
-                    fill={entry.isFavourite ? 'currentColor' : 'none'}
-                  />
-                </button>
-                {/* Delete: unfavourites if favourited; only removes favourites-only entries fully */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (window.confirm(`Remove ${entry.reference} from your list?`)) {
-                      // Unfavourite if needed
-                      if (entry.isFavourite) {
-                        for (let v = entry.startVerse; v <= entry.endVerse; v++) {
-                          if (isSaved(entry.book, entry.chapterNumber, v)) {
-                            removeVerse(entry.book, entry.chapterNumber, v);
+                <div className="flex items-center gap-2">
+                  <Link
+                    to={`/read/${entry.book}/${entry.chapterNumber}?verse=${entry.startVerse}`}
+                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                    aria-label={`Read ${entry.reference}`}
+                    title="Read"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => toggleFavourite(entry)}
+                    className={`w-9 h-9 rounded-lg border transition-colors flex items-center justify-center ${
+                      entry.isFavourite
+                        ? 'border-gold-500/30 text-red-400 hover:text-red-300'
+                        : 'border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40'
+                    }`}
+                    aria-label={
+                      entry.isFavourite
+                        ? `Remove ${entry.reference} from favourites`
+                        : `Add ${entry.reference} to favourites`
+                    }
+                    title={entry.isFavourite ? 'Remove from favourites' : 'Add to favourites'}
+                  >
+                    <Heart
+                      className="w-4 h-4"
+                      fill={entry.isFavourite ? 'currentColor' : 'none'}
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`Remove ${entry.reference} from your list?`)) {
+                        if (entry.isFavourite) {
+                          for (let v = entry.startVerse; v <= entry.endVerse; v++) {
+                            if (isSaved(entry.book, entry.chapterNumber, v)) {
+                              removeVerse(entry.book, entry.chapterNumber, v);
+                            }
                           }
                         }
                       }
-                    }
-                  }}
-                  className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40 transition-colors flex items-center justify-center"
-                  aria-label={`Remove ${entry.reference}`}
-                  title="Remove"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                    }}
+                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40 transition-colors flex items-center justify-center"
+                    aria-label={`Remove ${entry.reference}`}
+                    title="Remove"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
