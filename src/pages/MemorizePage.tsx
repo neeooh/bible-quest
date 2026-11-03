@@ -219,28 +219,16 @@ export default function MemorizePage() {
               <ChevronDown className="w-4 h-4" />
             </button>
             </div>
-            <div
-              className="text-sm leading-relaxed font-serif transition-[filter] duration-200 select-none cursor-pointer"
+            <p
+              className="text-cream/60 text-sm leading-relaxed font-serif transition-[filter] duration-200 select-none cursor-pointer"
               style={{ filter: peeking ? 'none' : 'blur(6px)' }}
               onPointerDown={() => setPeeking(true)}
               onPointerUp={() => setPeeking(false)}
               onPointerLeave={() => setPeeking(false)}
               title="Hold to peek"
             >
-              {contextVerses.map((v) => {
-                const isSelected = v.verse >= startVerse && v.verse <= endVerse;
-                return (
-                  <span key={v.verse}>
-                    <sup className={`text-xs font-sans font-bold mr-0.5 ${isSelected ? 'text-gold-500' : 'text-gold-500/30'}`}>
-                      {v.verse}
-                    </sup>
-                    <span className={isSelected ? 'text-cream/80' : 'text-cream/25'}>
-                      {v.text}{' '}
-                    </span>
-                  </span>
-                );
-              })}
-            </div>
+              {passageText}
+            </p>
           </div>
         ) : (
           <>
@@ -369,14 +357,7 @@ export default function MemorizePage() {
                 ({verses.length} verse{verses.length > 1 ? 's' : ''})
               </span>
             </p>
-            <div
-              className="text-sm leading-relaxed font-serif transition-[filter] duration-200 select-none cursor-pointer"
-              style={{ filter: peeking ? 'none' : 'blur(6px)' }}
-              onPointerDown={() => setPeeking(true)}
-              onPointerUp={() => setPeeking(false)}
-              onPointerLeave={() => setPeeking(false)}
-              title="Hold to peek"
-            >
+            <div className="text-sm leading-relaxed font-serif select-none">
               {contextVerses.map((v) => {
                 const isSelected = v.verse >= startVerse && v.verse <= endVerse;
                 return (
