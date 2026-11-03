@@ -298,10 +298,10 @@ export default function ReadPage() {
 
       {/* Floating action bar */}
       {selectedVerses.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex gap-3 bg-navy-900/95 backdrop-blur-sm border border-gold-500/20 rounded-xl px-4 py-3 shadow-lg shadow-navy-900/50">
+        <div className="fixed bottom-6 left-4 right-4 z-40 flex flex-wrap justify-center gap-2 bg-navy-900/95 backdrop-blur-sm border border-gold-500/20 rounded-xl px-4 py-3 shadow-lg shadow-navy-900/50 max-w-3xl mx-auto">
           <Link
             to={`/memorize?book=${bookSlug}&chapter=${num}&start=${startV}&end=${endV}`}
-            className="btn-gold inline-flex items-center gap-2 shadow-lg shadow-navy-900/50 text-sm"
+            className="btn-gold inline-flex items-center gap-2 text-sm whitespace-nowrap"
           >
             <BookOpen className="w-4 h-4" />
             Memorise Selected ({selectedVerses.size} verse
