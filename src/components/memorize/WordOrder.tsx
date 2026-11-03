@@ -3,11 +3,12 @@ import { RotateCcw, CheckCircle, Undo2 } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { wordsMatch } from '../../lib/word-compare';
 
-type Difficulty = 'normal' | 'advanced';
+type Difficulty = 'normal' | 'medium' | 'hard';
 
 const DIFFICULTY_OPTIONS: { key: Difficulty; label: string; description: string }[] = [
   { key: 'normal', label: 'Normal', description: 'All words shown' },
-  { key: 'advanced', label: 'Advanced', description: 'Some words removed — type them in' },
+  { key: 'medium', label: 'Medium', description: '15% of words removed — type them in' },
+  { key: 'hard', label: 'Hard', description: '35% of words removed — type them in' },
 ];
 
 interface WordEntry {
@@ -53,10 +54,11 @@ export default function WordOrder({
   const totalWords = words.length;
 
 
-  // In advanced mode, ~20% of words are removed from the word bank
+  // In medium/hard mode, some words are removed from the word bank
   const removedIndices = useMemo(() => {
-    if (difficulty !== 'advanced') return new Set<number>();
-    const count = Math.max(1, Math.round(totalWords * 0.2));
+    if (difficulty === 'normal') return new Set<number>();
+    const percent = difficulty === 'medium' ? 0.15 : 0.35;
+    const count = Math.max(1, Math.round(totalWords * percent));
     const indices = shuffle(Array.from({ length: totalWords }, (_, i) => i));
     return new Set(indices.slice(0, count));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -393,16 +395,6 @@ export default function WordOrder({
       <div className="flex flex-wrap gap-3">
         {!checked && (
           <>
-            {placed.length > 0 && (
-              <button
-                type="button"
-                onClick={handleRemoveLast}
-                className="btn-outline text-sm inline-flex items-center gap-2"
-              >
-                <Undo2 className="w-4 h-4" />
-                Undo
-              </button>
-            )}
             <button
               type="button"
               onClick={handleCheck}
@@ -416,6 +408,16 @@ export default function WordOrder({
               <CheckCircle className="w-4 h-4" />
               Check Answer
             </button>
+            {placed.length > 0 && (
+              <button
+                type="button"
+                onClick={handleRemoveLast}
+                className="btn-outline text-sm inline-flex items-center gap-2"
+              >
+                <Undo2 className="w-4 h-4" />
+                Undo
+              </button>
+            )}
           </>
         )}
 
