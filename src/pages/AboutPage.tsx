@@ -161,11 +161,11 @@ export default function AboutPage() {
           <p className="text-cream/50 text-sm">
             Choose the voice for the Listen feature. Available voices depend on your device.
           </p>
-          <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <select
               value={selectedVoice}
               onChange={(e) => setVoice(e.target.value)}
-              className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50"
+              className="w-full sm:w-auto sm:min-w-[300px] bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50"
             >
               <option value="">System default</option>
               {voices.map((v) => (
