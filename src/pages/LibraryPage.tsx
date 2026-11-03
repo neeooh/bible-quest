@@ -219,32 +219,6 @@ export default function LibraryPage() {
         </div>
       )}
 
-      {/* Topics */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-serif font-semibold text-cream">
-          Explore by Topic
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {TOPICS.map((topic) => (
-            <Link
-              key={topic.slug}
-              to={`/topics/${topic.slug}`}
-              className="card group hover:border-gold-500/30 transition-all duration-200 cursor-pointer !p-4 flex items-center gap-3"
-            >
-              <span className="text-2xl">{topic.icon}</span>
-              <div className="min-w-0">
-                <h3 className="font-serif font-semibold text-cream group-hover:text-gold-400 transition-colors text-sm">
-                  {topic.name}
-                </h3>
-                <span className="text-xs text-cream/30">
-                  {topic.passages.length} passages
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
       {/* Go to a Passage */}
       <section className="card space-y-4 max-w-2xl mx-auto">
         <h2 className="text-sm font-medium text-cream/50">Go to a Passage</h2>
@@ -335,6 +309,32 @@ export default function LibraryPage() {
           </div>
         )}
       </section>
+
+      {/* Topics */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-serif font-semibold text-cream">
+          Explore by Topic
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {TOPICS.map((topic) => (
+            <Link
+              key={topic.slug}
+              to={`/topics/${topic.slug}`}
+              className="card group hover:border-gold-500/30 transition-all duration-200 cursor-pointer !p-4 flex items-center gap-3"
+            >
+              <span className="text-2xl">{topic.icon}</span>
+              <div className="min-w-0">
+                <h3 className="font-serif font-semibold text-cream group-hover:text-gold-400 transition-colors text-sm">
+                  {topic.name}
+                </h3>
+                <span className="text-xs text-cream/30">
+                  {topic.passages.length} passages
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
