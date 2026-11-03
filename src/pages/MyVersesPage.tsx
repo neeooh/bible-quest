@@ -4,6 +4,11 @@ import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
 import { getBookBySlug } from '../lib/book-metadata';
 import {
+  getPassageStage,
+  formatReviewDate,
+  type LearningStage,
+} from '../lib/learning-stage';
+import {
   BookOpen,
   Bookmark,
   Brain,
@@ -25,11 +30,12 @@ function timeAgo(timestamp: number): string {
   return `${days}d ago`;
 }
 
-type Filter = 'all' | 'favourites' | 'least-practised' | 'lowest-score' | 'perfect';
+type Filter = 'all' | 'favourites' | 'due-for-review' | 'least-practised' | 'lowest-score' | 'perfect';
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'favourites', label: 'Favourites' },
+  { key: 'due-for-review', label: 'Due for Review' },
   { key: 'least-practised', label: 'Least Practised' },
   { key: 'lowest-score', label: 'Lowest Score' },
   { key: 'perfect', label: '100% Score' },
@@ -48,6 +54,10 @@ interface UnifiedEntry {
   bestAccuracy: number;
   lastPractised: number;
   timesCompleted: number;
+  stage: LearningStage;
+  stageLabel: string;
+  nextReview: string | null;
+  dueForReview: boolean;
 }
 
 export default function MyVersesPage() {
@@ -92,6 +102,10 @@ export default function MyVersesPage() {
           bestAccuracy: exercise.accuracy,
           lastPractised: exercise.timestamp,
           timesCompleted: 1,
+          stage: 'learning',
+          stageLabel: 'Learning',
+          nextReview: null,
+          dueForReview: false,
         });
       }
     }
@@ -117,6 +131,10 @@ export default function MyVersesPage() {
           bestAccuracy: 0,
           lastPractised: sv.savedAt,
           timesCompleted: 0,
+          stage: 'learning',
+          stageLabel: 'Learning',
+          nextReview: null,
+          dueForReview: false,
         });
       }
     }
@@ -134,6 +152,21 @@ export default function MyVersesPage() {
       }
     }
 
+    // Compute stage for each entry
+    for (const entry of map.values()) {
+      const ps = getPassageStage(
+        progress.exerciseHistory,
+        entry.book,
+        entry.chapterNumber,
+        entry.startVerse,
+        entry.endVerse,
+      );
+      entry.stage = ps.stage;
+      entry.stageLabel = ps.label;
+      entry.nextReview = ps.nextReview;
+      entry.dueForReview = ps.dueForReview;
+    }
+
     return Array.from(map.values());
   }, [progress.exerciseHistory, savedVerses, isSaved]);
 
@@ -143,6 +176,9 @@ export default function MyVersesPage() {
     switch (filter) {
       case 'favourites':
         list = list.filter((e) => e.isFavourite);
+        break;
+      case 'due-for-review':
+        list = list.filter((e) => e.dueForReview);
         break;
       case 'least-practised':
         list = list.sort((a, b) => a.timesCompleted - b.timesCompleted);
@@ -249,6 +285,24 @@ export default function MyVersesPage() {
                 <p className="text-gold-400 font-serif font-semibold">
                   {entry.reference}
                 </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                      entry.stage === 'learning'
+                        ? 'bg-blue-500/15 text-blue-400'
+                        : entry.stage === 'memorising'
+                          ? 'bg-amber-500/15 text-amber-400'
+                          : 'bg-green-500/15 text-green-400'
+                    }`}
+                  >
+                    {entry.stageLabel}
+                  </span>
+                  {entry.nextReview && (
+                    <span className={`text-[10px] ${entry.dueForReview ? 'text-red-400 font-medium' : 'text-cream/30'}`}>
+                      {entry.dueForReview ? '⏰ ' : ''}Next review: {formatReviewDate(entry.nextReview)}
+                    </span>
+                  )}
+                </div>
                 {entry.text && (
                   <p className="text-cream/60 text-sm mt-1 italic leading-relaxed line-clamp-2">
                     &ldquo;{entry.text}&rdquo;

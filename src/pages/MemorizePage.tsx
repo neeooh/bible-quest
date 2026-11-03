@@ -9,6 +9,7 @@ import {
 } from '../lib/book-metadata';
 import { useProgress } from '../hooks/useProgress';
 import { showToast } from '../components/Toast';
+import { getPassageStage, getAvailableExercises, recordReview } from '../lib/learning-stage';
 import type { Verse, ExerciseResult, BibleData } from '../lib/types';
 import MissingWords from '../components/memorize/MissingWords';
 import Progressive from '../components/memorize/Progressive';
@@ -28,7 +29,7 @@ const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
 
 export default function MemorizePage() {
   const [searchParams] = useSearchParams();
-  const { recordExercise } = useProgress();
+  const { progress, recordExercise } = useProgress();
 
   const paramBook = searchParams.get('book');
   const paramChapter = searchParams.get('chapter');
@@ -104,6 +105,30 @@ export default function MemorizePage() {
 
   const passageSelected = selectedBook && selectedChapter > 0 && verses.length > 0;
 
+  const passageStage = useMemo(() => {
+    if (!passageSelected || !selectedBook) return null;
+    return getPassageStage(
+      progress.exerciseHistory,
+      selectedBook,
+      selectedChapter,
+      startVerse,
+      endVerse,
+    );
+  }, [passageSelected, selectedBook, selectedChapter, startVerse, endVerse, progress.exerciseHistory]);
+
+  const filteredTabs = useMemo(() => {
+    if (!passageStage) return tabs;
+    const available = getAvailableExercises(passageStage.stage);
+    return tabs.filter((t) => available.includes(t.key));
+  }, [passageStage]);
+
+  // Reset active tab if it is not available in the current stage
+  useEffect(() => {
+    if (filteredTabs.length > 0 && !filteredTabs.some((t) => t.key === activeTab)) {
+      setActiveTab(filteredTabs[0].key);
+    }
+  }, [filteredTabs, activeTab]);
+
   const XP_TABLE: Record<TabKey, number> = {
     'missing-words': 20,
     'first-letters': 35,
@@ -132,8 +157,13 @@ export default function MemorizePage() {
       const xp = base + bonus;
       const pct = Math.round(accuracy * 100);
       showToast(`+${xp} XP earned! (${pct}% accuracy)`, 'success');
+
+      // Record review for retention-stage passages
+      if (passageStage?.stage === 'retention' && accuracy >= 0.85) {
+        recordReview(selectedBook, selectedChapter, startVerse, endVerse);
+      }
     },
-    [activeTab, selectedBook, selectedChapter, startVerse, endVerse, recordExercise],
+    [activeTab, selectedBook, selectedChapter, startVerse, endVerse, recordExercise, passageStage],
   );
 
   const otBooks = getOldTestamentBooks();
@@ -334,8 +364,30 @@ export default function MemorizePage() {
       {/* Exercise Area */}
       {passageSelected && (
         <section className="space-y-6">
+          {/* Stage badge */}
+          {passageStage && (
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-xs px-3 py-1 rounded-full font-medium ${
+                  passageStage.stage === 'learning'
+                    ? 'bg-blue-500/15 text-blue-400'
+                    : passageStage.stage === 'memorising'
+                      ? 'bg-amber-500/15 text-amber-400'
+                      : 'bg-green-500/15 text-green-400'
+                }`}
+              >
+                {passageStage.label}
+              </span>
+              {passageStage.dueForReview && (
+                <span className="text-xs text-red-400 font-medium">
+                  Due for review
+                </span>
+              )}
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-2">
-            {tabs.map((tab) => {
+            {filteredTabs.map((tab) => {
               const isActive = activeTab === tab.key;
               return (
                 <button
