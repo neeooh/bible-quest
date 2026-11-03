@@ -105,7 +105,7 @@ export default function HomePage() {
           BibleQuest
         </h1>
         <p className="text-cream/50 text-lg md:text-xl font-light tracking-wide">
-          Hide the words. Learn the Word.
+          Hide His Word in your heart.
         </p>
       </section>
 

@@ -14,7 +14,7 @@ export default defineConfig({
       },
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'BibleQuest — Hide the Words. Learn the Word.',
+        name: 'BibleQuest — Hide His Word in Your Heart.',
         short_name: 'BibleQuest',
         description:
           'Memorize Scripture through interactive exercises. Read, study, and memorize the Bible offline.',

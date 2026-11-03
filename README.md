@@ -1,6 +1,6 @@
 # BibleQuest
 
-> Hide the words. Learn the Word.
+> Hide His Word in your heart.
 
 A mobile-first Bible memorization app. Read, study, and memorize Scripture through interactive exercises and speech recognition. Launches with the complete Gospel of Matthew (28 chapters, World English Bible).
 
