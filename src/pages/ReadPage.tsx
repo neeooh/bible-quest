@@ -11,6 +11,7 @@ import {
   Loader2,
   X,
   BookmarkPlus,
+  Copy,
 } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import { getBookBySlug } from '../lib/book-metadata';
@@ -313,6 +314,27 @@ export default function ReadPage() {
               <Heart className="w-4 h-4" />
             )}
             {allSelectedSaved ? 'Saved' : 'Favourite'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (!chapter || !bookSlug) return;
+              const sorted = Array.from(selectedVerses).sort((a, b) => a - b);
+              const text = chapter.verses
+                .filter((v) => sorted.includes(v.verse))
+                .map((v) => `${v.text}`)
+                .join(' ');
+              const ref = sorted.length === 1
+                ? formatReference(bookName, num, sorted[0])
+                : formatReference(bookName, num, sorted[0], sorted[sorted.length - 1]);
+              navigator.clipboard.writeText(`"${text}" — ${ref} (WEB)`).then(() => {
+                showToast('Copied to clipboard', 'success');
+              });
+            }}
+            className="btn-outline inline-flex items-center gap-2 text-sm"
+          >
+            <Copy className="w-4 h-4" />
+            Copy
           </button>
           <button
             type="button"
