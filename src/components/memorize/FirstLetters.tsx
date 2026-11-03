@@ -4,14 +4,6 @@ import type { ExerciseProps } from '../../lib/types';
 import { normalizeWord } from '../../lib/word-compare';
 import { formatReference } from '../../lib/bible';
 
-type Difficulty = 'easy' | 'medium' | 'hard';
-
-const DIFFICULTY_OPTIONS: { key: Difficulty; label: string; description: string }[] = [
-  { key: 'easy', label: 'Easy', description: 'First letters + punctuation' },
-  { key: 'medium', label: 'Medium', description: 'First letters only' },
-  { key: 'hard', label: 'Hard', description: 'First letters, no spaces' },
-];
-
 interface WordEntry {
   word: string;
   verseNum: number;
@@ -25,22 +17,6 @@ function getFirstLetter(word: string): string {
   return match ? match[0] : word[0] ?? '';
 }
 
-function getHint(word: string, difficulty: Difficulty): string {
-  const letter = getFirstLetter(word);
-  switch (difficulty) {
-    case 'easy': {
-      // First letter + punctuation preserved
-      const leading = word.match(/^[^a-zA-Z]*/)?.[0] ?? '';
-      const trailing = word.match(/[^a-zA-Z]*$/)?.[0] ?? '';
-      return `${leading}${letter}${trailing}`;
-    }
-    case 'medium':
-      return letter;
-    case 'hard':
-      return letter;
-  }
-}
-
 export default function FirstLetters({
   verses,
   bookName,
@@ -49,7 +25,6 @@ export default function FirstLetters({
   endVerse,
   onComplete,
 }: ExerciseProps) {
-  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [checked, setChecked] = useState(false);
   const [revealed, setRevealed] = useState(false);
@@ -88,19 +63,18 @@ export default function FirstLetters({
 
   // First-letter display text
   const hintText = useMemo(() => {
-    if (difficulty === 'hard') {
-      return words.map((w) => getHint(w.word, difficulty)).join('');
-    }
     const parts: string[] = [];
     for (const w of words) {
       if (w.isFirstInVerse && parts.length > 0) {
         parts.push(' ');
       }
-      parts.push(getHint(w.word, difficulty));
+      const leading = w.word.match(/^[^a-zA-Z]*/)?.[0] ?? '';
+      const trailing = w.word.match(/[^a-zA-Z]*$/)?.[0] ?? '';
+      parts.push(`${leading}${w.firstLetter}${trailing}`);
       parts.push(' ');
     }
     return parts.join('').trim();
-  }, [words, difficulty]);
+  }, [words]);
 
   const handleChange = useCallback((index: number, value: string) => {
     setAnswers((prev) => ({ ...prev, [index]: value }));
@@ -164,15 +138,6 @@ export default function FirstLetters({
     setHints(new Set());
   }, []);
 
-  const handleDifficultyChange = useCallback((d: Difficulty) => {
-    setDifficulty(d);
-    setAnswers({});
-    setChecked(false);
-    setRevealed(false);
-    setAccuracy(null);
-    setHints(new Set());
-  }, []);
-
   const accuracyColor =
     accuracy !== null
       ? accuracy > 0.8
@@ -210,28 +175,6 @@ export default function FirstLetters({
         >
           {filledCount}/{words.length} filled
         </span>
-      </div>
-
-      {/* Difficulty */}
-      <div className="space-y-2">
-        <p className="text-xs text-cream/40">Choose difficulty</p>
-        <div className="flex flex-wrap gap-2">
-          {DIFFICULTY_OPTIONS.map((opt) => (
-            <button
-              key={opt.key}
-              type="button"
-              onClick={() => handleDifficultyChange(opt.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                difficulty === opt.key
-                  ? 'bg-gold-500 text-navy-900'
-                  : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
-              }`}
-              title={opt.description}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* First-letter hint display */}
