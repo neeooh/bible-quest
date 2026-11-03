@@ -224,7 +224,7 @@ export default function MissingWords({
             Missing Words
           </h3>
           <p className="text-cream/40 text-sm">
-            {reference} · {DIFFICULTY_LEVELS.find((d) => d.percent === hidePercent)?.label ?? `${Math.round(hidePercent * 100)}%`} ({Math.round(hidePercent * 100)}% hidden)
+            {reference}
           </p>
         </div>
         <span
