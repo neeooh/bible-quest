@@ -18,8 +18,8 @@ import VoiceRecitation from '../components/memorize/VoiceRecitation';
 type TabKey = ExerciseResult['type'];
 
 const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'missing-words', label: 'Missing Words', icon: <Puzzle className="w-4 h-4" /> },
   { key: 'progressive', label: 'Progressive', icon: <Layers className="w-4 h-4" /> },
+  { key: 'missing-words', label: 'Missing Words', icon: <Puzzle className="w-4 h-4" /> },
   { key: 'recitation', label: 'Full Recitation', icon: <AlignLeft className="w-4 h-4" /> },
   { key: 'voice', label: 'Voice', icon: <Mic className="w-4 h-4" /> },
 ];
@@ -46,7 +46,7 @@ export default function MemorizePage() {
   const [endVerse, setEndVerse] = useState<number>(
     paramEnd ? Number(paramEnd) : 1,
   );
-  const [activeTab, setActiveTab] = useState<TabKey>('missing-words');
+  const [activeTab, setActiveTab] = useState<TabKey>('progressive');
   const [peeking, setPeeking] = useState(false);
 
   const bookMeta = selectedBook ? getBookBySlug(selectedBook) : undefined;
