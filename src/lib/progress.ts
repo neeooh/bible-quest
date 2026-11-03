@@ -4,6 +4,7 @@ const STORAGE_KEY = 'biblequest-progress-v2';
 
 const XP_REWARDS: Record<ExerciseResult['type'], number> = {
   'missing-words': 20,
+  'first-letters': 35,
   progressive: 30,
   recitation: 50,
   voice: 40,

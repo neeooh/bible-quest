@@ -21,7 +21,7 @@ export interface VerseRange {
 }
 
 export interface ExerciseResult {
-  type: 'missing-words' | 'progressive' | 'recitation' | 'voice';
+  type: 'missing-words' | 'progressive' | 'recitation' | 'voice' | 'first-letters';
   book: string;
   chapterNumber: number;
   startVerse: number;

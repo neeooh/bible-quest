@@ -13,6 +13,7 @@ import { getBookBySlug } from '../lib/book-metadata';
 
 const exerciseLabels: Record<string, string> = {
   'missing-words': 'Missing Words',
+  'first-letters': 'First Letters',
   progressive: 'Progressive',
   recitation: 'Recitation',
   voice: 'Voice',
