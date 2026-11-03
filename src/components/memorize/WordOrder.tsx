@@ -254,7 +254,8 @@ export default function WordOrder({
                   const isCorrect =
                     checked &&
                     normalizeWord(typed) === normalizeWord(words[i].word);
-                  const isWrong = checked && !isCorrect;
+                  const isEmpty = checked && typed.trim().length === 0;
+                  const isWrong = checked && !isCorrect && !isEmpty;
 
                   elements.push(
                     <span key={`typed-${i}`} className="inline-flex items-center gap-0.5">
@@ -273,15 +274,22 @@ export default function WordOrder({
                           'focus:outline-none focus:ring-1 transition-colors',
                           isCorrect
                             ? 'border-green-500/60 text-green-400 bg-green-500/10'
-                            : isWrong
-                              ? 'border-red-500/60 text-red-400 bg-red-500/10'
+                            : isEmpty
+                              ? 'border-yellow-500/60 text-yellow-400 bg-yellow-500/10'
+                              : isWrong
+                                ? 'border-red-500/60 text-red-400 bg-red-500/10'
                               : 'border-gold-500/40 bg-navy-600/50 text-cream placeholder:text-cream/30 focus:ring-gold-500/30',
                         ].join(' ')}
-                        placeholder="???"
+                        placeholder="type word"
                         autoComplete="off"
                         spellCheck={false}
                       />
-                      {checked && isWrong && (
+                      {checked && isWrong && typed.trim().length === 0 && (
+                        <span className="text-gold-400 text-xs font-sans">
+                          {words[i].word}
+                        </span>
+                      )}
+                      {checked && isWrong && typed.trim().length > 0 && (
                         <span className="text-gold-400 text-xs font-sans">
                           {words[i].word}
                         </span>
