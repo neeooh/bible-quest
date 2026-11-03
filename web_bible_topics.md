@@ -604,3 +604,75 @@ A useful way to approach work and ambition is to:
 - Be courageous when facing uncertainty.
 
 - Stay humble and remember that money is a tool, not the purpose of life.
+
+
+##  Implementation
+
+1. Bible page
+
+Keep the existing Bible navigation and add a second discovery option on the Library page:
+- Topics
+
+The Topics section displays curated topic cards - the data is in the web_bible_topics.md file.
+
+2. Topic page
+
+When the user selects Anxiety & Fear, they see:
+
+Anxiety & Fear
+
+Find comfort, peace and reassurance in God’s Word.
+
+Below that, display a list of relevant passages:
+
+* Philippians 4:6–7
+* Matthew 6:25–34
+* Isaiah 41:10
+* 1 Peter 5:7
+* Psalm 34:4
+
+Each passage appears as a compact card containing:
+
+* Bible reference
+* Short passage preview
+* Number of verses
+* Read button
+* Add to My Verses button
+
+I’d avoid displaying entire passages here. Keep the page easy to scan.
+
+3. Reading a passage
+
+When the user clicks Read:
+
+1. Open the existing Bible reader.
+2. Navigate to the relevant book and chapter.
+3. Highlight the selected passage.
+4. Allow the user to read the surrounding context.
+5. Let them select the passage and click Memorise selected.
+
+No need to build a separate reading experience.
+
+4. Adding a passage to My Verses
+
+When the user clicks Add to My Verses:
+
+1. Save the passage to My Verses.
+2. Show a confirmation.
+3. Allow the user to start practising immediately.
+
+The passage then follows your existing Learning → Memorised → Retention system.
+
+5. Overall user journey
+
+The simplest journey is:
+
+Bible → Topics → Anxiety & Fear → Select passage → Read → Add to My Verses → Practise → Track progress
+
+My recommendation
+
+Start with:
+* 8–12 curated topics from the web_bible_topics.md file.
+* Reuse your existing Bible reader and memorisation functionality.
+
+One important distinction: topics should be discovery tools, not another organisational system for My Verses. Keep personal collections as a potential future feature. No need to build two overlapping filing cabinets just yet.
