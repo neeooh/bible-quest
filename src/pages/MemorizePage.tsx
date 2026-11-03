@@ -162,7 +162,7 @@ export default function MemorizePage() {
         {passageSelected && selectorCollapsed ? (
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-cream/50 text-xs">Currently selected</p>
+              <p className="text-cream/50 text-xs">Currently you are practising</p>
               <p className="text-gold-400 font-serif font-semibold">
                 {formatReference(bookName, selectedChapter, startVerse, endVerse !== startVerse ? endVerse : undefined)}
                 <span className="text-cream/30 font-sans font-normal ml-2 text-sm">
