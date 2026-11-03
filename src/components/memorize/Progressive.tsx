@@ -3,6 +3,7 @@ import { RotateCcw, ChevronRight, BookOpen, CheckCircle, Lightbulb } from 'lucid
 import type { ExerciseProps } from '../../lib/types';
 import { normalizeWord, wordsMatch, compareTexts } from '../../lib/word-compare';
 import { formatReference } from '../../lib/bible';
+import { getEncouragement } from '../../lib/encouragement';
 
 const PHASE_LABELS = ['Read', '25%', '50%', '75%', 'Full Recall'];
 const PHASE_HIDE = [0, 0.25, 0.5, 0.75, 1.0];
@@ -229,16 +230,19 @@ export default function Progressive({
 
   const accuracyBar =
     phaseAccuracy !== null ? (
-      <div className="flex items-center gap-3">
-        <div className="flex-1 h-2 bg-navy-700 rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${accBg}`}
-            style={{ width: `${Math.round(phaseAccuracy * 100)}%` }}
-          />
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-2 bg-navy-700 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${accBg}`}
+              style={{ width: `${Math.round(phaseAccuracy * 100)}%` }}
+            />
+          </div>
+          <span className={`text-lg font-bold font-serif ${accColor}`}>
+            {Math.round(phaseAccuracy * 100)}%
+          </span>
         </div>
-        <span className={`text-lg font-bold font-serif ${accColor}`}>
-          {Math.round(phaseAccuracy * 100)}%
-        </span>
+        <p className="text-cream/50 text-sm">{getEncouragement(phaseAccuracy)}</p>
       </div>
     ) : null;
 

@@ -3,6 +3,7 @@ import { RotateCcw, Eye, CheckCircle, Lightbulb } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { normalizeWord, wordsMatch } from '../../lib/word-compare';
 import { formatReference } from '../../lib/bible';
+import { getEncouragement } from '../../lib/encouragement';
 
 interface WordEntry {
   word: string;
@@ -345,6 +346,7 @@ export default function MissingWords({
               {Math.round(accuracy * 100)}%
             </span>
           </div>
+          <p className="text-cream/50 text-sm">{getEncouragement(accuracy)}</p>
         </div>
       )}
 

@@ -3,6 +3,7 @@ import { RotateCcw, Check, Eye, EyeOff, Mic, MicOff } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { compareTexts, type CompareResult } from '../../lib/word-compare';
 import { formatReference } from '../../lib/bible';
+import { getEncouragement } from '../../lib/encouragement';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
 export default function Recitation({
@@ -178,6 +179,8 @@ export default function Recitation({
               {Math.round(result.accuracy * 100)}%
             </span>
           </div>
+
+          <p className="text-cream/50 text-sm">{getEncouragement(result.accuracy)}</p>
 
           <div className="bg-navy-700/50 border border-gold-500/10 rounded-lg p-5">
             <p className="text-cream/40 text-xs font-medium mb-3">

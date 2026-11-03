@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { RotateCcw, CheckCircle, Undo2 } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { wordsMatch } from '../../lib/word-compare';
+import { getEncouragement } from '../../lib/encouragement';
 
 type Difficulty = 'normal' | 'medium' | 'hard';
 
@@ -368,16 +369,19 @@ export default function WordOrder({
 
       {/* Accuracy bar */}
       {accuracy !== null && (
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-2 bg-navy-700 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${accuracyBg}`}
-              style={{ width: `${Math.round(accuracy * 100)}%` }}
-            />
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-2 bg-navy-700 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${accuracyBg}`}
+                style={{ width: `${Math.round(accuracy * 100)}%` }}
+              />
           </div>
           <span className={`text-lg font-bold font-serif ${accuracyColor}`}>
             {Math.round(accuracy * 100)}%
           </span>
+          </div>
+          <p className="text-cream/50 text-sm">{getEncouragement(accuracy)}</p>
         </div>
       )}
 
