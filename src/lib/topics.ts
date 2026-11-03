@@ -166,6 +166,22 @@ export const TOPICS: Topic[] = [
       { book: 'galatians', chapter: 6, startVerse: 9, endVerse: 9, reference: 'Galatians 6:9', preview: 'Let us not be weary in doing good, for we will reap in due season…', explainer: 'Keep going when progress is slow. Persistence pays off.', verseCount: 1 },
     ],
   },
+  {
+    slug: 'lust-self-control',
+    name: 'Lust & Sexual Self-Control',
+    description: 'Overcoming lust, resisting sexual temptation, practising self-control and keeping your thoughts and actions pure.',
+    icon: '🛡️',
+    passages: [
+      { book: 'matthew', chapter: 5, startVerse: 27, endVerse: 28, reference: 'Matthew 5:27–28', preview: 'Everyone who gazes at a woman to lust after her has committed adultery with her already in his heart.', explainer: 'Jesus teaches that faithfulness begins in the heart, not just in physical actions.', verseCount: 2 },
+      { book: '1corinthians', chapter: 6, startVerse: 18, endVerse: 20, reference: '1 Corinthians 6:18–20', preview: 'Flee sexual immorality! Your body is a temple of the Holy Spirit…', explainer: 'Your body deserves respect. Paul encourages us to honour God through our physical choices.', verseCount: 3 },
+      { book: '1thessalonians', chapter: 4, startVerse: 3, endVerse: 5, reference: '1 Thessalonians 4:3–5', preview: 'This is the will of God: your sanctification, that you abstain from sexual immorality…', explainer: 'God calls people to practise sexual self-control rather than being ruled by uncontrolled desires.', verseCount: 3 },
+      { book: '2timothy', chapter: 2, startVerse: 22, endVerse: 22, reference: '2 Timothy 2:22', preview: 'Flee from youthful lusts; but pursue righteousness, faith, love, and peace…', explainer: 'Replace unhealthy desires with positive pursuits such as faith, love, and meaningful relationships.', verseCount: 1 },
+      { book: 'galatians', chapter: 5, startVerse: 16, endVerse: 16, reference: 'Galatians 5:16', preview: 'Walk by the Spirit, and you won\'t fulfill the lust of the flesh.', explainer: 'Focus on living according to God\'s guidance rather than giving in to every physical desire.', verseCount: 1 },
+      { book: 'colossians', chapter: 3, startVerse: 5, endVerse: 5, reference: 'Colossians 3:5', preview: 'Put to death therefore your members which are on the earth: sexual immorality…', explainer: 'Actively reject behaviours and cravings that pull you away from God.', verseCount: 1 },
+      { book: 'job', chapter: 31, startVerse: 1, endVerse: 1, reference: 'Job 31:1', preview: 'I made a covenant with my eyes, how then should I look lustfully at a young woman?', explainer: 'Self-control often begins with the choices we make about what we expose ourselves to.', verseCount: 1 },
+      { book: '1corinthians', chapter: 10, startVerse: 13, endVerse: 13, reference: '1 Corinthians 10:13', preview: 'No temptation has taken you except such as is common to man. God is faithful…', explainer: 'Everyone experiences temptation. God provides opportunities to resist it and choose a different path.', verseCount: 1 },
+    ],
+  },
 ];
 
 export function getTopicBySlug(slug: string): Topic | undefined {
