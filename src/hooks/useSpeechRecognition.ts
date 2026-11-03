@@ -54,6 +54,27 @@ function getConstructor(): SRConstructor | null {
 /*  Public interface                                                   */
 /* ------------------------------------------------------------------ */
 
+/** Convert spoken punctuation words into actual punctuation marks. */
+function normalizePunctuation(text: string): string {
+  return text
+    .replace(/\bfull stop\b/gi, '.')
+    .replace(/\bperiod\b/gi, '.')
+    .replace(/\bcomma\b/gi, ',')
+    .replace(/\bquestion mark\b/gi, '?')
+    .replace(/\bexclamation mark\b/gi, '!')
+    .replace(/\bexclamation point\b/gi, '!')
+    .replace(/\bcolon\b/gi, ':')
+    .replace(/\bsemicolon\b/gi, ';')
+    .replace(/\bsemi colon\b/gi, ';')
+    .replace(/\bopen quote\b/gi, '"')
+    .replace(/\bclose quote\b/gi, '"')
+    .replace(/\bend quote\b/gi, '"')
+    .replace(/\bhyphen\b/gi, '-')
+    .replace(/\bdash\b/gi, '—')
+    .replace(/\bnew line\b/gi, '\n')
+    .replace(/\s+([.,?!:;])/g, '$1');
+}
+
 export interface UseSpeechRecognitionReturn {
   /** True while the recogniser is actively listening. */
   isListening: boolean;
@@ -112,7 +133,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
           interimText += seg[0].transcript;
         }
       }
-      setTranscript(finalText + interimText);
+      setTranscript(normalizePunctuation(finalText + interimText));
     };
 
     recognition.onerror = (event: SRErrorEvent) => {
