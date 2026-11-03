@@ -606,73 +606,67 @@ A useful way to approach work and ambition is to:
 - Stay humble and remember that money is a tool, not the purpose of life.
 
 
-##  Implementation
 
-1. Bible page
+Category
 
-Keep the existing Bible navigation and add a second discovery option on the Library page:
-- Topics
+Description
 
-The Topics section displays curated topic cards - the data is in the web_bible_topics.md file.
+Marriage & Relationships
 
-2. Topic page
+Building healthy, loving and faithful relationships
 
-When the user selects Anxiety & Fear, they see:
+Lust & Sexual Self-Control
 
-Anxiety & Fear
+Overcoming sexual temptation and practising self-discipline
 
-Find comfort, peace and reassurance in God’s Word.
+Lust & Sexual Self-Control
 
-Below that, display a list of relevant passages:
+Overcoming lust, resisting sexual temptation, practising self-control and keeping your thoughts and actions pure.
 
-* Philippians 4:6–7
-* Matthew 6:25–34
-* Isaiah 41:10
-* 1 Peter 5:7
-* Psalm 34:4
+1. Matthew 5:27–28
 
-Each passage appears as a compact card containing:
+You have heard that it was said, ‘You shall not commit adultery;’ but I tell you that everyone who gazes at a woman to lust after her has committed adultery with her already in his heart.
 
-* Bible reference
-* Short passage preview
-* Number of verses
-* Read button
-* Add to My Verses button
+Explainer: Jesus teaches that faithfulness begins in the heart, not just in physical actions. What we deliberately entertain in our thoughts matters.
 
-I’d avoid displaying entire passages here. Keep the page easy to scan.
+2. 1 Corinthians 6:18–20
 
-3. Reading a passage
+Flee sexual immorality! Every sin that a man does is outside the body, but he who commits sexual immorality sins against his own body. Or don’t you know that your body is a temple of the Holy Spirit who is in you, whom you have from God? You are not your own, for you were bought with a price. Therefore glorify God in your body and in your spirit, which are God’s.
 
-When the user clicks Read:
+Explainer: Your body deserves respect and should not be treated as an instrument for satisfying every desire. Paul encourages us to honour God through our physical choices.
 
-1. Open the existing Bible reader.
-2. Navigate to the relevant book and chapter.
-3. Highlight the selected passage.
-4. Allow the user to read the surrounding context.
-5. Let them select the passage and click Memorise selected.
+3. 1 Thessalonians 4:3–5
 
-No need to build a separate reading experience.
+For this is the will of God: your sanctification, that you abstain from sexual immorality, that each one of you know how to control his own body in sanctification and honour, not in the passion of lust, even as the Gentiles who don’t know God.
 
-4. Adding a passage to My Verses
+Explainer: God calls people to practise sexual self-control rather than being ruled by uncontrolled desires. Self-discipline is part of living a life of faith.
 
-When the user clicks Add to My Verses:
+4. 2 Timothy 2:22
 
-1. Save the passage to My Verses.
-2. Show a confirmation.
-3. Allow the user to start practising immediately.
+Flee from youthful lusts; but pursue righteousness, faith, love, and peace with those who call on the Lord out of a pure heart.
 
-The passage then follows your existing Learning → Memorised → Retention system.
+Explainer: Don’t simply try to resist temptation. Replace unhealthy desires with positive pursuits such as faith, love, righteousness and meaningful relationships.
 
-5. Overall user journey
+5. Galatians 5:16
 
-The simplest journey is:
+But I say, walk by the Spirit, and you won’t fulfill the lust of the flesh.
 
-Bible → Topics → Anxiety & Fear → Select passage → Read → Add to My Verses → Practise → Track progress
+Explainer: Focus on living according to God’s guidance rather than giving in to every physical desire. Your actions should be guided by your values, not temporary impulses.
 
-My recommendation
+6. Colossians 3:5
 
-Start with:
-* 8–12 curated topics from the web_bible_topics.md file.
-* Reuse your existing Bible reader and memorisation functionality.
+Put to death therefore your members which are on the earth: sexual immorality, uncleanness, depraved passion, evil desire, and covetousness, which is idolatry.
 
-One important distinction: topics should be discovery tools, not another organisational system for My Verses. Keep personal collections as a potential future feature. No need to build two overlapping filing cabinets just yet.
+Explainer: Don’t allow destructive desires to control your life. Paul encourages actively rejecting behaviours and cravings that pull you away from God.
+
+7. Job 31:1
+
+I made a covenant with my eyes, how then should I look lustfully at a young woman?
+
+Explainer: Job describes making a conscious commitment to control what he looks at. It’s a reminder that self-control often begins with the choices we make about what we expose ourselves to.
+
+8. 1 Corinthians 10:13
+
+No temptation has taken you except such as is common to man. God is faithful, who will not allow you to be tempted above what you are able, but will with the temptation also make the way of escape, that you may be able to endure it.
+
+Explainer: Everyone experiences temptation, and experiencing it doesn’t mean you’ve failed. God provides opportunities to resist it and choose a different path.
