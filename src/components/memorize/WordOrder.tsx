@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { RotateCcw, CheckCircle, Undo2 } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
-import { normalizeWord } from '../../lib/word-compare';
+import { wordsMatch } from '../../lib/word-compare';
 
 type Difficulty = 'normal' | 'advanced';
 
@@ -98,7 +98,7 @@ export default function WordOrder({
       for (let i = 0; i < placed.length; i++) {
         if (
           i < words.length &&
-          normalizeWord(words[placed[i]].word) === normalizeWord(words[i].word)
+          wordsMatch(words[placed[i]].word, words[i].word)
         ) {
           correct++;
         }
@@ -114,7 +114,7 @@ export default function WordOrder({
           ans = pIdx < placed.length ? words[placed[pIdx]].word : '';
           pIdx++;
         }
-        if (normalizeWord(ans) === normalizeWord(words[i].word)) {
+        if (wordsMatch(ans, words[i].word)) {
           correct++;
         }
       }
@@ -214,7 +214,7 @@ export default function WordOrder({
                 const isCorrectPos =
                   checked &&
                   pos < words.length &&
-                  normalizeWord(entry.word) === normalizeWord(words[pos].word);
+                  wordsMatch(entry.word, words[pos].word);
                 const isWrongPos = checked && !isCorrectPos;
 
                 return (
@@ -253,7 +253,7 @@ export default function WordOrder({
                   const typed = typedWords[i] ?? '';
                   const isCorrect =
                     checked &&
-                    normalizeWord(typed) === normalizeWord(words[i].word);
+                    wordsMatch(typed, words[i].word);
                   const isEmpty = checked && typed.trim().length === 0;
                   const isWrong = checked && !isCorrect && !isEmpty;
 
@@ -303,7 +303,7 @@ export default function WordOrder({
                     const entry = words[wordIdx];
                     const isCorrectPos =
                       checked &&
-                      normalizeWord(entry.word) === normalizeWord(words[i].word);
+                      wordsMatch(entry.word, words[i].word);
                     const isWrongPos = checked && !isCorrectPos;
 
                     elements.push(

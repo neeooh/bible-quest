@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { RotateCcw, ChevronRight, BookOpen, CheckCircle, Lightbulb } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
-import { normalizeWord, compareTexts } from '../../lib/word-compare';
+import { normalizeWord, wordsMatch, compareTexts } from '../../lib/word-compare';
 import { formatReference } from '../../lib/bible';
 
 const PHASE_LABELS = ['Read', '25%', '50%', '75%', 'Full Recall'];
@@ -122,7 +122,7 @@ export default function Progressive({
       total++;
       if (hints.has(entry.globalIndex)) continue;
       const answer = answers[entry.globalIndex] ?? '';
-      if (normalizeWord(answer) === normalizeWord(entry.word)) {
+      if (wordsMatch(answer, entry.word)) {
         correct++;
       }
     }
@@ -249,9 +249,8 @@ export default function Progressive({
         const isHidden = hiddenSet.has(entry.globalIndex);
         const answer = answers[entry.globalIndex] ?? '';
         const normAnswer = normalizeWord(answer);
-        const normExpected = normalizeWord(entry.word);
-        const isCorrect = normAnswer.length > 0 && normAnswer === normExpected;
-        const isWrong = normAnswer.length > 0 && normAnswer !== normExpected;
+        const isCorrect = normAnswer.length > 0 && wordsMatch(answer, entry.word);
+        const isWrong = normAnswer.length > 0 && !wordsMatch(answer, entry.word);
         const isHinted = hints.has(entry.globalIndex);
 
         return (

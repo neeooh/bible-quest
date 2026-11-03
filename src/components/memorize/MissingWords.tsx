@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { RotateCcw, Eye, CheckCircle, Lightbulb } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
-import { normalizeWord } from '../../lib/word-compare';
+import { normalizeWord, wordsMatch } from '../../lib/word-compare';
 import { formatReference } from '../../lib/bible';
 
 interface WordEntry {
@@ -146,7 +146,7 @@ export default function MissingWords({
       total++;
       if (hints.has(entry.globalIndex)) continue; // hinted words do not count as correct
       const answer = answers[entry.globalIndex] ?? '';
-      if (normalizeWord(answer) === normalizeWord(entry.word)) {
+      if (wordsMatch(answer, entry.word)) {
         correct++;
       }
     }
@@ -262,9 +262,8 @@ export default function MissingWords({
           const isHidden = hiddenSet.has(entry.globalIndex);
           const answer = answers[entry.globalIndex] ?? '';
           const normAnswer = normalizeWord(answer);
-          const normExpected = normalizeWord(entry.word);
-          const isCorrect = normAnswer.length > 0 && normAnswer === normExpected;
-          const isWrong = normAnswer.length > 0 && normAnswer !== normExpected;
+          const isCorrect = normAnswer.length > 0 && wordsMatch(answer, entry.word);
+          const isWrong = normAnswer.length > 0 && !wordsMatch(answer, entry.word);
 
           return (
             <span key={entry.globalIndex}>
