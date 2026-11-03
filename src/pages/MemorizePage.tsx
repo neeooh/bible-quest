@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Puzzle, Layers, Mic, AlignLeft, Eye, Loader2, Brain } from 'lucide-react';
+import { Puzzle, Layers, Mic, AlignLeft, Eye, Loader2, Brain, ChevronDown, ChevronUp } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import {
   getBookBySlug,
@@ -48,6 +48,9 @@ export default function MemorizePage() {
   );
   const [activeTab, setActiveTab] = useState<TabKey>('progressive');
   const [peeking, setPeeking] = useState(false);
+  const [selectorCollapsed, setSelectorCollapsed] = useState(
+    Boolean(paramBook && paramChapter),
+  );
 
   const bookMeta = selectedBook ? getBookBySlug(selectedBook) : undefined;
   const bookName = bookMeta?.name ?? '';
@@ -149,7 +152,43 @@ export default function MemorizePage() {
 
       {/* Passage Selector */}
       <section className="card space-y-4">
-        <h2 className="text-sm font-medium text-cream/50">Select a Passage</h2>
+        {/* Collapsed state */}
+        {passageSelected && selectorCollapsed ? (
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-cream/50 text-xs">Currently selected</p>
+              <p className="text-gold-400 font-serif font-semibold">
+                {formatReference(bookName, selectedChapter, startVerse, endVerse !== startVerse ? endVerse : undefined)}
+                <span className="text-cream/30 font-sans font-normal ml-2 text-sm">
+                  ({verses.length} verse{verses.length > 1 ? 's' : ''})
+                </span>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectorCollapsed(false)}
+              className="btn-outline text-sm inline-flex items-center gap-1.5"
+            >
+              Change passage
+              <ChevronDown className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Expanded header */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-medium text-cream/50">Select a Passage</h2>
+              {passageSelected && (
+                <button
+                  type="button"
+                  onClick={() => setSelectorCollapsed(true)}
+                  className="text-cream/30 hover:text-cream/60 text-xs inline-flex items-center gap-1 transition-colors"
+                >
+                  Collapse
+                  <ChevronUp className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Book */}
           <div className="space-y-1.5">
@@ -284,6 +323,8 @@ export default function MemorizePage() {
               </button>
             </div>
           </div>
+        )}
+          </>
         )}
       </section>
 
