@@ -58,6 +58,8 @@ export interface SavedVerse {
   text: string;
   reference: string;
   savedAt: number;
+  /** Whether this verse is marked as a favourite. Defaults to true for backwards compat. */
+  favourite?: boolean;
 }
 
 export interface ExerciseProps {

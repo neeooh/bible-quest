@@ -7,7 +7,9 @@ export interface UseSavedVersesReturn {
   addVerse: (verse: Omit<SavedVerse, 'savedAt'>) => void;
   addVerses: (verses: Omit<SavedVerse, 'savedAt'>[]) => void;
   removeVerse: (book: string, chapter: number, verse: number) => void;
+  setFavourite: (book: string, chapter: number, verse: number, favourite: boolean) => void;
   isSaved: (book: string, chapter: number, verse: number) => boolean;
+  isFavourite: (book: string, chapter: number, verse: number) => boolean;
 }
 
 export function useSavedVerses(): UseSavedVersesReturn {
@@ -33,6 +35,14 @@ export function useSavedVerses(): UseSavedVersesReturn {
     [],
   );
 
+  const setFavourite = useCallback(
+    (book: string, chapter: number, verse: number, favourite: boolean) => {
+      const updated = savedVersesLib.setVerseFavourite(book, chapter, verse, favourite);
+      setSavedVerses(updated);
+    },
+    [],
+  );
+
   const isSaved = useCallback(
     (book: string, chapter: number, verse: number) =>
       savedVerses.some(
@@ -42,5 +52,17 @@ export function useSavedVerses(): UseSavedVersesReturn {
     [savedVerses],
   );
 
-  return { savedVerses, addVerse, addVerses, removeVerse, isSaved };
+  const isFavourite = useCallback(
+    (book: string, chapter: number, verse: number) =>
+      savedVerses.some(
+        (v) =>
+          v.book === book &&
+          v.chapter === chapter &&
+          v.verse === verse &&
+          v.favourite !== false,
+      ),
+    [savedVerses],
+  );
+
+  return { savedVerses, addVerse, addVerses, removeVerse, setFavourite, isSaved, isFavourite };
 }

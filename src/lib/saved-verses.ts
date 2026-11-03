@@ -21,14 +21,20 @@ export function addSavedVerse(
   verse: Omit<SavedVerse, 'savedAt'>,
 ): SavedVerse[] {
   const current = getSavedVerses();
-  const exists = current.some(
+  const existing = current.find(
     (v) =>
       v.book === verse.book &&
       v.chapter === verse.chapter &&
       v.verse === verse.verse,
   );
-  if (exists) return current;
-  return persist([...current, { ...verse, savedAt: Date.now() }]);
+  if (existing) {
+    // Re-favourite if it was unfavourited
+    if (existing.favourite === false) {
+      return setVerseFavourite(verse.book, verse.chapter, verse.verse, true);
+    }
+    return current;
+  }
+  return persist([...current, { ...verse, favourite: true, savedAt: Date.now() }]);
 }
 
 export function addSavedVerses(
@@ -69,6 +75,22 @@ export function removeSavedVerse(
     current.filter(
       (v) =>
         !(v.book === book && v.chapter === chapter && v.verse === verse),
+    ),
+  );
+}
+
+export function setVerseFavourite(
+  book: string,
+  chapter: number,
+  verse: number,
+  favourite: boolean,
+): SavedVerse[] {
+  const current = getSavedVerses();
+  return persist(
+    current.map((v) =>
+      v.book === book && v.chapter === chapter && v.verse === verse
+        ? { ...v, favourite }
+        : v,
     ),
   );
 }

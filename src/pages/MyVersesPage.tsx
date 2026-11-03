@@ -62,7 +62,7 @@ interface UnifiedEntry {
 
 export default function MyVersesPage() {
   const { progress } = useProgress();
-  const { savedVerses, addVerse, removeVerse, isSaved } = useSavedVerses();
+  const { savedVerses, addVerse, removeVerse, setFavourite, isSaved, isFavourite } = useSavedVerses();
   const [filter, setFilter] = useState<Filter>('all');
 
   const entries: UnifiedEntry[] = useMemo(() => {
@@ -113,9 +113,10 @@ export default function MyVersesPage() {
     // Add favourites (merge or create new entries)
     for (const sv of savedVerses) {
       const key = `${sv.book}:${sv.chapter}:${sv.verse}-${sv.verse}`;
+      const isFav = sv.favourite !== false;
       const existing = map.get(key);
       if (existing) {
-        existing.isFavourite = true;
+        if (isFav) existing.isFavourite = true;
         if (!existing.text) existing.text = sv.text;
       } else {
         map.set(key, {
@@ -127,7 +128,7 @@ export default function MyVersesPage() {
           endVerse: sv.verse,
           reference: sv.reference,
           text: sv.text,
-          isFavourite: true,
+          isFavourite: isFav,
           bestAccuracy: 0,
           lastPractised: sv.savedAt,
           timesCompleted: 0,
@@ -142,9 +143,9 @@ export default function MyVersesPage() {
     // Also mark favourite status for multi-verse passages by checking each verse
     for (const entry of map.values()) {
       if (!entry.isFavourite) {
-        // Check if any verse in the range is saved
+        // Check if any verse in the range is favourited
         for (let v = entry.startVerse; v <= entry.endVerse; v++) {
-          if (isSaved(entry.book, entry.chapterNumber, v)) {
+          if (isFavourite(entry.book, entry.chapterNumber, v)) {
             entry.isFavourite = true;
             break;
           }
@@ -200,31 +201,25 @@ export default function MyVersesPage() {
 
   function toggleFavourite(entry: UnifiedEntry) {
     if (entry.isFavourite) {
-      // If this entry only exists because it is favourited (never practised),
-      // warn the user that it will disappear from the list.
-      if (
-        entry.timesCompleted === 0 &&
-        !window.confirm(
-          `Remove ${entry.reference} from favourites? It will be removed from your list since it has not been practised.`,
-        )
-      ) {
-        return;
-      }
-      // Remove all verses in the range from favourites
+      // Unfavourite — keep the entry in saved verses, just toggle the flag
       for (let v = entry.startVerse; v <= entry.endVerse; v++) {
-        if (isSaved(entry.book, entry.chapterNumber, v)) {
-          removeVerse(entry.book, entry.chapterNumber, v);
+        if (isFavourite(entry.book, entry.chapterNumber, v)) {
+          setFavourite(entry.book, entry.chapterNumber, v, false);
         }
       }
     } else {
-      // Add the first verse as favourite (we may not have text for ranges)
-      addVerse({
-        book: entry.book,
-        chapter: entry.chapterNumber,
-        verse: entry.startVerse,
-        text: entry.text,
-        reference: entry.reference,
-      });
+      // Favourite — add or re-favourite
+      if (isSaved(entry.book, entry.chapterNumber, entry.startVerse)) {
+        setFavourite(entry.book, entry.chapterNumber, entry.startVerse, true);
+      } else {
+        addVerse({
+          book: entry.book,
+          chapter: entry.chapterNumber,
+          verse: entry.startVerse,
+          text: entry.text,
+          reference: entry.reference,
+        });
+      }
     }
   }
 
