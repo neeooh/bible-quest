@@ -292,7 +292,7 @@ export default function MyVersesPage() {
                   : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
               }`}
             >
-              Stage
+              Learning Stage
               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${stageDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
