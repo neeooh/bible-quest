@@ -282,12 +282,12 @@ export default function MyVersesPage() {
               className="card flex items-start justify-between gap-4"
             >
               <div className="min-w-0">
-                <p className="text-gold-400 font-serif font-semibold">
-                  {entry.reference}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-gold-400 font-serif font-semibold">
+                    {entry.reference}
+                  </p>
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0 ${
                       entry.stage === 'learning'
                         ? 'bg-blue-500/15 text-blue-400'
                         : entry.stage === 'memorising'
@@ -298,8 +298,8 @@ export default function MyVersesPage() {
                     {entry.stageLabel}
                   </span>
                   {entry.nextReview && (
-                    <span className={`text-[10px] ${entry.dueForReview ? 'text-red-400 font-medium' : 'text-cream/30'}`}>
-                      {entry.dueForReview ? '⏰ ' : ''}Next review: {formatReviewDate(entry.nextReview)}
+                    <span className={`text-[10px] shrink-0 ${entry.dueForReview ? 'text-red-400 font-medium' : 'text-cream/30'}`}>
+                      {entry.dueForReview ? '⏰ ' : ''}{formatReviewDate(entry.nextReview)}
                     </span>
                   )}
                 </div>
@@ -309,17 +309,22 @@ export default function MyVersesPage() {
                   </p>
                 )}
                 {entry.timesCompleted > 0 && (
-                  <p className="text-cream/40 text-xs mt-1.5 flex items-center gap-1">
-                    <Target className="w-3 h-3" />
-                    Best: {Math.round(entry.bestAccuracy * 100)}% &middot;{' '}
-                    {entry.timesCompleted} session
-                    {entry.timesCompleted > 1 ? 's' : ''}
-                  </p>
-                )}
-                {entry.lastPractised > 0 && entry.timesCompleted > 0 && (
-                  <p className="text-cream/25 text-xs mt-0.5 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    Last practised {timeAgo(entry.lastPractised)}
+                  <p className="text-cream/40 text-xs mt-1.5 flex items-center gap-2">
+                    <span className="flex items-center gap-1">
+                      <Target className="w-3 h-3" />
+                      Best: {Math.round(entry.bestAccuracy * 100)}%
+                    </span>
+                    <span className="text-cream/20">&middot;</span>
+                    <span>{entry.timesCompleted} session{entry.timesCompleted > 1 ? 's' : ''}</span>
+                    {entry.lastPractised > 0 && (
+                      <>
+                        <span className="text-cream/20">&middot;</span>
+                        <span className="flex items-center gap-1 text-cream/25">
+                          <Clock className="w-3 h-3" />
+                          {timeAgo(entry.lastPractised)}
+                        </span>
+                      </>
+                    )}
                   </p>
                 )}
               </div>
