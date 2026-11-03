@@ -406,7 +406,7 @@ export default function MyVersesPage() {
                   </p>
                 )}
                 {entry.timesCompleted > 0 ? (
-                  <p className="text-cream/40 text-xs mt-1.5 flex items-center gap-2">
+                  <p className="text-cream/40 text-xs mt-3 flex items-center gap-2">
                     <span className="flex items-center gap-1">
                       <Target className="w-3 h-3" />
                       Best: {Math.round(entry.bestAccuracy * 100)}%
@@ -424,7 +424,7 @@ export default function MyVersesPage() {
                     )}
                   </p>
                 ) : (
-                  <p className="text-cream/25 text-xs mt-1.5">Not practised yet</p>
+                  <p className="text-cream/25 text-xs mt-3">Not practised yet</p>
                 )}
               </div>
 

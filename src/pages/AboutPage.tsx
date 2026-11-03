@@ -6,7 +6,7 @@ export default function AboutPage() {
   const { voices, selectedVoice, setVoice, speak, isSpeaking, isSupported } = useTextToSpeech();
 
   return (
-    <div className="py-10 space-y-10 max-w-3xl mx-auto">
+    <div className="py-10 space-y-10">
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
