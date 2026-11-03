@@ -17,6 +17,7 @@ import {
   Clock,
   Target,
   Trash2,
+  ChevronDown,
 } from 'lucide-react';
 
 function timeAgo(timestamp: number): string {
@@ -64,6 +65,10 @@ export default function MyVersesPage() {
   const { progress } = useProgress();
   const { savedVerses, addVerse, removeVerse, setFavourite, isSaved, isFavourite } = useSavedVerses();
   const [filter, setFilter] = useState<Filter>('all');
+  const [stageFilter, setStageFilter] = useState<Set<LearningStage>>(
+    new Set(['learning', 'memorising', 'retention']),
+  );
+  const [stageDropdownOpen, setStageDropdownOpen] = useState(false);
 
   const entries: UnifiedEntry[] = useMemo(() => {
     const map = new Map<string, UnifiedEntry>();
@@ -192,6 +197,11 @@ export default function MyVersesPage() {
   const filtered = useMemo(() => {
     let list = [...entries];
 
+    // Apply stage filter (unless all are selected)
+    if (stageFilter.size < 3) {
+      list = list.filter((e) => stageFilter.has(e.stage));
+    }
+
     switch (filter) {
       case 'favourites':
         list = list.filter((e) => e.isFavourite);
@@ -215,7 +225,7 @@ export default function MyVersesPage() {
     }
 
     return list.sort((a, b) => b.lastPractised - a.lastPractised);
-  }, [entries, filter]);
+  }, [entries, filter, stageFilter]);
 
   function toggleFavourite(entry: UnifiedEntry) {
     if (entry.isFavourite) {
@@ -255,7 +265,7 @@ export default function MyVersesPage() {
 
       {/* Filters */}
       {entries.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
           {FILTERS.map((f) => (
             <button
               key={f.key}
@@ -270,6 +280,70 @@ export default function MyVersesPage() {
               {f.label}
             </button>
           ))}
+
+          {/* Stage dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setStageDropdownOpen((v) => !v)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-1.5 ${
+                stageFilter.size < 3
+                  ? 'bg-gold-500 text-navy-900'
+                  : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
+              }`}
+            >
+              Stage
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${stageDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {stageDropdownOpen && (
+              <div className="absolute top-full mt-2 right-0 z-50 bg-navy-800 border border-gold-500/20 rounded-xl p-2 shadow-lg shadow-navy-900/50 min-w-[180px]">
+                {([
+                  { key: 'learning' as LearningStage, label: 'Learning', color: 'bg-blue-500' },
+                  { key: 'memorising' as LearningStage, label: 'Memorising', color: 'bg-amber-500' },
+                  { key: 'retention' as LearningStage, label: 'Retention', color: 'bg-green-500' },
+                ]).map((opt) => {
+                  const isChecked = stageFilter.has(opt.key);
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => {
+                        setStageFilter((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(opt.key)) {
+                            if (next.size > 1) next.delete(opt.key);
+                          } else {
+                            next.add(opt.key);
+                          }
+                          return next;
+                        });
+                      }}
+                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors hover:bg-navy-700"
+                    >
+                      <div
+                        className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
+                          isChecked
+                            ? `${opt.color} border-transparent`
+                            : 'border-cream/20'
+                        }`}
+                      >
+                        {isChecked && (
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <span className={`w-2 h-2 rounded-full ${opt.color}`} />
+                      <span className={isChecked ? 'text-cream' : 'text-cream/40'}>
+                        {opt.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
