@@ -154,10 +154,7 @@ export default function AboutPage() {
       {/* Voice Settings */}
       {isSupported && (
         <section className="card space-y-4">
-          <h2 className="text-lg font-serif font-semibold text-cream flex items-center gap-2">
-            <Volume2 className="w-5 h-5 text-gold-500" />
-            Voice Settings
-          </h2>
+          <h2 className="text-lg font-serif font-semibold text-cream">Voice Settings</h2>
           <p className="text-cream/50 text-sm">
             Choose the voice for the Listen feature. Available voices depend on your device.
           </p>
