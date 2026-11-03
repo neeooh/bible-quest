@@ -76,10 +76,10 @@ export default function TopicPage() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-gold-400 font-serif font-semibold">
+                  <p className="text-gold-400 font-serif font-semibold text-base">
                     {passage.reference}
                   </p>
-                  <p className="text-cream/60 text-sm mt-1 leading-relaxed line-clamp-2">
+                  <p className="text-cream/60 text-sm mt-1.5 leading-relaxed line-clamp-2 font-serif">
                     {passage.preview}
                   </p>
                 </div>
@@ -88,7 +88,7 @@ export default function TopicPage() {
                 </span>
               </div>
 
-              <p className="text-cream/40 text-xs leading-relaxed">
+              <p className="text-cream/40 text-sm leading-relaxed">
                 {passage.explainer}
               </p>
 
@@ -110,7 +110,7 @@ export default function TopicPage() {
                 <button
                   type="button"
                   onClick={() => handleToggleFavourite(passage)}
-                  className={`w-9 h-9 rounded-lg border transition-colors flex items-center justify-center ${
+                  className={`px-3 py-3 rounded-lg border transition-colors flex items-center justify-center ${
                     isFav
                       ? 'border-gold-500/30 text-red-400 hover:text-red-300'
                       : 'border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40'
