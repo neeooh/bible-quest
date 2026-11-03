@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Puzzle, Layers, Mic, AlignLeft, Loader2, Brain, ChevronDown, ChevronUp, CaseSensitive, Shuffle } from 'lucide-react';
+import { Puzzle, Layers, AlignLeft, Loader2, Brain, ChevronDown, ChevronUp, CaseSensitive, Shuffle } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import {
   getBookBySlug,
@@ -13,7 +13,6 @@ import type { Verse, ExerciseResult, BibleData } from '../lib/types';
 import MissingWords from '../components/memorize/MissingWords';
 import Progressive from '../components/memorize/Progressive';
 import Recitation from '../components/memorize/Recitation';
-import VoiceRecitation from '../components/memorize/VoiceRecitation';
 import FirstLetters from '../components/memorize/FirstLetters';
 import WordOrder from '../components/memorize/WordOrder';
 
@@ -25,7 +24,6 @@ const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'first-letters', label: 'First Letters', icon: <CaseSensitive className="w-4 h-4" /> },
   { key: 'word-order', label: 'Word Order', icon: <Shuffle className="w-4 h-4" /> },
   { key: 'recitation', label: 'Full Recitation', icon: <AlignLeft className="w-4 h-4" /> },
-  { key: 'voice', label: 'Voice', icon: <Mic className="w-4 h-4" /> },
 ];
 
 export default function MemorizePage() {
@@ -112,7 +110,6 @@ export default function MemorizePage() {
     'word-order': 25,
     progressive: 30,
     recitation: 50,
-    voice: 40,
   };
 
   const handleComplete = useCallback(
@@ -405,16 +402,6 @@ export default function MemorizePage() {
             )}
             {activeTab === 'recitation' && (
               <Recitation
-                verses={verses}
-                bookName={bookName}
-                chapter={selectedChapter}
-                startVerse={startVerse}
-                endVerse={endVerse}
-                onComplete={handleComplete}
-              />
-            )}
-            {activeTab === 'voice' && (
-              <VoiceRecitation
                 verses={verses}
                 bookName={bookName}
                 chapter={selectedChapter}

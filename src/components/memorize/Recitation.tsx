@@ -1,8 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
-import { RotateCcw, Check, Eye, EyeOff } from 'lucide-react';
+import { RotateCcw, Check, Eye, EyeOff, Mic, MicOff } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { compareTexts, type CompareResult } from '../../lib/word-compare';
 import { formatReference } from '../../lib/bible';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
 export default function Recitation({
   verses,
@@ -16,6 +17,15 @@ export default function Recitation({
   const [result, setResult] = useState<CompareResult | null>(null);
   const [showOriginal, setShowOriginal] = useState(false);
 
+  const {
+    isListening,
+    transcript,
+    startListening,
+    stopListening,
+    resetTranscript,
+    isSupported: voiceSupported,
+  } = useSpeechRecognition();
+
   const fullText = useMemo(
     () => verses.map((v) => v.text).join(' '),
     [verses],
@@ -28,20 +38,36 @@ export default function Recitation({
     startVerse !== endVerse ? endVerse : undefined,
   );
 
-  /* ---- handlers -------------------------------------------------- */
+  // Sync transcript into the text input
+  const effectiveInput = isListening ? transcript : userInput;
+
+  const handleMicToggle = useCallback(() => {
+    if (isListening) {
+      stopListening();
+      // Copy transcript into the editable input
+      setUserInput(transcript);
+    } else {
+      resetTranscript();
+      setUserInput('');
+      startListening();
+    }
+  }, [isListening, transcript, startListening, stopListening, resetTranscript]);
+
   const handleCheck = useCallback(() => {
-    const cmp = compareTexts(fullText, userInput);
+    const text = isListening ? transcript : userInput;
+    const cmp = compareTexts(fullText, text);
     setResult(cmp);
+    if (isListening) stopListening();
     onComplete(cmp.accuracy);
-  }, [fullText, userInput, onComplete]);
+  }, [fullText, userInput, transcript, isListening, stopListening, onComplete]);
 
   const handleReset = useCallback(() => {
     setUserInput('');
     setResult(null);
     setShowOriginal(false);
-  }, []);
+    resetTranscript();
+  }, [resetTranscript]);
 
-  /* ---- accuracy colours ----------------------------------------- */
   const accColor = result
     ? result.accuracy > 0.8
       ? 'text-green-400'
@@ -60,17 +86,17 @@ export default function Recitation({
 
   return (
     <div className="space-y-6">
-      {/* ---- header ---- */}
+      {/* Header */}
       <div>
         <h3 className="text-lg font-serif font-semibold text-cream">
           Full Recitation
         </h3>
         <p className="text-cream/40 text-sm">
-          Type the passage from memory.
+          Type or speak the passage from memory.
         </p>
       </div>
 
-      {/* ---- reference card ---- */}
+      {/* Reference card */}
       <div className="bg-navy-700/50 border border-gold-500/10 rounded-lg p-5 text-center">
         <p className="text-gold-400 font-serif text-xl font-semibold">
           {reference}
@@ -80,7 +106,7 @@ export default function Recitation({
         </p>
       </div>
 
-      {/* ---- peek toggle ---- */}
+      {/* Peek toggle */}
       <button
         type="button"
         onClick={() => setShowOriginal((v) => !v)}
@@ -102,21 +128,66 @@ export default function Recitation({
         </div>
       )}
 
-      {/* ---- input ---- */}
+      {/* Input area */}
       {!result && (
         <div className="space-y-3">
-          <textarea
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            rows={8}
-            className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-4 py-3 text-cream font-serif text-base leading-relaxed focus:outline-none focus:border-gold-500/50 resize-none transition-colors"
-            placeholder="Type the passage from memory..."
-            autoFocus
-          />
+          {/* Textarea + mic button */}
+          <div className="relative">
+            <textarea
+              value={isListening ? transcript : userInput}
+              onChange={(e) => {
+                if (!isListening) setUserInput(e.target.value);
+              }}
+              readOnly={isListening}
+              rows={8}
+              className={`w-full bg-navy-700 border rounded-lg px-4 py-3 pr-14 text-cream font-serif text-base leading-relaxed focus:outline-none resize-none transition-colors ${
+                isListening
+                  ? 'border-red-500/40 focus:border-red-500/50'
+                  : 'border-gold-500/20 focus:border-gold-500/50'
+              }`}
+              placeholder={
+                isListening
+                  ? 'Listening...'
+                  : 'Type the passage from memory...'
+              }
+              autoFocus
+            />
+
+            {/* Mic button */}
+            {voiceSupported && (
+              <button
+                type="button"
+                onClick={handleMicToggle}
+                className={`absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                  isListening
+                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                    : 'bg-gold-500/10 text-cream/40 hover:text-gold-400 hover:bg-gold-500/20'
+                }`}
+                aria-label={isListening ? 'Stop recording' : 'Start voice input'}
+                title={isListening ? 'Stop recording' : 'Speak the passage'}
+              >
+                {isListening ? (
+                  <>
+                    <span className="absolute inset-0 rounded-full border-2 border-red-500 animate-ping opacity-25" />
+                    <MicOff className="w-5 h-5 relative z-10" />
+                  </>
+                ) : (
+                  <Mic className="w-5 h-5" />
+                )}
+              </button>
+            )}
+          </div>
+
+          {isListening && (
+            <p className="text-red-400 text-xs animate-pulse">
+              Listening… tap the mic to stop
+            </p>
+          )}
+
           <button
             type="button"
             onClick={handleCheck}
-            disabled={!userInput.trim()}
+            disabled={!effectiveInput.trim() || isListening}
             className="btn-gold text-sm inline-flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Check className="w-4 h-4" />
@@ -125,10 +196,9 @@ export default function Recitation({
         </div>
       )}
 
-      {/* ---- results ---- */}
+      {/* Results */}
       {result && (
         <div className="space-y-5">
-          {/* accuracy bar */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-3 bg-navy-700 rounded-full overflow-hidden">
               <div
@@ -141,7 +211,6 @@ export default function Recitation({
             </span>
           </div>
 
-          {/* word-by-word breakdown */}
           <div className="bg-navy-700/50 border border-gold-500/10 rounded-lg p-5">
             <p className="text-cream/40 text-xs font-medium mb-3">
               Word-by-word breakdown:
@@ -158,15 +227,15 @@ export default function Recitation({
                   case 'incorrect':
                     cls =
                       'text-yellow-400 underline decoration-yellow-500/30 decoration-wavy';
-                    title = 'Incorrect — you wrote a different word';
+                    title = 'Incorrect';
                     break;
                   case 'missing':
                     cls = 'text-red-400 line-through decoration-red-500/50';
-                    title = 'Missing — not in your answer';
+                    title = 'Missing';
                     break;
                   case 'extra':
                     cls = 'text-cream/20 italic';
-                    title = 'Extra — not in the original';
+                    title = 'Extra';
                     break;
                 }
                 return (
@@ -177,7 +246,6 @@ export default function Recitation({
               })}
             </div>
 
-            {/* legend */}
             <div className="flex flex-wrap gap-4 mt-4 text-xs text-cream/40">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-green-400" />
@@ -194,7 +262,6 @@ export default function Recitation({
             </div>
           </div>
 
-          {/* try again */}
           <button
             type="button"
             onClick={handleReset}

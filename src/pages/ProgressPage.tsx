@@ -17,7 +17,7 @@ const exerciseLabels: Record<string, string> = {
   'word-order': 'Word Order',
   progressive: 'Progressive',
   recitation: 'Recitation',
-  voice: 'Voice',
+  voice: 'Voice (legacy)',
 };
 
 export default function ProgressPage() {

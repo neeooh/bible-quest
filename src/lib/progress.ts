@@ -8,7 +8,6 @@ const XP_REWARDS: Record<ExerciseResult['type'], number> = {
   'word-order': 25,
   progressive: 30,
   recitation: 50,
-  voice: 40,
 };
 
 const HIGH_ACCURACY_BONUS = 10;
