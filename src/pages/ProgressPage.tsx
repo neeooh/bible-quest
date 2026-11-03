@@ -80,14 +80,14 @@ export default function ProgressPage() {
           label="Day Streak"
         />
         <StatCard
-          icon={<BookOpen className="w-5 h-5 text-gold-500" />}
-          value={progress.chaptersExplored.length}
-          label="Chapters Explored"
-        />
-        <StatCard
           icon={<Brain className="w-5 h-5 text-gold-500" />}
           value={progress.passagesMemorized.length}
           label="Passages Memorised"
+        />
+        <StatCard
+          icon={<BookOpen className="w-5 h-5 text-gold-500" />}
+          value={progress.chaptersExplored.length}
+          label="Chapters Explored"
         />
         <StatCard
           icon={<Target className="w-5 h-5 text-gold-500" />}
