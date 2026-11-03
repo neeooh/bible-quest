@@ -341,6 +341,27 @@ export default function ReadPage() {
             <Copy className="w-4 h-4" />
             Copy
           </button>
+          {ttsSupported && (
+            <button
+              type="button"
+              onClick={() => {
+                if (isSpeaking) {
+                  stop();
+                } else if (chapter) {
+                  const sorted = Array.from(selectedVerses).sort((a, b) => a - b);
+                  const text = chapter.verses
+                    .filter((v) => sorted.includes(v.verse))
+                    .map((v) => v.text)
+                    .join(' ');
+                  speak(text);
+                }
+              }}
+              className="btn-outline inline-flex items-center gap-2 text-sm"
+            >
+              {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              {isSpeaking ? 'Stop' : 'Listen'}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => {
@@ -368,27 +389,6 @@ export default function ReadPage() {
             <Share2 className="w-4 h-4" />
             Share
           </button>
-          {ttsSupported && (
-            <button
-              type="button"
-              onClick={() => {
-                if (isSpeaking) {
-                  stop();
-                } else if (chapter) {
-                  const sorted = Array.from(selectedVerses).sort((a, b) => a - b);
-                  const text = chapter.verses
-                    .filter((v) => sorted.includes(v.verse))
-                    .map((v) => v.text)
-                    .join(' ');
-                  speak(text);
-                }
-              }}
-              className="btn-outline inline-flex items-center gap-2 text-sm"
-            >
-              {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-              {isSpeaking ? 'Stop' : 'Listen'}
-            </button>
-          )}
           <button
             type="button"
             onClick={() => setSelectedVerses(new Set())}

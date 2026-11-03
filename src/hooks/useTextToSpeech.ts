@@ -2,11 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 
 const VOICE_KEY = 'biblequest_tts_voice';
 
+const DEFAULT_VOICE = 'Google UK English Male';
+
 function getStoredVoiceName(): string {
   try {
-    return localStorage.getItem(VOICE_KEY) ?? '';
+    return localStorage.getItem(VOICE_KEY) ?? DEFAULT_VOICE;
   } catch {
-    return '';
+    return DEFAULT_VOICE;
   }
 }
 
