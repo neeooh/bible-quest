@@ -153,6 +153,24 @@ export default function MyVersesPage() {
       }
     }
 
+    // Merge text from saved verses into entries that lack it
+    for (const entry of map.values()) {
+      if (!entry.text) {
+        for (const sv of savedVerses) {
+          if (
+            sv.book === entry.book &&
+            sv.chapter === entry.chapterNumber &&
+            sv.verse >= entry.startVerse &&
+            sv.verse <= entry.endVerse &&
+            sv.text
+          ) {
+            entry.text = sv.text;
+            break;
+          }
+        }
+      }
+    }
+
     // Compute stage for each entry
     for (const entry of map.values()) {
       const ps = getPassageStage(
@@ -313,7 +331,7 @@ export default function MyVersesPage() {
                     &ldquo;{entry.text}&rdquo;
                   </p>
                 )}
-                {entry.timesCompleted > 0 && (
+                {entry.timesCompleted > 0 ? (
                   <p className="text-cream/40 text-xs mt-1.5 flex items-center gap-2">
                     <span className="flex items-center gap-1">
                       <Target className="w-3 h-3" />
@@ -331,6 +349,8 @@ export default function MyVersesPage() {
                       </>
                     )}
                   </p>
+                ) : (
+                  <p className="text-cream/25 text-xs mt-1.5">Not practised yet</p>
                 )}
               </div>
 
