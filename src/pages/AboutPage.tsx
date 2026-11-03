@@ -156,6 +156,57 @@ export default function AboutPage() {
         </p>
       </section>
 
+      {/* Author & Contact */}
+      <section className="card space-y-4">
+        <h2 className="text-lg font-serif font-semibold text-cream">Author</h2>
+        <p className="text-cream/70 text-sm leading-relaxed">
+          Built by <span className="text-cream font-medium">Your Name</span>.
+        </p>
+        <div className="flex flex-wrap gap-4 text-sm">
+          <a
+            href="mailto:hello@example.com"
+            className="text-gold-400 hover:text-gold-300 transition-colors"
+          >
+            hello@example.com
+          </a>
+          <a
+            href="https://github.com/neeooh"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold-400 hover:text-gold-300 transition-colors"
+          >
+            GitHub
+          </a>
+          <a
+            href="https://twitter.com/yourhandle"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold-400 hover:text-gold-300 transition-colors"
+          >
+            Twitter / X
+          </a>
+        </div>
+      </section>
+
+      {/* Open Source */}
+      <section className="card space-y-4">
+        <h2 className="text-lg font-serif font-semibold text-cream">Open Source</h2>
+        <p className="text-cream/70 text-sm leading-relaxed">
+          BibleQuest is open source under the <span className="text-cream font-medium">MIT License</span>. Contributions, issues, and feedback are welcome.
+        </p>
+        <a
+          href="https://github.com/neeooh/bible-quest"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gold-400 hover:text-gold-300 transition-colors text-sm inline-flex items-center gap-1.5"
+        >
+          github.com/neeooh/bible-quest
+        </a>
+        <p className="text-cream/25 text-xs">
+          &copy; {new Date().getFullYear()} Your Name. Released under the MIT License.
+        </p>
+      </section>
+
       {/* Back */}
       <div className="text-center">
         <Link to="/" className="btn-outline inline-flex items-center gap-2 text-sm">
