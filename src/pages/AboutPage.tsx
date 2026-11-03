@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Info, BookOpen, Brain, Puzzle, CaseSensitive, Shuffle, AlignLeft, Flame, Trophy, Star } from 'lucide-react';
+import { Info, BookOpen, Brain, Puzzle, CaseSensitive, Shuffle, AlignLeft, Flame, Trophy, Star, Volume2 } from 'lucide-react';
+import { useTextToSpeech } from '../hooks/useTextToSpeech';
 
 export default function AboutPage() {
+  const { voices, selectedVoice, setVoice, speak, isSpeaking, isSupported } = useTextToSpeech();
+
   return (
     <div className="py-10 space-y-10 max-w-3xl mx-auto">
       {/* Header */}
@@ -147,6 +150,44 @@ export default function AboutPage() {
           </p>
         </div>
       </section>
+
+      {/* Voice Settings */}
+      {isSupported && (
+        <section className="card space-y-4">
+          <h2 className="text-lg font-serif font-semibold text-cream flex items-center gap-2">
+            <Volume2 className="w-5 h-5 text-gold-500" />
+            Voice Settings
+          </h2>
+          <p className="text-cream/50 text-sm">
+            Choose the voice for the Listen feature. Available voices depend on your device.
+          </p>
+          <div className="space-y-3">
+            <select
+              value={selectedVoice}
+              onChange={(e) => setVoice(e.target.value)}
+              className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50"
+            >
+              <option value="">System default</option>
+              {voices.map((v) => (
+                <option key={v.name} value={v.name}>
+                  {v.name} ({v.lang})
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() =>
+                speak('The Lord is my shepherd. I shall lack nothing.')
+              }
+              disabled={isSpeaking}
+              className="btn-outline text-sm inline-flex items-center gap-2 disabled:opacity-40"
+            >
+              <Volume2 className="w-4 h-4" />
+              Test Voice
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Bible Text */}
       <section className="card space-y-4">

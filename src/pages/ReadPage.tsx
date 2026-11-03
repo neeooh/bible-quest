@@ -13,11 +13,14 @@ import {
   BookmarkPlus,
   Copy,
   Share2,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import { getBookBySlug } from '../lib/book-metadata';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
+import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import { saveLastRead } from '../lib/last-read';
 import { showToast } from '../components/Toast';
 import type { BibleData } from '../lib/types';
@@ -42,6 +45,7 @@ export default function ReadPage() {
 
   const { markChapterExplored, progress } = useProgress();
   const { addVerses, isSaved } = useSavedVerses();
+  const { speak, stop, isSpeaking, isSupported: ttsSupported } = useTextToSpeech();
   const toastedChapterRef = useRef<string | null>(null);
 
   // Load book data
@@ -364,6 +368,27 @@ export default function ReadPage() {
             <Share2 className="w-4 h-4" />
             Share
           </button>
+          {ttsSupported && (
+            <button
+              type="button"
+              onClick={() => {
+                if (isSpeaking) {
+                  stop();
+                } else if (chapter) {
+                  const sorted = Array.from(selectedVerses).sort((a, b) => a - b);
+                  const text = chapter.verses
+                    .filter((v) => sorted.includes(v.verse))
+                    .map((v) => v.text)
+                    .join(' ');
+                  speak(text);
+                }
+              }}
+              className="btn-outline inline-flex items-center gap-2 text-sm"
+            >
+              {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              {isSpeaking ? 'Stop' : 'Listen'}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setSelectedVerses(new Set())}

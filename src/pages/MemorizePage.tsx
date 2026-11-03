@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Puzzle, Layers, AlignLeft, Loader2, Brain, ChevronDown, ChevronUp, CaseSensitive, Shuffle } from 'lucide-react';
+import { Puzzle, Layers, AlignLeft, Loader2, Brain, ChevronDown, ChevronUp, CaseSensitive, Shuffle, Volume2, VolumeX } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import {
   getBookBySlug,
@@ -10,6 +10,7 @@ import {
 import { useProgress } from '../hooks/useProgress';
 import { showToast } from '../components/Toast';
 import { getPassageStage, getAvailableExercises, recordReview } from '../lib/learning-stage';
+import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import type { Verse, ExerciseResult, BibleData } from '../lib/types';
 import MissingWords from '../components/memorize/MissingWords';
 import Progressive from '../components/memorize/Progressive';
@@ -51,6 +52,7 @@ export default function MemorizePage() {
   );
   const [activeTab, setActiveTab] = useState<TabKey>('progressive');
   const [peeking, setPeeking] = useState(false);
+  const { speak, stop, isSpeaking, isSupported: ttsSupported } = useTextToSpeech();
   const [selectorCollapsed, setSelectorCollapsed] = useState(
     Boolean(paramBook && paramChapter),
   );
@@ -223,14 +225,33 @@ export default function MemorizePage() {
                   )}
                 </p>
               </div>
-              <button
-              type="button"
-              onClick={() => setSelectorCollapsed(false)}
-              className="btn-outline text-sm inline-flex items-center gap-1.5"
-            >
-              Change passage
-              <ChevronDown className="w-4 h-4" />
-            </button>
+              <div className="flex items-center gap-2 shrink-0">
+                {ttsSupported && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isSpeaking) {
+                        stop();
+                      } else {
+                        speak(passageText);
+                      }
+                    }}
+                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                    aria-label={isSpeaking ? 'Stop listening' : 'Listen to passage'}
+                    title={isSpeaking ? 'Stop' : 'Listen'}
+                  >
+                    {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setSelectorCollapsed(false)}
+                  className="btn-outline text-sm inline-flex items-center gap-1.5"
+                >
+                  Change passage
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <p
               className="text-cream/60 text-sm leading-relaxed font-serif transition-[filter] duration-200 select-none cursor-pointer"
