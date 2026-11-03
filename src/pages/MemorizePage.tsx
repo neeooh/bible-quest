@@ -134,7 +134,7 @@ export default function MemorizePage() {
     return tabs.filter((t) => available.includes(t.key));
   }, [passageStage]);
 
-  // Reset active tab if it is not available in the current stage
+  // Default to the first recommended tab when stage changes
   useEffect(() => {
     if (filteredTabs.length > 0 && !filteredTabs.some((t) => t.key === activeTab)) {
       setActiveTab(filteredTabs[0].key);
@@ -404,8 +404,9 @@ export default function MemorizePage() {
           )}
 
           <div className="flex flex-wrap gap-2">
-            {filteredTabs.map((tab) => {
+            {tabs.map((tab) => {
               const isActive = activeTab === tab.key;
+              const isRecommended = filteredTabs.some((t) => t.key === tab.key);
               return (
                 <button
                   key={tab.key}
@@ -414,13 +415,15 @@ export default function MemorizePage() {
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     isActive
                       ? 'bg-gold-500 text-navy-900'
-                      : 'bg-navy-800 border border-gold-500/10 hover:border-gold-500/30 hover:text-cream'
+                      : isRecommended
+                        ? 'bg-navy-800 border border-gold-500/10 hover:border-gold-500/30 hover:text-cream'
+                        : 'bg-navy-800/50 border border-gold-500/5 hover:border-gold-500/20 hover:text-cream/60'
                   }`}
                 >
-                  <span className={isActive ? '' : 'text-gold-500'}>
+                  <span className={isActive ? '' : isRecommended ? 'text-gold-500' : 'text-gold-500/30'}>
                     {tab.icon}
                   </span>
-                  <span className={isActive ? '' : 'text-cream/50'}>
+                  <span className={isActive ? '' : isRecommended ? 'text-cream/50' : 'text-cream/25'}>
                     {tab.label}
                   </span>
                 </button>
