@@ -8,6 +8,7 @@ const links = [
   { to: '/memorize', label: 'Memorise' },
   { to: '/my-verses', label: 'My Verses' },
   { to: '/progress', label: 'My Progress' },
+  { to: '/about', label: 'About' },
 ];
 
 interface NavbarProps {
