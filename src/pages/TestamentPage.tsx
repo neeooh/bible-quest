@@ -62,9 +62,9 @@ export default function TestamentPage() {
           <div key={book.slug} className="relative">
             <Link
               to={`/library/${book.slug}`}
-              className="card group hover:border-gold-500/30 transition-all duration-200 cursor-pointer block"
+              className="card group hover:border-gold-500/30 transition-all duration-200 cursor-pointer block !p-4"
             >
-              <div className="flex items-start gap-2.5">
+              <div className="flex items-start gap-4">
                 <span className="text-2xl font-bold text-cream/8 font-sans leading-none shrink-0 w-6 text-right">
                   {index + 1}
                 </span>
