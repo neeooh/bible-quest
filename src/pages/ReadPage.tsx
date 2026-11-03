@@ -12,6 +12,7 @@ import {
   X,
   BookmarkPlus,
   Copy,
+  Share2,
 } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import { getBookBySlug } from '../lib/book-metadata';
@@ -335,6 +336,33 @@ export default function ReadPage() {
           >
             <Copy className="w-4 h-4" />
             Copy
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (!chapter || !bookSlug) return;
+              const sorted = Array.from(selectedVerses).sort((a, b) => a - b);
+              const text = chapter.verses
+                .filter((v) => sorted.includes(v.verse))
+                .map((v) => v.text)
+                .join(' ');
+              const ref = sorted.length === 1
+                ? formatReference(bookName, num, sorted[0])
+                : formatReference(bookName, num, sorted[0], sorted[sorted.length - 1]);
+              const shareText = `"${text}" — ${ref} (WEB)`;
+
+              if (navigator.share) {
+                navigator.share({ text: shareText }).catch(() => {});
+              } else {
+                navigator.clipboard.writeText(shareText).then(() => {
+                  showToast('Copied to clipboard', 'success');
+                });
+              }
+            }}
+            className="btn-outline inline-flex items-center gap-2 text-sm"
+          >
+            <Share2 className="w-4 h-4" />
+            Share
           </button>
           <button
             type="button"
