@@ -298,7 +298,7 @@ export default function ReadPage() {
 
       {/* Floating action bar */}
       {selectedVerses.size > 0 && (
-        <div className="fixed bottom-6 left-4 right-4 z-40 flex flex-wrap justify-center gap-2 bg-navy-900/95 backdrop-blur-sm border border-gold-500/20 rounded-xl px-4 py-3 shadow-lg shadow-navy-900/50 max-w-3xl mx-auto">
+        <div className="fixed bottom-6 left-4 right-4 z-40 flex flex-wrap justify-center gap-2 bg-navy-900/95 backdrop-blur-sm border border-gold-500/20 rounded-xl px-4 py-3 shadow-lg shadow-navy-900/50 max-w-5xl mx-auto">
           <Link
             to={`/memorize?book=${bookSlug}&chapter=${num}&start=${startV}&end=${endV}`}
             className="btn-gold inline-flex items-center gap-2 text-sm whitespace-nowrap"
@@ -392,7 +392,7 @@ export default function ReadPage() {
           <button
             type="button"
             onClick={() => setSelectedVerses(new Set())}
-            className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+            className="px-3 py-3 rounded-lg border border-gold-500/20 text-cream/40 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
             aria-label="Clear selection"
             title="Clear selection"
           >
