@@ -96,38 +96,6 @@ export default function Recitation({
         </p>
       </div>
 
-      {/* Reference card */}
-      <div className="bg-navy-700/50 border border-gold-500/10 rounded-lg p-5 text-center">
-        <p className="text-gold-400 font-serif text-xl font-semibold">
-          {reference}
-        </p>
-        <p className="text-cream/20 text-sm mt-1">
-          {verses.length} verse{verses.length !== 1 ? 's' : ''}
-        </p>
-      </div>
-
-      {/* Peek toggle */}
-      <button
-        type="button"
-        onClick={() => setShowOriginal((v) => !v)}
-        className="inline-flex items-center gap-2 text-sm text-cream/40 hover:text-cream/60 transition-colors"
-      >
-        {showOriginal ? (
-          <EyeOff className="w-4 h-4" />
-        ) : (
-          <Eye className="w-4 h-4" />
-        )}
-        {showOriginal ? 'Hide Original' : 'Peek at Original'}
-      </button>
-
-      {showOriginal && (
-        <div className="bg-navy-700/30 border border-gold-500/10 rounded-lg p-4 animate-[fadeIn_200ms_ease-out]">
-          <p className="text-cream/60 font-serif leading-relaxed text-sm">
-            {fullText}
-          </p>
-        </div>
-      )}
-
       {/* Input area */}
       {!result && (
         <div className="space-y-3">
