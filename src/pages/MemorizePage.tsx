@@ -208,6 +208,19 @@ export default function MemorizePage() {
                   <span className="text-cream/30 font-sans font-normal ml-2 text-sm">
                     ({verses.length} verse{verses.length > 1 ? 's' : ''})
                   </span>
+                  {passageStage && (
+                    <span
+                      className={`font-sans font-medium ml-2 text-[10px] px-2 py-0.5 rounded-full ${
+                        passageStage.stage === 'learning'
+                          ? 'bg-blue-500/15 text-blue-400'
+                          : passageStage.stage === 'memorising'
+                            ? 'bg-amber-500/15 text-amber-400'
+                            : 'bg-green-500/15 text-green-400'
+                      }`}
+                    >
+                      {passageStage.label}
+                    </span>
+                  )}
                 </p>
               </div>
               <button
@@ -381,28 +394,6 @@ export default function MemorizePage() {
       {/* Exercise Area */}
       {passageSelected && (
         <section className="space-y-6">
-          {/* Stage badge */}
-          {passageStage && (
-            <div className="flex items-center gap-2">
-              <span
-                className={`text-xs px-3 py-1 rounded-full font-medium ${
-                  passageStage.stage === 'learning'
-                    ? 'bg-blue-500/15 text-blue-400'
-                    : passageStage.stage === 'memorising'
-                      ? 'bg-amber-500/15 text-amber-400'
-                      : 'bg-green-500/15 text-green-400'
-                }`}
-              >
-                {passageStage.label}
-              </span>
-              {passageStage.dueForReview && (
-                <span className="text-xs text-red-400 font-medium">
-                  Due for review
-                </span>
-              )}
-            </div>
-          )}
-
           <div className="flex flex-wrap gap-2">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.key;
