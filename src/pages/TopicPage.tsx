@@ -72,57 +72,59 @@ export default function TopicPage() {
           return (
             <div
               key={`${passage.book}:${passage.chapter}:${passage.startVerse}`}
-              className="card space-y-3"
+              className="card flex items-start justify-between gap-4"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
                   <p className="text-gold-400 font-serif font-semibold text-base">
                     {passage.reference}
                   </p>
-                  <p className="text-cream/60 text-sm mt-1.5 leading-relaxed line-clamp-2 font-serif">
-                    {passage.preview}
-                  </p>
+                  <span className="text-cream/25 text-xs shrink-0">
+                    {passage.verseCount} verse{passage.verseCount > 1 ? 's' : ''}
+                  </span>
                 </div>
-                <span className="text-cream/25 text-xs shrink-0 mt-1">
-                  {passage.verseCount} verse{passage.verseCount > 1 ? 's' : ''}
-                </span>
+                <p className="text-cream/60 text-sm mt-1.5 leading-relaxed line-clamp-2 font-serif">
+                  {passage.preview}
+                </p>
+                <p className="text-cream/40 text-sm mt-2 leading-relaxed">
+                  {passage.explainer}
+                </p>
               </div>
 
-              <p className="text-cream/40 text-sm leading-relaxed">
-                {passage.explainer}
-              </p>
-
-              <div className="flex items-center gap-2 pt-1">
-                <Link
-                  to={`/read/${passage.book}/${passage.chapter}?verse=${passage.startVerse}`}
-                  className="btn-outline text-sm inline-flex items-center gap-1.5"
-                >
-                  <BookOpen className="w-3.5 h-3.5" />
-                  Read
-                </Link>
+              <div className="flex flex-col gap-2 shrink-0">
                 <Link
                   to={`/memorize?book=${passage.book}&chapter=${passage.chapter}&start=${passage.startVerse}&end=${passage.endVerse}`}
-                  className="btn-gold text-sm inline-flex items-center gap-1.5"
+                  className="btn-gold text-sm inline-flex items-center justify-center gap-1.5 w-full"
                 >
                   <Brain className="w-3.5 h-3.5" />
                   Practise
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => handleToggleFavourite(passage)}
-                  className={`px-3 py-3 rounded-lg border transition-colors flex items-center justify-center ${
-                    isFav
-                      ? 'border-gold-500/30 text-red-400 hover:text-red-300'
-                      : 'border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40'
-                  }`}
-                  aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                  title={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                >
-                  <Heart
+                <div className="flex items-center gap-2">
+                  <Link
+                    to={`/read/${passage.book}/${passage.chapter}?verse=${passage.startVerse}`}
+                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                    aria-label={`Read ${passage.reference}`}
+                    title="Read"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleFavourite(passage)}
+                    className={`w-9 h-9 rounded-lg border transition-colors flex items-center justify-center ${
+                      isFav
+                        ? 'border-gold-500/30 text-red-400 hover:text-red-300'
+                        : 'border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40'
+                    }`}
+                    aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                    title={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                  >
+                    <Heart
                     className="w-4 h-4"
                     fill={isFav ? 'currentColor' : 'none'}
                   />
-                </button>
+                  </button>
+                </div>
               </div>
             </div>
           );
