@@ -241,7 +241,7 @@ export default function HomePage() {
               <p className="text-2xl font-bold text-cream">
                 {progress.passagesMemorized.length}
               </p>
-              <p className="text-cream/40 text-xs">Passages Memorised</p>
+              <p className="text-cream/40 text-xs">Verses Memorised</p>
             </div>
           </div>
         </Link>
