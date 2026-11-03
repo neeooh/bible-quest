@@ -21,7 +21,7 @@ import type { DailyVerse } from '../lib/types';
 
 export default function HomePage() {
   const { progress } = useProgress();
-  const { addVerse, isSaved } = useSavedVerses();
+  const { addVerse, isSaved, isFavourite, setFavourite } = useSavedVerses();
   const [copied, setCopied] = useState(false);
   const [daily, setDaily] = useState<DailyVerse | null>(null);
   const lastRead = getLastRead();
@@ -30,8 +30,8 @@ export default function HomePage() {
     getDailyVerse().then(setDaily);
   }, []);
 
-  const dailySaved =
-    daily !== null && isSaved(daily.book, daily.chapter, daily.verse);
+  const dailyFavourited =
+    daily !== null && isFavourite(daily.book, daily.chapter, daily.verse);
 
   const hasAnyData =
     progress.totalXp > 0 ||
@@ -48,16 +48,25 @@ export default function HomePage() {
     });
   }
 
-  function handleAddToMyVerses() {
+  function handleToggleFavourite() {
     if (!daily) return;
-    addVerse({
-      book: daily.book,
-      chapter: daily.chapter,
-      verse: daily.verse,
-      text: daily.text,
-      reference: daily.reference,
-    });
-    showToast('Added to favourites', 'success');
+    if (dailyFavourited) {
+      setFavourite(daily.book, daily.chapter, daily.verse, false);
+      showToast('Removed from favourites', 'info');
+    } else {
+      if (isSaved(daily.book, daily.chapter, daily.verse)) {
+        setFavourite(daily.book, daily.chapter, daily.verse, true);
+      } else {
+        addVerse({
+          book: daily.book,
+          chapter: daily.chapter,
+          verse: daily.verse,
+          text: daily.text,
+          reference: daily.reference,
+        });
+      }
+      showToast('Added to favourites', 'success');
+    }
   }
 
   return (
@@ -109,16 +118,15 @@ export default function HomePage() {
               </Link>
               <button
                 type="button"
-                onClick={handleAddToMyVerses}
-                disabled={dailySaved}
-                className={`btn-outline inline-flex items-center gap-2 text-sm ${dailySaved ? 'opacity-50 cursor-default' : ''}`}
+                onClick={handleToggleFavourite}
+                className="btn-outline inline-flex items-center gap-2 text-sm"
               >
-                {dailySaved ? (
-                  <Check className="w-4 h-4" />
+                {dailyFavourited ? (
+                  <Heart className="w-4 h-4 text-red-400" fill="currentColor" />
                 ) : (
                   <Heart className="w-4 h-4" />
                 )}
-                {dailySaved ? 'Saved' : 'Favourite'}
+                {dailyFavourited ? 'Favourited' : 'Favourite'}
               </button>
               <button
                 type="button"
