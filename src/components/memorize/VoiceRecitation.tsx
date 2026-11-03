@@ -86,7 +86,7 @@ export default function VoiceRecitation({
         <h3 className="text-lg font-serif font-semibold text-cream">
           Voice Recitation
         </h3>
-        <p className="text-cream/40 text-sm">Recite {reference} aloud.</p>
+        <p className="text-cream/40 text-sm">Recite the passage aloud.</p>
       </div>
 
       {/* ---- not-supported banner ---- */}

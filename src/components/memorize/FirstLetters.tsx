@@ -164,7 +164,6 @@ export default function FirstLetters({
           <h3 className="text-lg font-serif font-semibold text-cream">
             First Letters
           </h3>
-          <p className="text-cream/40 text-sm">{reference}</p>
         </div>
         <span
           className={`text-xs px-3 py-1 rounded-full ${

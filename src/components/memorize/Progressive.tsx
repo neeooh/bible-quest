@@ -325,7 +325,6 @@ export default function Progressive({
           <h3 className="text-lg font-serif font-semibold text-cream">
             Progressive Recall
           </h3>
-          <p className="text-cream/40 text-sm">{reference}</p>
         </div>
         {phase >= 2 && phase <= 4 && (
           <span

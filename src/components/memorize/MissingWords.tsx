@@ -223,9 +223,6 @@ export default function MissingWords({
           <h3 className="text-lg font-serif font-semibold text-cream">
             Missing Words
           </h3>
-          <p className="text-cream/40 text-sm">
-            {reference}
-          </p>
         </div>
         <span
           className={`text-xs px-3 py-1 rounded-full ${

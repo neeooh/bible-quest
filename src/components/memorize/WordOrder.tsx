@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from 'react';
 import { RotateCcw, CheckCircle, Undo2 } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { normalizeWord } from '../../lib/word-compare';
-import { formatReference } from '../../lib/bible';
 
 type Difficulty = 'normal' | 'advanced';
 
@@ -53,12 +52,6 @@ export default function WordOrder({
 
   const totalWords = words.length;
 
-  const reference = formatReference(
-    bookName,
-    chapter,
-    startVerse,
-    startVerse !== endVerse ? endVerse : undefined,
-  );
 
   // In advanced mode, ~20% of words are removed from the word bank
   const removedIndices = useMemo(() => {
@@ -176,7 +169,6 @@ export default function WordOrder({
           <h3 className="text-lg font-serif font-semibold text-cream">
             Word Ordering
           </h3>
-          <p className="text-cream/40 text-sm">{reference}</p>
         </div>
         <span
           className={`text-xs px-3 py-1 rounded-full ${
