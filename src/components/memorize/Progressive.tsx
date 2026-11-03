@@ -1,11 +1,18 @@
 import { useState, useMemo, useCallback } from 'react';
-import { RotateCcw, ChevronRight, BookOpen } from 'lucide-react';
+import { RotateCcw, ChevronRight, BookOpen, CheckCircle, Lightbulb } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
-import { compareTexts } from '../../lib/word-compare';
+import { normalizeWord, compareTexts } from '../../lib/word-compare';
 import { formatReference } from '../../lib/bible';
 
 const PHASE_LABELS = ['Read', '25%', '50%', '75%', 'Full Recall'];
 const PHASE_HIDE = [0, 0.25, 0.5, 0.75, 1.0];
+
+interface WordEntry {
+  word: string;
+  verseNum: number;
+  globalIndex: number;
+  isFirstInVerse: boolean;
+}
 
 export default function Progressive({
   verses,
@@ -16,21 +23,35 @@ export default function Progressive({
   onComplete,
 }: ExerciseProps) {
   const [phase, setPhase] = useState(1);
-  const [userInput, setUserInput] = useState('');
   const [phaseChecked, setPhaseChecked] = useState(false);
   const [phaseAccuracy, setPhaseAccuracy] = useState<number | null>(null);
+
+  // Inline input state for phases 2–4
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [hints, setHints] = useState<Set<number>>(new Set());
+
+  // Textarea state for phase 5
+  const [userInput, setUserInput] = useState('');
 
   const fullText = useMemo(
     () => verses.map((v) => v.text).join(' '),
     [verses],
   );
 
-  const allWords = useMemo(
-    () => fullText.split(/\s+/).filter((w) => w.length > 0),
-    [fullText],
-  );
+  const words: WordEntry[] = useMemo(() => {
+    let idx = 0;
+    return verses.flatMap((v) => {
+      const tokens = v.text.split(/\s+/).filter((t) => t.length > 0);
+      return tokens.map((word, i) => ({
+        word,
+        verseNum: v.verse,
+        globalIndex: idx++,
+        isFirstInVerse: i === 0,
+      }));
+    });
+  }, [verses]);
 
-  const totalWords = allWords.length;
+  const totalWords = words.length;
 
   const reference = formatReference(
     bookName,
@@ -39,11 +60,7 @@ export default function Progressive({
     startVerse !== endVerse ? endVerse : undefined,
   );
 
-  /*
-   * Pre-shuffle all word indices once per session.
-   * Each phase hides a growing prefix of this order, so phase N always
-   * includes every word hidden in phase N-1 plus new ones.
-   */
+  /* Pre-shuffle indices once — each phase hides a growing prefix. */
   const shuffled = useMemo(() => {
     const arr = Array.from({ length: totalWords }, (_, i) => i);
     for (let i = arr.length - 1; i > 0; i--) {
@@ -59,18 +76,76 @@ export default function Progressive({
     [shuffled, hideCount],
   );
 
+  const sortedHiddenIndices = useMemo(
+    () => Array.from(hiddenSet).sort((a, b) => a - b),
+    [hiddenSet],
+  );
+
+  const filledCount = Array.from(hiddenSet).filter(
+    (i) => (answers[i] ?? '').trim().length > 0,
+  ).length;
+
   /* ---- handlers -------------------------------------------------- */
-  const handleCheck = useCallback(() => {
+  const handleChange = useCallback((index: number, value: string) => {
+    setAnswers((prev) => ({ ...prev, [index]: value }));
+  }, []);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>, globalIndex: number) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const currentPos = sortedHiddenIndices.indexOf(globalIndex);
+        if (currentPos < sortedHiddenIndices.length - 1) {
+          const nextIndex = sortedHiddenIndices[currentPos + 1];
+          const nextInput = document.querySelector<HTMLInputElement>(
+            `[data-prog-index="${nextIndex}"]`,
+          );
+          nextInput?.focus();
+        }
+      }
+    },
+    [sortedHiddenIndices],
+  );
+
+  const handleHint = useCallback((entry: WordEntry) => {
+    const cleanWord = entry.word.replace(/[.,;:!?"'\u2018\u2019()]+$/, '');
+    setAnswers((prev) => ({ ...prev, [entry.globalIndex]: cleanWord }));
+    setHints((prev) => new Set(prev).add(entry.globalIndex));
+  }, []);
+
+  const handleCheckInline = useCallback(() => {
+    let correct = 0;
+    let total = 0;
+
+    for (const entry of words) {
+      if (!hiddenSet.has(entry.globalIndex)) continue;
+      total++;
+      if (hints.has(entry.globalIndex)) continue;
+      const answer = answers[entry.globalIndex] ?? '';
+      if (normalizeWord(answer) === normalizeWord(entry.word)) {
+        correct++;
+      }
+    }
+
+    const acc = total > 0 ? correct / total : 1;
+    setPhaseAccuracy(acc);
+    setPhaseChecked(true);
+    if (phase === 4) {
+      // Phase 4 is the last inline phase — do not call onComplete yet
+    }
+  }, [words, hiddenSet, answers, hints, phase]);
+
+  const handleCheckFull = useCallback(() => {
     const result = compareTexts(fullText, userInput);
     setPhaseAccuracy(result.accuracy);
     setPhaseChecked(true);
-    if (phase === 5) {
-      onComplete(result.accuracy);
-    }
-  }, [fullText, userInput, phase, onComplete]);
+    onComplete(result.accuracy);
+  }, [fullText, userInput, onComplete]);
 
   const handleContinue = useCallback(() => {
     setPhase((p) => Math.min(p + 1, 5));
+    setAnswers({});
+    setHints(new Set());
     setUserInput('');
     setPhaseChecked(false);
     setPhaseAccuracy(null);
@@ -78,6 +153,8 @@ export default function Progressive({
 
   const handleRestart = useCallback(() => {
     setPhase(1);
+    setAnswers({});
+    setHints(new Set());
     setUserInput('');
     setPhaseChecked(false);
     setPhaseAccuracy(null);
@@ -150,7 +227,6 @@ export default function Progressive({
     </div>
   );
 
-  /* ---- accuracy bar (reused) ------------------------------------ */
   const accuracyBar =
     phaseAccuracy !== null ? (
       <div className="flex items-center gap-3">
@@ -166,37 +242,102 @@ export default function Progressive({
       </div>
     ) : null;
 
-  /* ---- passage display with blanks ------------------------------ */
-  const passageWithBlanks = (
-    <div className="bg-navy-700/50 border border-gold-500/10 rounded-lg p-5">
-      <p className="font-serif text-lg leading-relaxed">
-        {allWords.map((word, i) =>
-          hiddenSet.has(i) ? (
-            <span key={i} className="text-cream/20 mx-0.5">
-              {'_'.repeat(Math.max(word.length, 3))}
-            </span>
-          ) : (
-            <span key={i} className="text-cream/90">
-              {word}
-            </span>
-          ),
-        ).reduce<React.ReactNode[]>((acc, node, i) => {
-          if (i > 0) acc.push(' ');
-          acc.push(node);
-          return acc;
-        }, [])}
-      </p>
+  /* ---- inline passage with blanks (phases 2–4) ------------------ */
+  const inlinePassage = (
+    <div className="leading-[2.6] text-cream/90 font-serif text-lg select-none">
+      {words.map((entry) => {
+        const isHidden = hiddenSet.has(entry.globalIndex);
+        const answer = answers[entry.globalIndex] ?? '';
+        const normAnswer = normalizeWord(answer);
+        const normExpected = normalizeWord(entry.word);
+        const isCorrect = normAnswer.length > 0 && normAnswer === normExpected;
+        const isWrong = normAnswer.length > 0 && normAnswer !== normExpected;
+        const isHinted = hints.has(entry.globalIndex);
+
+        return (
+          <span key={entry.globalIndex}>
+            {entry.isFirstInVerse && (
+              <sup className="text-gold-500 text-xs font-sans font-bold mr-0.5 select-none">
+                {entry.verseNum}
+              </sup>
+            )}
+
+            {isHidden ? (
+              <span className="inline-flex items-center mx-0.5 align-baseline gap-0.5">
+                <input
+                  type="text"
+                  value={answer}
+                  onChange={(e) => handleChange(entry.globalIndex, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, entry.globalIndex)}
+                  disabled={phaseChecked || isHinted}
+                  data-prog-index={entry.globalIndex}
+                  className={[
+                    'text-center text-base font-serif px-1 py-0.5 rounded border',
+                    'focus:outline-none focus:ring-1 transition-colors',
+                    phaseChecked
+                      ? isCorrect || isHinted
+                        ? 'border-green-500/60 text-green-400 bg-green-500/10'
+                        : 'border-red-500/60 text-red-400 bg-red-500/10'
+                      : isHinted
+                        ? 'border-gold-500/40 text-gold-400 bg-gold-500/10'
+                        : isCorrect
+                          ? 'border-green-500/60 text-green-400 bg-navy-700 focus:ring-green-500/40'
+                          : isWrong
+                            ? 'border-red-500/40 text-cream bg-navy-700 focus:ring-red-500/30'
+                            : 'border-gold-500/40 bg-navy-600/50 text-cream placeholder:text-gold-500/50 focus:ring-gold-500/30',
+                  ].join(' ')}
+                  style={{ width: `${Math.max(entry.word.length + 2, 4)}ch` }}
+                  placeholder="···"
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+                {!phaseChecked && !isHinted && !isCorrect && (
+                  <button
+                    type="button"
+                    onClick={() => handleHint(entry)}
+                    className="text-cream/20 hover:text-gold-400 transition-colors"
+                    aria-label="Reveal this word"
+                    title="Hint"
+                  >
+                    <Lightbulb className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {phaseChecked && !isCorrect && !isHinted && (
+                  <span className="text-gold-400 text-xs font-sans whitespace-nowrap">
+                    {entry.word}
+                  </span>
+                )}
+              </span>
+            ) : (
+              <span className="select-text">{entry.word}</span>
+            )}{' '}
+          </span>
+        );
+      })}
     </div>
   );
 
   return (
     <div className="space-y-6">
       {/* ---- header ---- */}
-      <div>
-        <h3 className="text-lg font-serif font-semibold text-cream">
-          Progressive Recall
-        </h3>
-        <p className="text-cream/40 text-sm">{reference}</p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h3 className="text-lg font-serif font-semibold text-cream">
+            Progressive Recall
+          </h3>
+          <p className="text-cream/40 text-sm">{reference}</p>
+        </div>
+        {phase >= 2 && phase <= 4 && (
+          <span
+            className={`text-xs px-3 py-1 rounded-full ${
+              filledCount === hiddenSet.size
+                ? 'text-gold-400 bg-gold-500/15'
+                : 'text-cream/30 bg-navy-700'
+            }`}
+          >
+            {filledCount}/{hiddenSet.size} filled
+          </span>
+        )}
       </div>
 
       {stepper}
@@ -207,10 +348,17 @@ export default function Progressive({
           <p className="text-cream/50 text-sm">
             Read the passage carefully. Press Ready when you feel prepared.
           </p>
-          <div className="bg-navy-700/50 border border-gold-500/10 rounded-lg p-5">
-            <p className="text-cream/90 font-serif text-lg leading-relaxed">
-              {fullText}
-            </p>
+          <div className="leading-[2.6] font-serif text-lg text-cream/90">
+            {words.map((entry) => (
+              <span key={entry.globalIndex}>
+                {entry.isFirstInVerse && (
+                  <sup className="text-gold-500 text-xs font-sans font-bold mr-0.5 select-none">
+                    {entry.verseNum}
+                  </sup>
+                )}
+                <span>{entry.word}</span>{' '}
+              </span>
+            ))}
           </div>
           <button
             type="button"
@@ -223,34 +371,25 @@ export default function Progressive({
         </div>
       )}
 
-      {/* ---- phases 2–4: partial recall ---- */}
+      {/* ---- phases 2–4: inline fill-in ---- */}
       {phase >= 2 && phase <= 4 && (
         <div className="space-y-4">
           <p className="text-cream/50 text-sm">
             {Math.round(PHASE_HIDE[phase - 1] * 100)}% of the words are hidden.
-            Type the complete passage from memory.
+            Fill in the missing words.
           </p>
 
-          {passageWithBlanks}
+          {inlinePassage}
 
           {!phaseChecked && (
-            <div className="space-y-3">
-              <textarea
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                rows={5}
-                className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-4 py-3 text-cream font-serif text-base leading-relaxed focus:outline-none focus:border-gold-500/50 resize-none transition-colors"
-                placeholder="Type the complete passage..."
-              />
-              <button
-                type="button"
-                onClick={handleCheck}
-                disabled={!userInput.trim()}
-                className="btn-gold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Check
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleCheckInline}
+              className="btn-gold text-sm inline-flex items-center gap-2"
+            >
+              <CheckCircle className="w-4 h-4" />
+              Check
+            </button>
           )}
 
           {phaseChecked && (
@@ -279,7 +418,7 @@ export default function Progressive({
         </div>
       )}
 
-      {/* ---- phase 5: full recall ---- */}
+      {/* ---- phase 5: full recall (textarea) ---- */}
       {phase === 5 && (
         <div className="space-y-4">
           <p className="text-cream/50 text-sm">
@@ -304,7 +443,7 @@ export default function Progressive({
               />
               <button
                 type="button"
-                onClick={handleCheck}
+                onClick={handleCheckFull}
                 disabled={!userInput.trim()}
                 className="btn-gold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
@@ -317,7 +456,6 @@ export default function Progressive({
             <div className="space-y-4">
               {accuracyBar}
 
-              {/* show correct passage after final check */}
               <div className="bg-navy-700/50 border border-gold-500/10 rounded-lg p-5">
                 <p className="text-cream/50 text-xs font-medium mb-2">
                   Complete passage:
