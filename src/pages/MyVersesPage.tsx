@@ -18,6 +18,8 @@ import {
   Target,
   Trash2,
   ChevronDown,
+  Search,
+  X,
 } from 'lucide-react';
 
 function timeAgo(timestamp: number): string {
@@ -69,6 +71,7 @@ export default function MyVersesPage() {
     new Set(['learning', 'memorising', 'retention']),
   );
   const [stageDropdownOpen, setStageDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const entries: UnifiedEntry[] = useMemo(() => {
     const map = new Map<string, UnifiedEntry>();
@@ -197,6 +200,16 @@ export default function MyVersesPage() {
   const filtered = useMemo(() => {
     let list = [...entries];
 
+    // Apply search filter
+    const needle = searchQuery.toLowerCase().trim();
+    if (needle) {
+      list = list.filter(
+        (e) =>
+          e.reference.toLowerCase().includes(needle) ||
+          e.text.toLowerCase().includes(needle),
+      );
+    }
+
     // Apply stage filter (unless all are selected)
     if (stageFilter.size < 3) {
       list = list.filter((e) => stageFilter.has(e.stage));
@@ -225,7 +238,7 @@ export default function MyVersesPage() {
     }
 
     return list.sort((a, b) => b.lastPractised - a.lastPractised);
-  }, [entries, filter, stageFilter]);
+  }, [entries, filter, stageFilter, searchQuery]);
 
   function toggleFavourite(entry: UnifiedEntry) {
     if (entry.isFavourite) {
@@ -262,6 +275,30 @@ export default function MyVersesPage() {
           Your favourites and practised passages
         </p>
       </div>
+
+      {/* Search */}
+      {entries.length > 0 && (
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/30" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search your verses..."
+            className="w-full bg-navy-700 border border-gold-500/20 rounded-lg pl-10 pr-10 py-2.5 text-cream text-sm placeholder:text-cream/30 focus:outline-none focus:border-gold-500/50 transition-colors"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/30 hover:text-cream/60 transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Filters */}
       {entries.length > 0 && (
