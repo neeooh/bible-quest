@@ -239,7 +239,9 @@ export default function MissingWords({
       </div>
 
       {/* ---- difficulty buttons ---- */}
-      <div className="flex flex-wrap gap-2">
+      <div className="space-y-2">
+        <p className="text-xs text-cream/40">Choose difficulty</p>
+        <div className="flex flex-wrap gap-2">
         {DIFFICULTY_LEVELS.map((level) => (
           <button
             key={level.label}
@@ -254,6 +256,7 @@ export default function MissingWords({
             {level.label}
           </button>
         ))}
+        </div>
       </div>
 
       {/* ---- passage with inline inputs ---- */}
