@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Puzzle, Layers, Mic, AlignLeft, Eye, Loader2, Brain, ChevronDown, ChevronUp, CaseSensitive } from 'lucide-react';
+import { Puzzle, Layers, Mic, AlignLeft, Eye, Loader2, Brain, ChevronDown, ChevronUp, CaseSensitive, Shuffle } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import {
   getBookBySlug,
@@ -15,6 +15,7 @@ import Progressive from '../components/memorize/Progressive';
 import Recitation from '../components/memorize/Recitation';
 import VoiceRecitation from '../components/memorize/VoiceRecitation';
 import FirstLetters from '../components/memorize/FirstLetters';
+import WordOrder from '../components/memorize/WordOrder';
 
 type TabKey = ExerciseResult['type'];
 
@@ -22,6 +23,7 @@ const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'progressive', label: 'Progressive', icon: <Layers className="w-4 h-4" /> },
   { key: 'missing-words', label: 'Missing Words', icon: <Puzzle className="w-4 h-4" /> },
   { key: 'first-letters', label: 'First Letters', icon: <CaseSensitive className="w-4 h-4" /> },
+  { key: 'word-order', label: 'Word Order', icon: <Shuffle className="w-4 h-4" /> },
   { key: 'recitation', label: 'Full Recitation', icon: <AlignLeft className="w-4 h-4" /> },
   { key: 'voice', label: 'Voice', icon: <Mic className="w-4 h-4" /> },
 ];
@@ -107,6 +109,7 @@ export default function MemorizePage() {
   const XP_TABLE: Record<TabKey, number> = {
     'missing-words': 20,
     'first-letters': 35,
+    'word-order': 25,
     progressive: 30,
     recitation: 50,
     voice: 40,
@@ -372,6 +375,16 @@ export default function MemorizePage() {
             )}
             {activeTab === 'first-letters' && (
               <FirstLetters
+                verses={verses}
+                bookName={bookName}
+                chapter={selectedChapter}
+                startVerse={startVerse}
+                endVerse={endVerse}
+                onComplete={handleComplete}
+              />
+            )}
+            {activeTab === 'word-order' && (
+              <WordOrder
                 verses={verses}
                 bookName={bookName}
                 chapter={selectedChapter}
