@@ -160,17 +160,18 @@ export default function MemorizePage() {
       <section className="card space-y-4">
         {/* Collapsed state */}
         {passageSelected && selectorCollapsed ? (
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-cream/50 text-xs">Currently you are practising</p>
-              <p className="text-gold-400 font-serif font-semibold">
-                {formatReference(bookName, selectedChapter, startVerse, endVerse !== startVerse ? endVerse : undefined)}
-                <span className="text-cream/30 font-sans font-normal ml-2 text-sm">
-                  ({verses.length} verse{verses.length > 1 ? 's' : ''})
-                </span>
-              </p>
-            </div>
-            <button
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-cream/50 text-xs">Currently you are practising</p>
+                <p className="text-gold-400 font-serif font-semibold">
+                  {formatReference(bookName, selectedChapter, startVerse, endVerse !== startVerse ? endVerse : undefined)}
+                  <span className="text-cream/30 font-sans font-normal ml-2 text-sm">
+                    ({verses.length} verse{verses.length > 1 ? 's' : ''})
+                  </span>
+                </p>
+              </div>
+              <button
               type="button"
               onClick={() => setSelectorCollapsed(false)}
               className="btn-outline text-sm inline-flex items-center gap-1.5"
@@ -178,6 +179,29 @@ export default function MemorizePage() {
               Change passage
               <ChevronDown className="w-4 h-4" />
             </button>
+            </div>
+            <p
+              className="text-cream/60 text-sm leading-relaxed line-clamp-3 font-serif transition-[filter] duration-200 select-none"
+              style={{ filter: peeking ? 'none' : 'blur(6px)' }}
+            >
+              {passageText}
+            </p>
+            <div className="text-center">
+              <button
+                type="button"
+                onPointerDown={() => setPeeking(true)}
+                onPointerUp={() => setPeeking(false)}
+                onPointerLeave={() => setPeeking(false)}
+                className={`inline-flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg border transition-colors select-none ${
+                  peeking
+                    ? 'border-gold-500/40 bg-gold-500/10 text-gold-400'
+                    : 'border-gold-500/20 text-cream/40 hover:text-cream/60'
+                }`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                {peeking ? 'Peeking…' : 'Hold to Peek'}
+              </button>
+            </div>
           </div>
         ) : (
           <>
