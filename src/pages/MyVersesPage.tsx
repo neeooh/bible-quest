@@ -200,6 +200,16 @@ export default function MyVersesPage() {
 
   function toggleFavourite(entry: UnifiedEntry) {
     if (entry.isFavourite) {
+      // If this entry only exists because it is favourited (never practised),
+      // warn the user that it will disappear from the list.
+      if (
+        entry.timesCompleted === 0 &&
+        !window.confirm(
+          `Remove ${entry.reference} from favourites? It will be removed from your list since it has not been practised.`,
+        )
+      ) {
+        return;
+      }
       // Remove all verses in the range from favourites
       for (let v = entry.startVerse; v <= entry.endVerse; v++) {
         if (isSaved(entry.book, entry.chapterNumber, v)) {
