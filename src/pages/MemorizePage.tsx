@@ -103,6 +103,18 @@ export default function MemorizePage() {
     [verses],
   );
 
+  /** Surrounding verses for context (3 before + selected + 3 after). */
+  const contextVerses = useMemo(() => {
+    if (!chapter) return [];
+    const CONTEXT = 3;
+    const minV = Math.max(1, startVerse - CONTEXT);
+    const maxV = Math.min(
+      chapter.verses[chapter.verses.length - 1]?.verse ?? endVerse,
+      endVerse + CONTEXT,
+    );
+    return chapter.verses.filter((v) => v.verse >= minV && v.verse <= maxV);
+  }, [chapter, startVerse, endVerse]);
+
   const passageSelected = selectedBook && selectedChapter > 0 && verses.length > 0;
 
   const passageStage = useMemo(() => {
@@ -207,16 +219,28 @@ export default function MemorizePage() {
               <ChevronDown className="w-4 h-4" />
             </button>
             </div>
-            <p
-              className="text-cream/60 text-sm leading-relaxed line-clamp-3 font-serif transition-[filter] duration-200 select-none cursor-pointer"
+            <div
+              className="text-sm leading-relaxed font-serif transition-[filter] duration-200 select-none cursor-pointer"
               style={{ filter: peeking ? 'none' : 'blur(6px)' }}
               onPointerDown={() => setPeeking(true)}
               onPointerUp={() => setPeeking(false)}
               onPointerLeave={() => setPeeking(false)}
               title="Hold to peek"
             >
-              {passageText}
-            </p>
+              {contextVerses.map((v) => {
+                const isSelected = v.verse >= startVerse && v.verse <= endVerse;
+                return (
+                  <span key={v.verse}>
+                    <sup className={`text-xs font-sans font-bold mr-0.5 ${isSelected ? 'text-gold-500' : 'text-gold-500/30'}`}>
+                      {v.verse}
+                    </sup>
+                    <span className={isSelected ? 'text-cream/80' : 'text-cream/25'}>
+                      {v.text}{' '}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
           </div>
         ) : (
           <>
@@ -345,16 +369,28 @@ export default function MemorizePage() {
                 ({verses.length} verse{verses.length > 1 ? 's' : ''})
               </span>
             </p>
-            <p
-              className="text-cream/60 text-sm leading-relaxed line-clamp-3 font-serif transition-[filter] duration-200 select-none cursor-pointer"
+            <div
+              className="text-sm leading-relaxed font-serif transition-[filter] duration-200 select-none cursor-pointer"
               style={{ filter: peeking ? 'none' : 'blur(6px)' }}
               onPointerDown={() => setPeeking(true)}
               onPointerUp={() => setPeeking(false)}
               onPointerLeave={() => setPeeking(false)}
               title="Hold to peek"
             >
-              {passageText}
-            </p>
+              {contextVerses.map((v) => {
+                const isSelected = v.verse >= startVerse && v.verse <= endVerse;
+                return (
+                  <span key={v.verse}>
+                    <sup className={`text-xs font-sans font-bold mr-0.5 ${isSelected ? 'text-gold-500' : 'text-gold-500/30'}`}>
+                      {v.verse}
+                    </sup>
+                    <span className={isSelected ? 'text-cream/80' : 'text-cream/25'}>
+                      {v.text}{' '}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
           </div>
         )}
           </>
