@@ -86,8 +86,8 @@ export default function BookChaptersPage() {
       <section className="card space-y-4">
         <h2 className="text-sm font-medium text-cream/50">Go to a Passage</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-          <div className="space-y-1.5">
-            <label htmlFor="lib-chapter" className="text-xs text-cream/40">
+          <div className="">
+            <label htmlFor="lib-chapter" className="block text-xs text-cream/40 mb-2">
               Chapter
             </label>
             <select
@@ -105,8 +105,8 @@ export default function BookChaptersPage() {
             </select>
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="lib-verse" className="text-xs text-cream/40">
+          <div className="">
+            <label htmlFor="lib-verse" className="block text-xs text-cream/40 mb-2">
               Verse
             </label>
             <select

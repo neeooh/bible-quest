@@ -282,8 +282,8 @@ export default function MemorizePage() {
             </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Book */}
-          <div className="space-y-1.5">
-            <label htmlFor="book-select" className="text-xs text-cream/40">
+          <div className="">
+            <label htmlFor="book-select" className="block text-xs text-cream/40 mb-2">
               Book
             </label>
             <select
@@ -311,8 +311,8 @@ export default function MemorizePage() {
           </div>
 
           {/* Chapter */}
-          <div className="space-y-1.5">
-            <label htmlFor="chapter-select" className="text-xs text-cream/40">
+          <div className="">
+            <label htmlFor="chapter-select" className="block text-xs text-cream/40 mb-2">
               Chapter
             </label>
             <select
@@ -332,8 +332,8 @@ export default function MemorizePage() {
           </div>
 
           {/* Start Verse */}
-          <div className="space-y-1.5">
-            <label htmlFor="start-verse" className="text-xs text-cream/40">
+          <div className="">
+            <label htmlFor="start-verse" className="block text-xs text-cream/40 mb-2">
               Start Verse
             </label>
             <select
@@ -352,8 +352,8 @@ export default function MemorizePage() {
           </div>
 
           {/* End Verse */}
-          <div className="space-y-1.5">
-            <label htmlFor="end-verse" className="text-xs text-cream/40">
+          <div className="">
+            <label htmlFor="end-verse" className="block text-xs text-cream/40 mb-2">
               End Verse
             </label>
             <select
