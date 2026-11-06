@@ -537,46 +537,44 @@ export default function MyVersesPage() {
                   </p>
                 )}
                 {/* Stage progress bar — always visible */}
-                <div className="flex items-center gap-3 mt-3">
-                  <div className="flex items-center gap-1.5">
-                    {(['learning', 'memorising', 'retention'] as const).map((s, i) => {
-                      const stageIndex = entry.stage === 'learning' ? 0 : entry.stage === 'memorising' ? 1 : 2;
-                      const segmentIndex = i;
-                      const isLit = entry.timesCompleted > 0 && segmentIndex <= stageIndex;
-                      const stageColor = entry.stage === 'learning' ? 'bg-blue-400' : entry.stage === 'memorising' ? 'bg-amber-400' : 'bg-green-400';
-                      return (
-                        <div
-                          key={s}
-                          className={`h-1.5 w-6 rounded-full ${isLit ? stageColor : 'bg-cream/10'}`}
-                        />
-                      );
-                    })}
-                  </div>
-                  <span className="text-cream/40 text-xs flex items-center gap-2">
-                    <span className={entry.timesCompleted === 0 ? 'text-cream/25' : ''}>
+                <div className="mt-3 space-y-1">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      {(['learning', 'memorising', 'retention'] as const).map((s, i) => {
+                        const stageIndex = entry.stage === 'learning' ? 0 : entry.stage === 'memorising' ? 1 : 2;
+                        const isLit = entry.timesCompleted > 0 && i <= stageIndex;
+                        const stageColor = entry.stage === 'learning' ? 'bg-blue-400' : entry.stage === 'memorising' ? 'bg-amber-400' : 'bg-green-400';
+                        return (
+                          <div
+                            key={s}
+                            className={`h-1.5 w-6 rounded-full ${isLit ? stageColor : 'bg-cream/10'}`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <span className={`text-xs ${entry.timesCompleted === 0 ? 'text-cream/25' : 'text-cream/40'}`}>
                       Stage: {entry.timesCompleted === 0 ? 'Not practised yet' : entry.stageLabel}
                     </span>
-                    {entry.timesCompleted > 0 && (
-                      <>
-                        <span className="text-cream/20">&middot;</span>
-                        <span className="flex items-center gap-1">
-                          <Target className="w-3 h-3" />
-                          Best: {Math.round(entry.bestAccuracy * 100)}%
-                        </span>
-                        <span className="text-cream/20">&middot;</span>
-                        <span>{entry.timesCompleted} session{entry.timesCompleted > 1 ? 's' : ''}</span>
-                        {entry.lastPractised > 0 && (
-                          <>
-                            <span className="text-cream/20">&middot;</span>
-                            <span className="flex items-center gap-1 text-cream/25">
-                              <Clock className="w-3 h-3" />
-                              {timeAgo(entry.lastPractised)}
-                            </span>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </span>
+                  </div>
+                  {entry.timesCompleted > 0 && (
+                    <div className="flex items-center gap-2 text-cream/40 text-xs">
+                      <span className="flex items-center gap-1">
+                        <Target className="w-3 h-3" />
+                        Best: {Math.round(entry.bestAccuracy * 100)}%
+                      </span>
+                      <span className="text-cream/20">&middot;</span>
+                      <span>{entry.timesCompleted} session{entry.timesCompleted > 1 ? 's' : ''}</span>
+                      {entry.lastPractised > 0 && (
+                        <>
+                          <span className="text-cream/20">&middot;</span>
+                          <span className="flex items-center gap-1 text-cream/25">
+                            <Clock className="w-3 h-3" />
+                            {timeAgo(entry.lastPractised)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
