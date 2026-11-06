@@ -39,16 +39,15 @@ function timeAgo(timestamp: number): string {
   return `${days}d ago`;
 }
 
-type Filter = 'all' | 'favourites' | 'due-for-review' | 'not-started' | 'least-practised' | 'lowest-score' | 'perfect';
+type StageFilter = 'all' | 'not-started' | 'learning' | 'memorising' | 'retention' | 'due-for-review';
 
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'favourites', label: 'Favourites' },
-  { key: 'due-for-review', label: 'Due for Review' },
+const STAGE_OPTIONS: { key: StageFilter; label: string; color?: string }[] = [
+  { key: 'all', label: 'All Stages' },
   { key: 'not-started', label: 'Not Started' },
-  { key: 'least-practised', label: 'Least Practised' },
-  { key: 'lowest-score', label: 'Lowest Score' },
-  { key: 'perfect', label: '100% Score' },
+  { key: 'learning', label: 'Learning', color: 'bg-blue-500' },
+  { key: 'memorising', label: 'Memorising', color: 'bg-amber-500' },
+  { key: 'retention', label: 'Retention', color: 'bg-green-500' },
+  { key: 'due-for-review', label: 'Due for Review', color: 'bg-red-500' },
 ];
 
 interface UnifiedEntry {
@@ -85,18 +84,13 @@ export default function MyVersesPage() {
   const [activeTab, setActiveTab] = useState<'all-passages' | 'my-collections'>(
     searchParams.get('tab') === 'collections' ? 'my-collections' : 'all-passages',
   );
-  const [filter, setFilter] = useState<Filter>(
-    (searchParams.get('filter') as Filter) || 'all',
-  );
-  const [stageFilter, setStageFilter] = useState<Set<LearningStage>>(() => {
-    const stageParam = searchParams.get('stage') as LearningStage | null;
-    if (stageParam && ['learning', 'memorising', 'retention'].includes(stageParam)) {
-      return new Set([stageParam]);
-    }
-    return new Set(['learning', 'memorising', 'retention']);
+  const [stageFilter, setStageFilter] = useState<StageFilter>(() => {
+    const param = searchParams.get('stage');
+    if (param && STAGE_OPTIONS.some((o) => o.key === param)) return param as StageFilter;
+    return 'all';
   });
+  const [favouritesOnly, setFavouritesOnly] = useState(searchParams.get('filter') === 'favourites');
   const [stageDropdownOpen, setStageDropdownOpen] = useState(false);
-  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') ?? '');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
@@ -239,38 +233,32 @@ export default function MyVersesPage() {
       );
     }
 
-    // Apply stage filter (unless all are selected)
-    if (stageFilter.size < 3) {
-      list = list.filter((e) => stageFilter.has(e.stage));
-    }
-
-    switch (filter) {
-      case 'favourites':
-        list = list.filter((e) => e.isFavourite);
+    // Apply stage filter
+    switch (stageFilter) {
+      case 'not-started':
+        list = list.filter((e) => e.timesCompleted === 0);
+        break;
+      case 'learning':
+        list = list.filter((e) => e.timesCompleted > 0 && e.stage === 'learning');
+        break;
+      case 'memorising':
+        list = list.filter((e) => e.timesCompleted > 0 && e.stage === 'memorising');
+        break;
+      case 'retention':
+        list = list.filter((e) => e.timesCompleted > 0 && e.stage === 'retention');
         break;
       case 'due-for-review':
         list = list.filter((e) => e.dueForReview);
         break;
-      case 'not-started':
-        list = list.filter((e) => e.timesCompleted === 0);
-        break;
-      case 'least-practised':
-        list = list.sort((a, b) => a.timesCompleted - b.timesCompleted);
-        return list;
-      case 'lowest-score':
-        list = list
-          .filter((e) => e.timesCompleted > 0 && e.bestAccuracy < 0.99)
-          .sort((a, b) => a.bestAccuracy - b.bestAccuracy);
-        return list;
-      case 'perfect':
-        list = list.filter(
-          (e) => e.timesCompleted > 0 && e.bestAccuracy >= 0.99,
-        );
-        break;
+    }
+
+    // Apply favourites toggle
+    if (favouritesOnly) {
+      list = list.filter((e) => e.isFavourite);
     }
 
     return list.sort((a, b) => b.lastPractised - a.lastPractised);
-  }, [entries, filter, stageFilter, searchQuery]);
+  }, [entries, stageFilter, favouritesOnly, searchQuery]);
 
   function toggleFavourite(entry: UnifiedEntry) {
     if (entry.isFavourite) {
@@ -388,121 +376,57 @@ export default function MyVersesPage() {
 
       {/* Filters */}
       {entries.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center">
-          {FILTERS.slice(0, 3).map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => setFilter(f.key)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                filter === f.key
-                  ? 'bg-gold-500 text-navy-900'
-                  : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-
-          {/* More filters dropdown */}
+        <div className="flex gap-2 items-center">
+          {/* Stage dropdown */}
           <div className="relative">
             <button
               type="button"
-              onClick={() => setMoreFiltersOpen((v) => !v)}
+              onClick={() => setStageDropdownOpen((v) => !v)}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-1.5 ${
-                FILTERS.slice(3).some((f) => f.key === filter)
+                stageFilter !== 'all'
                   ? 'bg-gold-500 text-navy-900'
                   : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
               }`}
             >
-              {FILTERS.slice(3).find((f) => f.key === filter)?.label ?? 'More'}
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreFiltersOpen ? 'rotate-180' : ''}`} />
+              {STAGE_OPTIONS.find((o) => o.key === stageFilter)?.label ?? 'All Stages'}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${stageDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {moreFiltersOpen && (
+            {stageDropdownOpen && (
               <div className="absolute top-full mt-2 left-0 z-50 bg-navy-800 border border-gold-500/20 rounded-xl p-2 shadow-lg shadow-navy-900/50 min-w-[180px]">
-                {FILTERS.slice(3).map((f) => (
+                {STAGE_OPTIONS.map((opt) => (
                   <button
-                    key={f.key}
+                    key={opt.key}
                     type="button"
                     onClick={() => {
-                      setFilter(f.key);
-                      setMoreFiltersOpen(false);
+                      setStageFilter(opt.key);
+                      setStageDropdownOpen(false);
                     }}
                     className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors hover:bg-navy-700 ${
-                      filter === f.key ? 'text-cream' : 'text-cream/50'
+                      stageFilter === opt.key ? 'text-cream' : 'text-cream/50'
                     }`}
                   >
-                    {f.label}
+                    {opt.color && <span className={`w-2 h-2 rounded-full ${opt.color}`} />}
+                    {opt.label}
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Stage dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setStageDropdownOpen((v) => !v)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-1.5 ${
-                stageFilter.size < 3
-                  ? 'bg-gold-500 text-navy-900'
-                  : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
-              }`}
-            >
-              Learning Stage
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${stageDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {stageDropdownOpen && (
-              <div className="absolute top-full mt-2 right-0 z-50 bg-navy-800 border border-gold-500/20 rounded-xl p-2 shadow-lg shadow-navy-900/50 min-w-[180px]">
-                {([
-                  { key: 'learning' as LearningStage, label: 'Learning', color: 'bg-blue-500' },
-                  { key: 'memorising' as LearningStage, label: 'Memorising', color: 'bg-amber-500' },
-                  { key: 'retention' as LearningStage, label: 'Retention', color: 'bg-green-500' },
-                ]).map((opt) => {
-                  const isChecked = stageFilter.has(opt.key);
-                  return (
-                    <button
-                      key={opt.key}
-                      type="button"
-                      onClick={() => {
-                        setStageFilter((prev) => {
-                          const next = new Set(prev);
-                          if (next.has(opt.key)) {
-                            if (next.size > 1) next.delete(opt.key);
-                          } else {
-                            next.add(opt.key);
-                          }
-                          return next;
-                        });
-                      }}
-                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors hover:bg-navy-700"
-                    >
-                      <div
-                        className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
-                          isChecked
-                            ? `${opt.color} border-transparent`
-                            : 'border-cream/20'
-                        }`}
-                      >
-                        {isChecked && (
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-                      <span className={`w-2 h-2 rounded-full ${opt.color}`} />
-                      <span className={isChecked ? 'text-cream' : 'text-cream/40'}>
-                        {opt.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          {/* Favourites toggle */}
+          <button
+            type="button"
+            onClick={() => setFavouritesOnly((v) => !v)}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-1.5 ${
+              favouritesOnly
+                ? 'bg-gold-500 text-navy-900'
+                : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
+            }`}
+          >
+            <Heart className={`w-3.5 h-3.5 ${favouritesOnly ? 'fill-current' : ''}`} />
+            Favourites
+          </button>
         </div>
       )}
 
