@@ -498,7 +498,7 @@ export default function MyVersesPage() {
           {filtered.map((entry) => (
             <div
               key={entry.key}
-              className={`card flex items-start justify-between gap-4 border-l-4 ${
+              className={`card flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-l-4 ${
                 entry.isFavourite
                   ? 'border-l-gold-500'
                   : 'border-l-navy-600'
@@ -591,10 +591,10 @@ export default function MyVersesPage() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-2 shrink-0">
+              <div className="flex flex-col sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
                 <Link
                   to={`/memorize?book=${entry.book}&chapter=${entry.chapterNumber}&start=${entry.startVerse}&end=${entry.endVerse}`}
-                  className="btn-gold text-sm inline-flex items-center justify-center gap-1.5 w-full"
+                  className="btn-gold text-sm inline-flex items-center justify-center gap-1.5 w-full sm:w-full"
                 >
                   <Brain className="w-3.5 h-3.5" />
                   Practise

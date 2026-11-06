@@ -164,7 +164,7 @@ export default function HomePage() {
                 ) : (
                   <Heart className="w-4 h-4" />
                 )}
-                {dailyFavourited ? 'Favourited' : 'Favourite'}
+                <span className="hidden sm:inline">{dailyFavourited ? 'Favourited' : 'Favourite'}</span>
               </button>
               <button
                 type="button"
@@ -176,7 +176,7 @@ export default function HomePage() {
                 ) : (
                   <Copy className="w-4 h-4" />
                 )}
-                {copied ? 'Copied' : 'Copy'}
+                <span className="hidden sm:inline">{copied ? 'Copied' : 'Copy'}</span>
               </button>
               <button
                 type="button"
@@ -194,7 +194,7 @@ export default function HomePage() {
                 className="btn-outline inline-flex items-center gap-2 text-sm"
               >
                 <Share2 className="w-4 h-4" />
-                Share
+                <span className="hidden sm:inline">Share</span>
               </button>
             </div>
           </>
