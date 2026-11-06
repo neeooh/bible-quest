@@ -207,12 +207,32 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Your Memorisation — persistent summary card */}
+      {/* CTA */}
+      <section className="flex flex-wrap justify-center gap-4">
+        <Link
+          to="/library"
+          className="btn-gold inline-flex items-center gap-2 text-base px-8 py-3.5"
+        >
+          Explore the Bible
+          <ArrowRight className="w-5 h-5" />
+        </Link>
+        {lastRead && (
+          <Link
+            to={`/read/${lastRead.book}/${lastRead.chapter}`}
+            className="btn-outline inline-flex items-center gap-2 text-base px-8 py-3.5"
+          >
+            <BookMarked className="w-5 h-5" />
+            Continue: {lastRead.bookName} {lastRead.chapter}
+          </Link>
+        )}
+      </section>
+
+      {/* Your Progress — persistent summary card */}
       {hasAnyData && (
         <section className="max-w-2xl mx-auto">
           <div className="card space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-cream/50">Your Memorisation</h2>
+              <h2 className="text-sm font-medium text-cream/50">Your Progress</h2>
               {progress.dailyStreak > 0 && (
                 <Link to="/progress" className="flex items-center gap-1.5 text-xs text-gold-400 hover:text-gold-300 transition-colors">
                   <Flame className="w-3.5 h-3.5" />
@@ -244,7 +264,11 @@ export default function HomePage() {
               </Link>
               <Link
                 to="/my-verses?filter=due-for-review"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+                className={`rounded-lg transition-colors p-3 group ${
+                  stageCounts.dueForReview > 0
+                    ? 'bg-amber-500/10 hover:bg-amber-500/20 ring-1 ring-amber-500/30'
+                    : 'bg-navy-700 hover:bg-navy-600'
+                }`}
               >
                 <p className={`text-2xl font-bold ${stageCounts.dueForReview > 0 ? 'text-amber-400' : 'text-cream/20'}`}>
                   {stageCounts.dueForReview}
@@ -261,45 +285,28 @@ export default function HomePage() {
                 <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Not Started</p>
               </Link>
               {stageCounts.nearestReview && (
-                <div className="rounded-lg bg-navy-700 p-3">
+                <Link
+                  to="/my-verses?stage=retention"
+                  className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+                >
                   <p className={`text-2xl font-bold ${stageCounts.dueForReview > 0 ? 'text-amber-400' : 'text-cream/40'}`}>
                     {stageCounts.dueForReview > 0 ? '!' : '✓'}
                   </p>
-                  <p className="text-cream/40 text-xs mt-0.5">
+                  <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">
                     {stageCounts.dueForReview > 0
                       ? 'Review now'
                       : `Next: ${formatReviewDate(stageCounts.nearestReview)}`}
                   </p>
-                </div>
+                </Link>
               )}
             </div>
           </div>
         </section>
       )}
 
-      {/* CTA */}
-      <section className="flex flex-wrap justify-center gap-4">
-        <Link
-          to="/library"
-          className="btn-gold inline-flex items-center gap-2 text-base px-8 py-3.5"
-        >
-          Explore the Bible
-          <ArrowRight className="w-5 h-5" />
-        </Link>
-        {lastRead && (
-          <Link
-            to={`/read/${lastRead.book}/${lastRead.chapter}`}
-            className="btn-outline inline-flex items-center gap-2 text-base px-8 py-3.5"
-          >
-            <BookMarked className="w-5 h-5" />
-            Continue: {lastRead.bookName} {lastRead.chapter}
-          </Link>
-        )}
-      </section>
-
       {/* About */}
       <section className="text-center">
-        <Link to="/about" className="text-cream/20 text-xs hover:text-cream/40 transition-colors">
+        <Link to="/about" className="text-cream/40 text-xs hover:text-cream/60 transition-colors">
           About BibleQuest
         </Link>
       </section>
