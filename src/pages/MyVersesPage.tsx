@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
+import { useCollections } from '../hooks/useCollections';
 import { getBookBySlug } from '../lib/book-metadata';
 import {
   getPassageStage,
@@ -20,7 +21,11 @@ import {
   ChevronDown,
   Search,
   X,
+  FolderPlus,
 } from 'lucide-react';
+import CollectionsOverview from '../components/collections/CollectionsOverview';
+import CreateCollectionDialog from '../components/collections/CreateCollectionDialog';
+import AddToCollectionDialog from '../components/collections/AddToCollectionDialog';
 
 function timeAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -66,6 +71,18 @@ interface UnifiedEntry {
 export default function MyVersesPage() {
   const { progress } = useProgress();
   const { savedVerses, addVerse, removeVerse, setFavourite, isSaved, isFavourite } = useSavedVerses();
+  const {
+    collections,
+    createCollection,
+    deleteCollection,
+    addPassageToCollections,
+    removePassageFromAllCollections,
+  } = useCollections();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<'all-passages' | 'my-collections'>(
+    searchParams.get('tab') === 'collections' ? 'my-collections' : 'all-passages',
+  );
   const [filter, setFilter] = useState<Filter>('all');
   const [stageFilter, setStageFilter] = useState<Set<LearningStage>>(
     new Set(['learning', 'memorising', 'retention']),
@@ -73,6 +90,8 @@ export default function MyVersesPage() {
   const [stageDropdownOpen, setStageDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
+  const [addToCollectionKey, setAddToCollectionKey] = useState<string | null>(null);
 
   const entries: UnifiedEntry[] = useMemo(() => {
     const map = new Map<string, UnifiedEntry>();
@@ -276,6 +295,49 @@ export default function MyVersesPage() {
           Your favourites and practised passages
         </p>
       </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setActiveTab('all-passages')}
+          className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+            activeTab === 'all-passages'
+              ? 'bg-gold-500 text-navy-900'
+              : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
+          }`}
+        >
+          All Passages
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('my-collections')}
+          className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+            activeTab === 'my-collections'
+              ? 'bg-gold-500 text-navy-900'
+              : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
+          }`}
+        >
+          My Collections
+        </button>
+      </div>
+
+      {activeTab === 'my-collections' ? (
+        <>
+          <CollectionsOverview
+            collections={collections}
+            onCreateCollection={() => setCreateCollectionOpen(true)}
+            onDeleteCollection={deleteCollection}
+            onNavigateToCollection={(collectionId) => navigate(`/my-verses/collection/${collectionId}`)}
+          />
+          <CreateCollectionDialog
+            isOpen={createCollectionOpen}
+            onClose={() => setCreateCollectionOpen(false)}
+            onSave={(name, description) => createCollection(name, description)}
+          />
+        </>
+      ) : (
+      <>
 
       {/* Search */}
       {entries.length > 0 && (
@@ -546,8 +608,18 @@ export default function MyVersesPage() {
                   </button>
                   <button
                     type="button"
+                    onClick={() => setAddToCollectionKey(entry.key)}
+                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/30 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                    aria-label={`Add ${entry.reference} to collection`}
+                    title="Add to collection"
+                  >
+                    <FolderPlus className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => {
                       if (window.confirm(`Remove ${entry.reference} from your list?`)) {
+                        removePassageFromAllCollections(entry.key);
                         if (entry.isFavourite) {
                           for (let v = entry.startVerse; v <= entry.endVerse; v++) {
                             if (isSaved(entry.book, entry.chapterNumber, v)) {
@@ -568,6 +640,18 @@ export default function MyVersesPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Add to Collection dialog */}
+      <AddToCollectionDialog
+        isOpen={addToCollectionKey !== null}
+        onClose={() => setAddToCollectionKey(null)}
+        passageKey={addToCollectionKey ?? ''}
+        collections={collections}
+        onAddPassageToCollections={addPassageToCollections}
+        onCreateCollection={createCollection}
+      />
+      </>
       )}
     </div>
   );

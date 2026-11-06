@@ -7,6 +7,7 @@ import BookChaptersPage from './pages/BookChaptersPage';
 import ReadPage from './pages/ReadPage';
 import MemorizePage from './pages/MemorizePage';
 import MyVersesPage from './pages/MyVersesPage';
+import CollectionDetailPage from './pages/CollectionDetailPage';
 import ProgressPage from './pages/ProgressPage';
 import AboutPage from './pages/AboutPage';
 import TopicPage from './pages/TopicPage';
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/library/:book" element={<BookChaptersPage />} />
           <Route path="/read/:book/:chapter" element={<ReadPage />} />
           <Route path="/memorize" element={<MemorizePage />} />
+          <Route path="/my-verses/collection/:id" element={<CollectionDetailPage />} />
           <Route path="/my-verses" element={<MyVersesPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/about" element={<AboutPage />} />
