@@ -25,13 +25,16 @@ function persist(collections: Collection[]): Collection[] {
   return collections;
 }
 
-export const DEFAULT_COLLECTION_ICON = '📖';
+export const DEFAULT_COLLECTION_ICON = 'BookOpen';
 
 export const COLLECTION_ICONS = [
-  '📖', '✝️', '🕊️', '❤️', '💡', '🙏', '⭐', '🔥',
-  '💎', '🌿', '🏔️', '🌊', '☀️', '🌙', '👑', '🦁',
-  '🕯️', '📜', '🎵', '💪', '🛡️', '⚓', '🌸', '🍞',
-];
+  'BookOpen', 'Heart', 'Star', 'Flame', 'Shield',
+  'Crown', 'Music', 'Mountain', 'Anchor', 'Cross',
+  'Lightbulb', 'Feather', 'Gem', 'Leaf', 'Sun',
+  'Moon', 'Flower2', 'Sword', 'Hand', 'Sparkles',
+] as const;
+
+export type CollectionIconName = typeof COLLECTION_ICONS[number];
 
 export function createCollection(name: string, description: string, icon?: string): { collections: Collection[]; id: string } {
   const current = getCollections();

@@ -19,6 +19,7 @@ import {
   FolderOpen,
 } from 'lucide-react';
 import CreateCollectionDialog from '../components/collections/CreateCollectionDialog';
+import CollectionIcon from '../components/collections/CollectionIcon';
 
 interface UnifiedEntry {
   key: string;
@@ -218,7 +219,9 @@ export default function CollectionDetailPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-serif font-bold text-cream flex items-center gap-3">
-            <span>{collection.icon || '📖'}</span>
+            <span className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0 text-gold-400">
+              <CollectionIcon name={collection.icon || 'BookOpen'} className="w-5 h-5" />
+            </span>
             {collection.name}
           </h1>
           <p className="text-cream/40 mt-1 text-sm">

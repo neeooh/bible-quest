@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, FolderOpen, X } from 'lucide-react';
 import type { Collection } from '../../lib/collections';
+import CollectionIcon from './CollectionIcon';
 
 interface CollectionsOverviewProps {
   collections: Collection[];
@@ -72,7 +73,9 @@ export default function CollectionsOverview({
               className="card text-left hover:border-gold-500/30 transition-colors group"
             >
               <div className="flex items-start gap-3 min-w-0">
-                <span className="text-2xl shrink-0">{c.icon || '📖'}</span>
+                <span className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0 text-gold-400">
+                  <CollectionIcon name={c.icon || 'BookOpen'} className="w-5 h-5" />
+                </span>
                 <div className="min-w-0">
                   <p className="text-cream font-semibold text-base truncate">
                     {c.name}

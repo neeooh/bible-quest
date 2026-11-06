@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { COLLECTION_ICONS, DEFAULT_COLLECTION_ICON } from '../../lib/collections';
+import CollectionIcon, { ICON_MAP } from './CollectionIcon';
+import type { CollectionIconName } from '../../lib/collections';
 
 interface CreateCollectionDialogProps {
   isOpen: boolean;
@@ -72,20 +74,25 @@ export default function CreateCollectionDialog({
               Icon
             </label>
             <div className="flex flex-wrap gap-1.5">
-              {COLLECTION_ICONS.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => setIcon(emoji)}
-                  className={`w-10 h-10 rounded-lg text-lg flex items-center justify-center transition-all ${
-                    icon === emoji
-                      ? 'bg-gold-500/20 ring-2 ring-gold-500 scale-110'
-                      : 'bg-navy-700 hover:bg-navy-600'
-                  }`}
-                >
-                  {emoji}
-                </button>
-              ))}
+              {COLLECTION_ICONS.map((iconName) => {
+                const IconComponent = ICON_MAP[iconName as CollectionIconName];
+                if (!IconComponent) return null;
+                return (
+                  <button
+                    key={iconName}
+                    type="button"
+                    onClick={() => setIcon(iconName)}
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+                      icon === iconName
+                        ? 'bg-gold-500/20 ring-2 ring-gold-500 text-gold-400 scale-110'
+                        : 'bg-navy-700 text-cream/40 hover:bg-navy-600 hover:text-cream/60'
+                    }`}
+                    title={iconName}
+                  >
+                    <IconComponent className="w-5 h-5" />
+                  </button>
+                );
+              })}
             </div>
           </div>
 
