@@ -41,14 +41,14 @@ function timeAgo(timestamp: number): string {
 
 type Filter = 'all' | 'favourites' | 'due-for-review' | 'not-started' | 'least-practised' | 'lowest-score' | 'perfect';
 
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'favourites', label: 'Favourites' },
-  { key: 'due-for-review', label: 'Due for Review' },
-  { key: 'not-started', label: 'Not Started' },
-  { key: 'least-practised', label: 'Least Practised' },
-  { key: 'lowest-score', label: 'Lowest Score' },
-  { key: 'perfect', label: '100% Score' },
+const FILTERS: { key: Filter; label: string; shortLabel: string }[] = [
+  { key: 'all', label: 'All', shortLabel: 'All' },
+  { key: 'favourites', label: 'Favourites', shortLabel: 'Favs' },
+  { key: 'due-for-review', label: 'Due for Review', shortLabel: 'Due' },
+  { key: 'not-started', label: 'Not Started', shortLabel: 'New' },
+  { key: 'least-practised', label: 'Least Practised', shortLabel: 'Least' },
+  { key: 'lowest-score', label: 'Lowest Score', shortLabel: 'Low' },
+  { key: 'perfect', label: '100% Score', shortLabel: '100%' },
 ];
 
 interface UnifiedEntry {
@@ -393,13 +393,14 @@ export default function MyVersesPage() {
               key={f.key}
               type="button"
               onClick={() => setFilter(f.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 filter === f.key
                   ? 'bg-gold-500 text-navy-900'
                   : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
               }`}
             >
-              {f.label}
+              <span className="sm:hidden">{f.shortLabel}</span>
+              <span className="hidden sm:inline">{f.label}</span>
             </button>
           ))}
 
