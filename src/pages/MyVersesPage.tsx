@@ -41,14 +41,14 @@ function timeAgo(timestamp: number): string {
 
 type Filter = 'all' | 'favourites' | 'due-for-review' | 'not-started' | 'least-practised' | 'lowest-score' | 'perfect';
 
-const FILTERS: { key: Filter; label: string; shortLabel: string }[] = [
-  { key: 'all', label: 'All', shortLabel: 'All' },
-  { key: 'favourites', label: 'Favourites', shortLabel: 'Favs' },
-  { key: 'due-for-review', label: 'Due for Review', shortLabel: 'Due' },
-  { key: 'not-started', label: 'Not Started', shortLabel: 'New' },
-  { key: 'least-practised', label: 'Least Practised', shortLabel: 'Least' },
-  { key: 'lowest-score', label: 'Lowest Score', shortLabel: 'Low' },
-  { key: 'perfect', label: '100% Score', shortLabel: '100%' },
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'favourites', label: 'Favourites' },
+  { key: 'due-for-review', label: 'Due for Review' },
+  { key: 'not-started', label: 'Not Started' },
+  { key: 'least-practised', label: 'Least Practised' },
+  { key: 'lowest-score', label: 'Lowest Score' },
+  { key: 'perfect', label: '100% Score' },
 ];
 
 interface UnifiedEntry {
@@ -399,8 +399,7 @@ export default function MyVersesPage() {
                   : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
               }`}
             >
-              <span className="sm:hidden">{f.shortLabel}</span>
-              <span className="hidden sm:inline">{f.label}</span>
+              {f.label}
             </button>
           ))}
 
