@@ -421,12 +421,13 @@ export default function MyVersesPage() {
               }`}
             >
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-gold-400 font-serif font-semibold">
-                    {entry.reference}
-                  </p>
+                {/* Identity zone: reference + metadata */}
+                <p className="text-base text-gold-400 font-serif font-semibold">
+                  {entry.reference}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0 ${
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
                       entry.stage === 'learning'
                         ? 'bg-blue-500/15 text-blue-400'
                         : entry.stage === 'memorising'
@@ -437,14 +438,16 @@ export default function MyVersesPage() {
                     {entry.stageLabel}
                   </span>
                   {entry.nextReview && (
-                    <span className={`text-[10px] shrink-0 ${entry.dueForReview ? 'text-red-400 font-medium' : 'text-cream/30'}`}>
+                    <span className={`text-xs shrink-0 ${entry.dueForReview ? 'text-red-400 font-medium' : 'text-cream/30'}`}>
                       {entry.dueForReview ? '⏰ ' : ''}{formatReviewDate(entry.nextReview)}
                     </span>
                   )}
                 </div>
+
+                {/* Content zone: verse text + stats */}
                 {entry.text && (
                   <p
-                    className={`text-cream/60 text-sm mt-1 italic leading-relaxed cursor-pointer hover:text-cream/80 transition-colors ${
+                    className={`text-cream/80 text-sm mt-3 italic leading-relaxed cursor-pointer hover:text-cream transition-colors ${
                       expandedCards.has(entry.key) ? '' : 'line-clamp-2'
                     }`}
                     onClick={() =>
