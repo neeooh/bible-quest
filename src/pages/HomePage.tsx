@@ -234,7 +234,7 @@ export default function HomePage() {
 
       {/* Your Progress — persistent summary card */}
       {hasAnyData && (
-        <section className="max-w-2xl lg:max-w-4xl mx-auto">
+        <section className="max-w-2xl mx-auto">
           <div className="card space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-cream/50">Your Progress</h2>
@@ -245,7 +245,7 @@ export default function HomePage() {
                 </Link>
               )}
             </div>
-            <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <Link
                 to="/my-verses?stage=learning"
                 className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center"
