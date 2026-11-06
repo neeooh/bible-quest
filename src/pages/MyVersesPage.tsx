@@ -419,7 +419,9 @@ export default function MyVersesPage() {
             </button>
 
             {stageDropdownOpen && (
-              <div className="absolute top-full mt-2 left-0 sm:left-auto sm:right-0 z-50 bg-navy-800 border border-gold-500/20 rounded-xl p-2 shadow-lg shadow-navy-900/50 min-w-[180px]">
+              <>
+                <div className="fixed inset-0 z-40 sm:hidden" onClick={() => setStageDropdownOpen(false)} />
+                <div className="fixed left-4 right-4 top-48 z-50 sm:absolute sm:top-full sm:mt-2 sm:left-auto sm:right-0 sm:inset-auto bg-navy-800 border border-gold-500/20 rounded-xl p-2 shadow-lg shadow-navy-900/50 sm:min-w-[180px]">
                 {([
                   { key: 'learning' as LearningStage, label: 'Learning', color: 'bg-blue-500' },
                   { key: 'memorising' as LearningStage, label: 'Memorising', color: 'bg-amber-500' },
@@ -464,6 +466,7 @@ export default function MyVersesPage() {
                   );
                 })}
               </div>
+              </>
             )}
           </div>
         </div>
