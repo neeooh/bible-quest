@@ -236,11 +236,12 @@ export default function MemorizePage() {
                         speak(passageText);
                       }
                     }}
-                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                    className="btn-outline text-sm inline-flex items-center gap-1.5"
                     aria-label={isSpeaking ? 'Stop listening' : 'Listen to passage'}
-                    title={isSpeaking ? 'Stop' : 'Listen'}
+                    title={isSpeaking ? 'Stop' : 'Listen to passage'}
                   >
                     {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                    {isSpeaking ? 'Stop' : 'Listen to Passage'}
                   </button>
                 )}
                 <button
