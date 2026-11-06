@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
+import { COLLECTION_ICONS, DEFAULT_COLLECTION_ICON } from '../../lib/collections';
 
 interface CreateCollectionDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (name: string, description: string) => void;
+  onSave: (name: string, description: string, icon: string) => void;
   onDelete?: () => void;
   initialName?: string;
   initialDescription?: string;
+  initialIcon?: string;
   title?: string;
 }
 
@@ -18,24 +20,27 @@ export default function CreateCollectionDialog({
   onDelete,
   initialName = '',
   initialDescription = '',
+  initialIcon = DEFAULT_COLLECTION_ICON,
   title = 'Create Collection',
 }: CreateCollectionDialogProps) {
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
+  const [icon, setIcon] = useState(initialIcon);
 
   useEffect(() => {
     if (isOpen) {
       setName(initialName);
       setDescription(initialDescription);
+      setIcon(initialIcon);
     }
-  }, [isOpen, initialName, initialDescription]);
+  }, [isOpen, initialName, initialDescription, initialIcon]);
 
   if (!isOpen) return null;
 
   function handleSave() {
     const trimmed = name.trim();
     if (!trimmed) return;
-    onSave(trimmed, description.trim());
+    onSave(trimmed, description.trim(), icon);
     onClose();
   }
 
@@ -61,6 +66,30 @@ export default function CreateCollectionDialog({
         </div>
 
         <div className="space-y-4">
+          {/* Icon picker */}
+          <div>
+            <label className="block text-sm text-cream/60 mb-2">
+              Icon
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {COLLECTION_ICONS.map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => setIcon(emoji)}
+                  className={`w-10 h-10 rounded-lg text-lg flex items-center justify-center transition-all ${
+                    icon === emoji
+                      ? 'bg-gold-500/20 ring-2 ring-gold-500 scale-110'
+                      : 'bg-navy-700 hover:bg-navy-600'
+                  }`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Name */}
           <div>
             <label htmlFor="collection-name" className="block text-sm text-cream/60 mb-1.5">
               Name <span className="text-red-400">*</span>
@@ -79,6 +108,7 @@ export default function CreateCollectionDialog({
             />
           </div>
 
+          {/* Description */}
           <div>
             <label htmlFor="collection-description" className="block text-sm text-cream/60 mb-1.5">
               Description

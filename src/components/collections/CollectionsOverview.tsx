@@ -85,18 +85,21 @@ export default function CollectionsOverview({
               onClick={() => onNavigateToCollection(c.id)}
               className="card text-left hover:border-gold-500/30 transition-colors group"
             >
-              <div className="min-w-0">
-                <p className="text-cream font-semibold text-base truncate">
-                  {c.name}
-                </p>
-                <p className="text-cream/40 text-xs mt-1">
-                  {c.passageKeys.length} passage{c.passageKeys.length !== 1 ? 's' : ''}
-                </p>
-                {c.description && (
-                  <p className="text-cream/30 text-sm mt-2 line-clamp-2">
-                    {c.description}
+              <div className="flex items-start gap-3 min-w-0">
+                <span className="text-2xl shrink-0">{c.icon || '📖'}</span>
+                <div className="min-w-0">
+                  <p className="text-cream font-semibold text-base truncate">
+                    {c.name}
                   </p>
-                )}
+                  <p className="text-cream/40 text-xs mt-1">
+                    {c.passageKeys.length} passage{c.passageKeys.length !== 1 ? 's' : ''}
+                  </p>
+                  {c.description && (
+                    <p className="text-cream/30 text-sm mt-2 line-clamp-2">
+                      {c.description}
+                    </p>
+                  )}
+                </div>
               </div>
             </button>
           ))}

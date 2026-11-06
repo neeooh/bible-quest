@@ -2,6 +2,7 @@ export interface Collection {
   id: string;
   name: string;
   description: string;
+  icon: string;
   passageKeys: string[];
   createdAt: number;
   updatedAt: number;
@@ -24,13 +25,22 @@ function persist(collections: Collection[]): Collection[] {
   return collections;
 }
 
-export function createCollection(name: string, description: string): { collections: Collection[]; id: string } {
+export const DEFAULT_COLLECTION_ICON = '📖';
+
+export const COLLECTION_ICONS = [
+  '📖', '✝️', '🕊️', '❤️', '💡', '🙏', '⭐', '🔥',
+  '💎', '🌿', '🏔️', '🌊', '☀️', '🌙', '👑', '🦁',
+  '🕯️', '📜', '🎵', '💪', '🛡️', '⚓', '🌸', '🍞',
+];
+
+export function createCollection(name: string, description: string, icon?: string): { collections: Collection[]; id: string } {
   const current = getCollections();
   const id = crypto.randomUUID();
   const newCollection: Collection = {
     id,
     name,
     description,
+    icon: icon || DEFAULT_COLLECTION_ICON,
     passageKeys: [],
     createdAt: Date.now(),
     updatedAt: Date.now(),
@@ -40,7 +50,7 @@ export function createCollection(name: string, description: string): { collectio
 
 export function updateCollection(
   id: string,
-  updates: Partial<Pick<Collection, 'name' | 'description'>>,
+  updates: Partial<Pick<Collection, 'name' | 'description' | 'icon'>>,
 ): Collection[] {
   const current = getCollections();
   return persist(

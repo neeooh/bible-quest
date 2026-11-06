@@ -332,7 +332,7 @@ export default function MyVersesPage() {
           <CreateCollectionDialog
             isOpen={createCollectionOpen}
             onClose={() => setCreateCollectionOpen(false)}
-            onSave={(name, description) => createCollection(name, description)}
+            onSave={(name, description, icon) => createCollection(name, description, icon)}
           />
         </>
       ) : (

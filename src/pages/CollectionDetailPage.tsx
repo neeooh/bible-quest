@@ -217,7 +217,8 @@ export default function CollectionDetailPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-cream">
+          <h1 className="text-3xl font-serif font-bold text-cream flex items-center gap-3">
+            <span>{collection.icon || '📖'}</span>
             {collection.name}
           </h1>
           <p className="text-cream/40 mt-1 text-sm">
@@ -392,8 +393,8 @@ export default function CollectionDetailPage() {
       <CreateCollectionDialog
         isOpen={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
-        onSave={(name, description) => {
-          updateCollection(collection.id, { name, description });
+        onSave={(name, description, icon) => {
+          updateCollection(collection.id, { name, description, icon });
         }}
         onDelete={() => {
           if (window.confirm(`Delete "${collection.name}"? Passages will not be removed from My Verses.`)) {
@@ -403,6 +404,7 @@ export default function CollectionDetailPage() {
         }}
         initialName={collection.name}
         initialDescription={collection.description}
+        initialIcon={collection.icon}
         title="Edit Collection"
       />
     </div>
