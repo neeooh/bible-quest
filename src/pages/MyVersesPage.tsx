@@ -419,7 +419,7 @@ export default function MyVersesPage() {
             </button>
 
             {stageDropdownOpen && (
-              <div className="absolute top-full mt-2 right-0 z-50 bg-navy-800 border border-gold-500/20 rounded-xl p-2 shadow-lg shadow-navy-900/50 min-w-[180px]">
+              <div className="absolute top-full mt-2 left-0 sm:left-auto sm:right-0 z-50 bg-navy-800 border border-gold-500/20 rounded-xl p-2 shadow-lg shadow-navy-900/50 min-w-[180px]">
                 {([
                   { key: 'learning' as LearningStage, label: 'Learning', color: 'bg-blue-500' },
                   { key: 'memorising' as LearningStage, label: 'Memorising', color: 'bg-amber-500' },
