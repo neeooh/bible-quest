@@ -237,7 +237,17 @@ export default function HomePage() {
                 </Link>
               )}
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-4 gap-3">
+              <Link
+                to="/my-verses?filter=not-started"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center"
+              >
+                <Clock className={`w-5 h-5 mx-auto mb-2 ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`} />
+                <p className={`text-3xl font-bold ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`}>
+                  {stageCounts.notPractised}
+                </p>
+                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Not Started</p>
+              </Link>
               <Link
                 to="/my-verses?stage=learning"
                 className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center"
@@ -261,16 +271,6 @@ export default function HomePage() {
                 <Shield className="w-5 h-5 text-green-400 mx-auto mb-2" />
                 <p className="text-3xl font-bold text-green-400">{stageCounts.retention}</p>
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Retention</p>
-              </Link>
-              <Link
-                to="/my-verses?filter=not-started"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center col-span-3"
-              >
-                <Clock className={`w-5 h-5 mx-auto mb-2 ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`} />
-                <p className={`text-3xl font-bold ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`}>
-                  {stageCounts.notPractised}
-                </p>
-                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Not Started</p>
               </Link>
             </div>
           </div>
