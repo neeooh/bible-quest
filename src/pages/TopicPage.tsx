@@ -99,10 +99,10 @@ export default function TopicPage() {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
+              <div className="flex flex-row flex-wrap sm:flex-col gap-2 shrink-0 w-full sm:w-auto items-center sm:items-stretch">
                 <Link
                   to={`/memorize?book=${passage.book}&chapter=${passage.chapter}&start=${passage.startVerse}&end=${passage.endVerse}`}
-                  className="btn-gold text-sm inline-flex items-center justify-center gap-1.5 w-full sm:w-full"
+                  className="btn-gold text-sm inline-flex items-center justify-center gap-1.5 w-auto sm:w-full"
                 >
                   <Brain className="w-3.5 h-3.5" />
                   Practise
