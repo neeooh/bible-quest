@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 
 interface CreateCollectionDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (name: string, description: string) => void;
+  onDelete?: () => void;
   initialName?: string;
   initialDescription?: string;
   title?: string;
@@ -14,6 +15,7 @@ export default function CreateCollectionDialog({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   initialName = '',
   initialDescription = '',
   title = 'Create Collection',
@@ -92,22 +94,34 @@ export default function CreateCollectionDialog({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 mt-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-outline text-sm px-4 py-2"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!name.trim()}
-            className="btn-gold text-sm px-4 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Save
-          </button>
+        <div className="flex items-center mt-6">
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="text-sm text-cream/30 hover:text-red-400 transition-colors inline-flex items-center gap-1.5"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </button>
+          )}
+          <div className="flex items-center gap-3 ml-auto">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-outline text-sm px-4 py-2"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!name.trim()}
+              className="btn-gold text-sm px-4 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Save
+            </button>
+          </div>
         </div>
       </div>
     </div>

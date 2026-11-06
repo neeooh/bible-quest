@@ -15,7 +15,6 @@ import {
   Brain,
   BookOpen,
   Heart,
-  Trash2,
   X,
   FolderOpen,
 } from 'lucide-react';
@@ -228,30 +227,14 @@ export default function CollectionDetailPage() {
             )}
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => setEditDialogOpen(true)}
-            className="btn-outline text-sm inline-flex items-center gap-1.5 px-3 py-2"
-          >
-            <Edit className="w-3.5 h-3.5" />
-            Edit
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (window.confirm(`Delete "${collection.name}"? Passages will not be removed from My Verses.`)) {
-                deleteCollection(collection.id);
-                navigate('/my-verses?tab=collections');
-              }
-            }}
-            className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40 transition-colors flex items-center justify-center"
-            aria-label={`Delete ${collection.name}`}
-            title="Delete collection"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setEditDialogOpen(true)}
+          className="btn-outline text-sm inline-flex items-center gap-1.5 px-3 py-2 shrink-0"
+        >
+          <Edit className="w-3.5 h-3.5" />
+          Edit
+        </button>
       </div>
 
       {/* Search */}
@@ -411,6 +394,12 @@ export default function CollectionDetailPage() {
         onClose={() => setEditDialogOpen(false)}
         onSave={(name, description) => {
           updateCollection(collection.id, { name, description });
+        }}
+        onDelete={() => {
+          if (window.confirm(`Delete "${collection.name}"? Passages will not be removed from My Verses.`)) {
+            deleteCollection(collection.id);
+            navigate('/my-verses?tab=collections');
+          }
         }}
         initialName={collection.name}
         initialDescription={collection.description}
