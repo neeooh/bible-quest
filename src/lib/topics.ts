@@ -22,7 +22,7 @@ export const TOPICS: Topic[] = [
     slug: 'faith',
     name: 'Faith',
     description: 'Trusting God, believing in His promises and relying on Him rather than our own understanding.',
-    icon: '✝️',
+    icon: 'Cross',
     passages: [
       { book: 'proverbs', chapter: 3, startVerse: 5, endVerse: 6, reference: 'Proverbs 3:5–6', preview: 'Trust in Yahweh with all your heart, and don\'t lean on your own understanding…', explainer: 'Trust God even when you cannot see the whole picture.', verseCount: 2 },
       { book: 'hebrews', chapter: 11, startVerse: 1, endVerse: 1, reference: 'Hebrews 11:1', preview: 'Now faith is assurance of things hoped for, proof of things not seen.', explainer: 'Faith means trusting in what God has promised, even when you cannot yet see the outcome.', verseCount: 1 },
@@ -36,7 +36,7 @@ export const TOPICS: Topic[] = [
     slug: 'anxiety-fear',
     name: 'Anxiety & Fear',
     description: 'Finding peace, overcoming fear and trusting God during difficult and uncertain times.',
-    icon: '🕊️',
+    icon: 'Feather',
     passages: [
       { book: 'philippians', chapter: 4, startVerse: 6, endVerse: 7, reference: 'Philippians 4:6–7', preview: 'In nothing be anxious, but in everything, by prayer and petition with thanksgiving…', explainer: 'Bring your worries to God through prayer instead of carrying them alone.', verseCount: 2 },
       { book: 'matthew', chapter: 6, startVerse: 25, endVerse: 27, reference: 'Matthew 6:25–27', preview: 'Therefore I tell you, don\'t be anxious for your life…', explainer: 'Jesus reminds us not to let worry about everyday needs take over our lives.', verseCount: 3 },
@@ -50,7 +50,7 @@ export const TOPICS: Topic[] = [
     slug: 'love',
     name: 'Love',
     description: 'Understanding God\'s love and learning to love others with kindness, patience and compassion.',
-    icon: '❤️',
+    icon: 'Heart',
     passages: [
       { book: '1corinthians', chapter: 13, startVerse: 4, endVerse: 7, reference: '1 Corinthians 13:4–7', preview: 'Love is patient and is kind; love doesn\'t envy…', explainer: 'What genuine love looks like in everyday behaviour.', verseCount: 4 },
       { book: '1john', chapter: 4, startVerse: 19, endVerse: 19, reference: '1 John 4:19', preview: 'We love him, because he first loved us.', explainer: 'Our ability to love God comes in response to His love for us.', verseCount: 1 },
@@ -64,7 +64,7 @@ export const TOPICS: Topic[] = [
     slug: 'wisdom',
     name: 'Wisdom',
     description: 'Seeking God\'s guidance, making better decisions and learning to distinguish right from wrong.',
-    icon: '💡',
+    icon: 'Lightbulb',
     passages: [
       { book: 'james', chapter: 1, startVerse: 5, endVerse: 5, reference: 'James 1:5', preview: 'But if any of you lacks wisdom, let him ask of God…', explainer: 'You can ask God for wisdom when you do not know what to do.', verseCount: 1 },
       { book: 'proverbs', chapter: 16, startVerse: 3, endVerse: 3, reference: 'Proverbs 16:3', preview: 'Commit your deeds to Yahweh, and your plans shall succeed.', explainer: 'Bring your plans and actions before God.', verseCount: 1 },
@@ -77,7 +77,7 @@ export const TOPICS: Topic[] = [
     slug: 'forgiveness',
     name: 'Forgiveness',
     description: 'Learning to forgive others, letting go of resentment and seeking forgiveness for our own mistakes.',
-    icon: '🤝',
+    icon: 'Handshake',
     passages: [
       { book: 'ephesians', chapter: 4, startVerse: 31, endVerse: 32, reference: 'Ephesians 4:31–32', preview: 'Let all bitterness, wrath, anger, outcry, and slander, be put away from you…', explainer: 'Let go of bitterness and treat others with kindness and compassion.', verseCount: 2 },
       { book: 'matthew', chapter: 6, startVerse: 14, endVerse: 15, reference: 'Matthew 6:14–15', preview: 'For if you forgive men their trespasses, your heavenly Father will also forgive you…', explainer: 'Receiving God\'s forgiveness should change how we respond when others wrong us.', verseCount: 2 },
@@ -90,7 +90,7 @@ export const TOPICS: Topic[] = [
     slug: 'strength',
     name: 'Strength',
     description: 'Finding courage, perseverance and strength through God when facing hardship and adversity.',
-    icon: '💪',
+    icon: 'Flame',
     passages: [
       { book: 'philippians', chapter: 4, startVerse: 13, endVerse: 13, reference: 'Philippians 4:13', preview: 'I can do all things through Christ, who strengthens me.', explainer: 'Christ gives strength to endure changing circumstances.', verseCount: 1 },
       { book: 'isaiah', chapter: 40, startVerse: 29, endVerse: 31, reference: 'Isaiah 40:29–31', preview: 'He gives power to the weak. He increases the strength of him who has no might…', explainer: 'Those who hope in God can find renewed strength to keep going.', verseCount: 3 },
@@ -103,7 +103,7 @@ export const TOPICS: Topic[] = [
     slug: 'hope',
     name: 'Hope',
     description: 'Remembering God\'s promises, finding encouragement and maintaining hope even when life feels difficult.',
-    icon: '🌅',
+    icon: 'Sun',
     passages: [
       { book: 'romans', chapter: 8, startVerse: 28, endVerse: 28, reference: 'Romans 8:28', preview: 'We know that all things work together for good for those who love God…', explainer: 'God can work even painful experiences towards His good purposes.', verseCount: 1 },
       { book: 'jeremiah', chapter: 29, startVerse: 11, endVerse: 11, reference: 'Jeremiah 29:11', preview: 'For I know the thoughts that I think toward you, says Yahweh, thoughts of peace…', explainer: 'God reassures His people that suffering is not the end of their story.', verseCount: 1 },
@@ -117,7 +117,7 @@ export const TOPICS: Topic[] = [
     slug: 'marriage-relationships',
     name: 'Marriage & Relationships',
     description: 'Building healthy relationships based on commitment, mutual respect, faithfulness and selfless love.',
-    icon: '💍',
+    icon: 'Gem',
     passages: [
       { book: 'ephesians', chapter: 5, startVerse: 25, endVerse: 25, reference: 'Ephesians 5:25', preview: 'Husbands, love your wives, even as Christ also loved the assembly…', explainer: 'Love through selfless care and sacrifice, following Christ\'s example.', verseCount: 1 },
       { book: 'colossians', chapter: 3, startVerse: 12, endVerse: 14, reference: 'Colossians 3:12–14', preview: 'Put on therefore, as God\'s chosen ones, a heart of compassion, kindness…', explainer: 'Healthy relationships need compassion, humility, patience and forgiveness.', verseCount: 3 },
@@ -130,7 +130,7 @@ export const TOPICS: Topic[] = [
     slug: 'loneliness',
     name: 'Loneliness',
     description: 'Finding comfort in God\'s presence, overcoming isolation and remembering that you are not abandoned.',
-    icon: '🫂',
+    icon: 'HeartHandshake',
     passages: [
       { book: 'deuteronomy', chapter: 31, startVerse: 8, endVerse: 8, reference: 'Deuteronomy 31:8', preview: 'Yahweh himself is who goes before you. He will be with you…', explainer: 'God promises to go with His people and not abandon them.', verseCount: 1 },
       { book: 'psalms', chapter: 27, startVerse: 10, endVerse: 10, reference: 'Psalm 27:10', preview: 'When my father and my mother forsake me, then Yahweh will take me up.', explainer: 'Even if the people closest to you let you down, God remains.', verseCount: 1 },
@@ -143,7 +143,7 @@ export const TOPICS: Topic[] = [
     slug: 'depression',
     name: 'Depression',
     description: 'Finding hope during emotional suffering, remembering God\'s compassion and finding strength when life feels overwhelming.',
-    icon: '🌱',
+    icon: 'Leaf',
     passages: [
       { book: 'psalms', chapter: 34, startVerse: 18, endVerse: 18, reference: 'Psalm 34:18', preview: 'Yahweh is near to those who have a broken heart…', explainer: 'God does not turn away from people who are emotionally broken.', verseCount: 1 },
       { book: 'psalms', chapter: 42, startVerse: 5, endVerse: 5, reference: 'Psalm 42:5', preview: 'Why are you in despair, my soul? Hope in God!', explainer: 'Recognise despair honestly and encourage yourself to keep hoping in God.', verseCount: 1 },
@@ -156,7 +156,7 @@ export const TOPICS: Topic[] = [
     slug: 'business-career',
     name: 'Business & Career',
     description: 'Building a business, working diligently, making wise decisions, managing money, and pursuing meaningful goals.',
-    icon: '📈',
+    icon: 'Mountain',
     passages: [
       { book: 'proverbs', chapter: 16, startVerse: 3, endVerse: 3, reference: 'Proverbs 16:3', preview: 'Commit your deeds to Yahweh, and your plans shall succeed.', explainer: 'Bring your work and ambitions before God.', verseCount: 1 },
       { book: 'proverbs', chapter: 21, startVerse: 5, endVerse: 5, reference: 'Proverbs 21:5', preview: 'The plans of the diligent surely lead to profit…', explainer: 'Sustainable progress comes from careful planning and consistent effort.', verseCount: 1 },
@@ -170,7 +170,7 @@ export const TOPICS: Topic[] = [
     slug: 'lust-self-control',
     name: 'Lust & Sexual Self-Control',
     description: 'Overcoming lust, resisting sexual temptation, practising self-control and keeping your thoughts and actions pure.',
-    icon: '🛡️',
+    icon: 'Shield',
     passages: [
       { book: 'matthew', chapter: 5, startVerse: 27, endVerse: 28, reference: 'Matthew 5:27–28', preview: 'Everyone who gazes at a woman to lust after her has committed adultery with her already in his heart.', explainer: 'Jesus teaches that faithfulness begins in the heart, not just in physical actions.', verseCount: 2 },
       { book: '1corinthians', chapter: 6, startVerse: 18, endVerse: 20, reference: '1 Corinthians 6:18–20', preview: 'Flee sexual immorality! Your body is a temple of the Holy Spirit…', explainer: 'Your body deserves respect. Paul encourages us to honour God through our physical choices.', verseCount: 3 },

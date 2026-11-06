@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ChevronLeft, BookOpen, Heart, Brain } from 'lucide-react';
 import { getTopicBySlug, TOPICS } from '../lib/topics';
 import { useSavedVerses } from '../hooks/useSavedVerses';
+import TopicIcon from '../components/TopicIcon';
 import { showToast } from '../components/Toast';
 
 export default function TopicPage() {
@@ -54,7 +55,9 @@ export default function TopicPage() {
           >
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <span className="text-3xl">{topic.icon}</span>
+          <span className="w-12 h-12 rounded-xl bg-gold-500/10 flex items-center justify-center shrink-0 text-gold-400">
+            <TopicIcon name={topic.icon} className="w-6 h-6" />
+          </span>
           <h1 className="text-3xl font-serif font-bold text-cream">
             {topic.name}
           </h1>

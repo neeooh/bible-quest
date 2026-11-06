@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Loader2, BookMarked, ArrowRight, Search, X } from 'lucide-react';
 import { loadBook, searchBible, type SearchResult } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
+import TopicIcon from '../components/TopicIcon';
 import { TOPICS } from '../lib/topics';
 import {
   getOldTestamentBooks,
@@ -322,7 +323,9 @@ export default function LibraryPage() {
               to={`/topics/${topic.slug}`}
               className="card group hover:border-gold-500/30 transition-all duration-200 cursor-pointer !p-4 flex items-center gap-3"
             >
-              <span className="text-2xl">{topic.icon}</span>
+              <span className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0 text-gold-400 group-hover:bg-gold-500/20 transition-colors">
+                <TopicIcon name={topic.icon} className="w-5 h-5" />
+              </span>
               <div className="min-w-0">
                 <h3 className="font-serif font-semibold text-cream group-hover:text-gold-400 transition-colors text-sm">
                   {topic.name}
