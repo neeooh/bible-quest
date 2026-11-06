@@ -447,7 +447,7 @@ export default function MyVersesPage() {
                 {/* Content zone: verse text + stats */}
                 {entry.text && (
                   <p
-                    className={`text-cream/80 text-sm mt-3 italic leading-relaxed cursor-pointer hover:text-cream transition-colors ${
+                    className={`text-cream/80 text-base mt-3 italic leading-relaxed cursor-pointer hover:text-cream transition-colors ${
                       expandedCards.has(entry.key) ? '' : 'line-clamp-2'
                     }`}
                     onClick={() =>
