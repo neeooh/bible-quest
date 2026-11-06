@@ -168,7 +168,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: 'lust-self-control',
-    name: 'Lust & Sexual Self-Control',
+    name: 'Lust & Self-Control',
     description: 'Overcoming lust, resisting sexual temptation, practising self-control and keeping your thoughts and actions pure.',
     icon: 'Shield',
     passages: [
