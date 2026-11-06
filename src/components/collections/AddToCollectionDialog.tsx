@@ -8,7 +8,7 @@ interface AddToCollectionDialogProps {
   passageKey: string;
   collections: Collection[];
   onAddPassageToCollections: (passageKey: string, collectionIds: string[]) => void;
-  onCreateCollection: (name: string, description: string) => void;
+  onCreateCollection: (name: string, description: string) => string;
 }
 
 export default function AddToCollectionDialog({
@@ -23,9 +23,9 @@ export default function AddToCollectionDialog({
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
 
+  // Only reset selections when the dialog opens (not when collections change)
   useEffect(() => {
     if (isOpen) {
-      // Pre-check collections that already contain this passage
       const initial = new Set<string>();
       for (const c of collections) {
         if (c.passageKeys.includes(passageKey)) {
@@ -36,7 +36,8 @@ export default function AddToCollectionDialog({
       setShowCreate(false);
       setNewName('');
     }
-  }, [isOpen, passageKey, collections]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, passageKey]);
 
   if (!isOpen) return null;
 
@@ -55,10 +56,10 @@ export default function AddToCollectionDialog({
   function handleCreateInline() {
     const trimmed = newName.trim();
     if (!trimmed) return;
-    onCreateCollection(trimmed, '');
+    const newId = onCreateCollection(trimmed, '');
+    setSelected((prev) => new Set([...prev, newId]));
     setNewName('');
     setShowCreate(false);
-    // The new collection will appear after re-render; select it in the next effect
   }
 
   function handleSave() {

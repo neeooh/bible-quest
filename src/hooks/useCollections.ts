@@ -4,7 +4,7 @@ import * as collectionsLib from '../lib/collections';
 
 export interface UseCollectionsReturn {
   collections: Collection[];
-  createCollection: (name: string, description: string) => void;
+  createCollection: (name: string, description: string) => string;
   updateCollection: (id: string, updates: Partial<Pick<Collection, 'name' | 'description'>>) => void;
   deleteCollection: (id: string) => void;
   addPassageToCollections: (passageKey: string, collectionIds: string[]) => void;
@@ -17,9 +17,10 @@ export function useCollections(): UseCollectionsReturn {
     collectionsLib.getCollections,
   );
 
-  const createCollection = useCallback((name: string, description: string) => {
-    const updated = collectionsLib.createCollection(name, description);
+  const createCollection = useCallback((name: string, description: string): string => {
+    const { collections: updated, id } = collectionsLib.createCollection(name, description);
     setCollections(updated);
+    return id;
   }, []);
 
   const updateCollection = useCallback(

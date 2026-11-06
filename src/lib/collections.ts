@@ -24,17 +24,18 @@ function persist(collections: Collection[]): Collection[] {
   return collections;
 }
 
-export function createCollection(name: string, description: string): Collection[] {
+export function createCollection(name: string, description: string): { collections: Collection[]; id: string } {
   const current = getCollections();
+  const id = crypto.randomUUID();
   const newCollection: Collection = {
-    id: crypto.randomUUID(),
+    id,
     name,
     description,
     passageKeys: [],
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
-  return persist([...current, newCollection]);
+  return { collections: persist([...current, newCollection]), id };
 }
 
 export function updateCollection(
