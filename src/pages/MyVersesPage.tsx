@@ -43,7 +43,7 @@ type StageFilter = 'all' | 'not-started' | 'learning' | 'memorising' | 'retentio
 
 const STAGE_OPTIONS: { key: StageFilter; label: string; color?: string }[] = [
   { key: 'all', label: 'All Stages' },
-  { key: 'not-started', label: 'Not Started' },
+  { key: 'not-started', label: 'Not Started', color: 'bg-cream/30' },
   { key: 'learning', label: 'Learning', color: 'bg-blue-500' },
   { key: 'memorising', label: 'Memorising', color: 'bg-amber-500' },
   { key: 'retention', label: 'Retention', color: 'bg-green-500' },
@@ -514,7 +514,7 @@ export default function MyVersesPage() {
                       })}
                     </div>
                     <span className={`text-xs ${entry.timesCompleted === 0 ? 'text-cream/25' : 'text-cream/40'}`}>
-                      Stage: {entry.timesCompleted === 0 ? 'Not practised yet' : entry.stageLabel}
+                      Stage: {entry.timesCompleted === 0 ? 'Not Started' : entry.stageLabel}
                     </span>
                   </div>
                   {entry.timesCompleted > 0 && (
