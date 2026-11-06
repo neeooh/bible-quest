@@ -267,7 +267,7 @@ export default function ReadPage() {
                   isSelected
                     ? 'bg-gold-500/20 text-cream'
                     : isSavedVerse
-                      ? 'bg-blue-500/10 hover:bg-blue-500/20'
+                      ? 'bg-blue-500/20 hover:bg-blue-500/30'
                       : 'hover:bg-gold-500/10'
                 }`}
               >
