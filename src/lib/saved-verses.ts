@@ -28,13 +28,13 @@ export function addSavedVerse(
       v.verse === verse.verse,
   );
   if (existing) {
-    // Re-favourite if it was unfavourited
-    if (existing.favourite === false) {
+    // Only re-favourite if the caller explicitly wants favourite: true
+    if (existing.favourite === false && verse.favourite !== false) {
       return setVerseFavourite(verse.book, verse.chapter, verse.verse, true);
     }
     return current;
   }
-  return persist([...current, { ...verse, favourite: true, savedAt: Date.now() }]);
+  return persist([...current, { ...verse, favourite: verse.favourite ?? true, savedAt: Date.now() }]);
 }
 
 export function addSavedVerses(

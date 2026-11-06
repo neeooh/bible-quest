@@ -143,6 +143,7 @@ export default function TopicPage() {
                           verse: passage.startVerse,
                           text: passage.preview,
                           reference: passage.reference,
+                          favourite: false,
                         });
                       }
                       setCollectionDialogKey(
