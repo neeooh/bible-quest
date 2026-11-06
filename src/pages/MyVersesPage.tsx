@@ -39,12 +39,13 @@ function timeAgo(timestamp: number): string {
   return `${days}d ago`;
 }
 
-type Filter = 'all' | 'favourites' | 'due-for-review' | 'least-practised' | 'lowest-score' | 'perfect';
+type Filter = 'all' | 'favourites' | 'due-for-review' | 'not-started' | 'least-practised' | 'lowest-score' | 'perfect';
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'favourites', label: 'Favourites' },
   { key: 'due-for-review', label: 'Due for Review' },
+  { key: 'not-started', label: 'Not Started' },
   { key: 'least-practised', label: 'Least Practised' },
   { key: 'lowest-score', label: 'Lowest Score' },
   { key: 'perfect', label: '100% Score' },
@@ -84,10 +85,16 @@ export default function MyVersesPage() {
   const [activeTab, setActiveTab] = useState<'all-passages' | 'my-collections'>(
     searchParams.get('tab') === 'collections' ? 'my-collections' : 'all-passages',
   );
-  const [filter, setFilter] = useState<Filter>('all');
-  const [stageFilter, setStageFilter] = useState<Set<LearningStage>>(
-    new Set(['learning', 'memorising', 'retention']),
+  const [filter, setFilter] = useState<Filter>(
+    (searchParams.get('filter') as Filter) || 'all',
   );
+  const [stageFilter, setStageFilter] = useState<Set<LearningStage>>(() => {
+    const stageParam = searchParams.get('stage') as LearningStage | null;
+    if (stageParam && ['learning', 'memorising', 'retention'].includes(stageParam)) {
+      return new Set([stageParam]);
+    }
+    return new Set(['learning', 'memorising', 'retention']);
+  });
   const [stageDropdownOpen, setStageDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') ?? '');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
@@ -242,6 +249,9 @@ export default function MyVersesPage() {
         break;
       case 'due-for-review':
         list = list.filter((e) => e.dueForReview);
+        break;
+      case 'not-started':
+        list = list.filter((e) => e.timesCompleted === 0);
         break;
       case 'least-practised':
         list = list.sort((a, b) => a.timesCompleted - b.timesCompleted);

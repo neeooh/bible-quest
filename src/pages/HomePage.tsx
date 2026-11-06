@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import {
   BookOpen,
   Flame,
-  Trophy,
   Star,
   Copy,
   ArrowRight,
@@ -11,14 +10,13 @@ import {
   Heart,
   Loader2,
   BookMarked,
-  Bell,
   Share2,
 } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
-import { getPassageStage } from '../lib/learning-stage';
+import { getPassageStage, formatReviewDate } from '../lib/learning-stage';
 import { showToast } from '../components/Toast';
 import type { DailyVerse } from '../lib/types';
 
@@ -40,7 +38,8 @@ export default function HomePage() {
     progress.totalXp > 0 ||
     progress.dailyStreak > 0 ||
     progress.chaptersExplored.length > 0 ||
-    progress.passagesMemorized.length > 0;
+    progress.passagesMemorized.length > 0 ||
+    savedVerses.length > 0;
 
   const stageCounts = useMemo(() => {
     const seen = new Set<string>();
@@ -49,6 +48,7 @@ export default function HomePage() {
     let retention = 0;
     let dueForReview = 0;
     let notPractised = 0;
+    let nearestReview: string | null = null;
 
     // Count stages from exercise history
     for (const e of progress.exerciseHistory) {
@@ -66,6 +66,9 @@ export default function HomePage() {
       if (stage.stage === 'memorising') memorising++;
       if (stage.stage === 'retention') retention++;
       if (stage.dueForReview) dueForReview++;
+      if (stage.nextReview && (!nearestReview || stage.nextReview < nearestReview)) {
+        nearestReview = stage.nextReview;
+      }
     }
 
     // Count saved verses that have never been practised
@@ -76,7 +79,7 @@ export default function HomePage() {
       }
     }
 
-    return { learning, memorising, retention, dueForReview, notPractised };
+    return { learning, memorising, retention, dueForReview, notPractised, nearestReview };
   }, [progress.exerciseHistory, savedVerses]);
 
   function handleCopy() {
@@ -204,85 +207,73 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Learning nudges */}
-      {(stageCounts.dueForReview > 0 || stageCounts.learning > 0 || stageCounts.notPractised > 0 || stageCounts.memorising > 0) && (
-        <section className="max-w-2xl mx-auto space-y-3">
-          {stageCounts.dueForReview > 0 && (
-            <Link
-              to="/my-verses?filter=due-for-review"
-              className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
-            >
-              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 group-hover:bg-amber-500/20 transition-colors">
-                <Bell className="w-5 h-5 text-amber-400" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-cream font-medium text-sm">
-                  {stageCounts.dueForReview} passage{stageCounts.dueForReview > 1 ? 's' : ''} due for review
+      {/* Your Memorisation — persistent summary card */}
+      {hasAnyData && (
+        <section className="max-w-2xl mx-auto">
+          <div className="card space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-medium text-cream/50">Your Memorisation</h2>
+              {progress.dailyStreak > 0 && (
+                <Link to="/progress" className="flex items-center gap-1.5 text-xs text-gold-400 hover:text-gold-300 transition-colors">
+                  <Flame className="w-3.5 h-3.5" />
+                  {progress.dailyStreak} day streak
+                </Link>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <Link
+                to="/my-verses?stage=learning"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+              >
+                <p className="text-2xl font-bold text-blue-400">{stageCounts.learning}</p>
+                <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Learning</p>
+              </Link>
+              <Link
+                to="/my-verses?stage=memorising"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+              >
+                <p className="text-2xl font-bold text-purple-400">{stageCounts.memorising}</p>
+                <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Memorising</p>
+              </Link>
+              <Link
+                to="/my-verses?stage=retention"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+              >
+                <p className="text-2xl font-bold text-green-400">{stageCounts.retention}</p>
+                <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Retention</p>
+              </Link>
+              <Link
+                to="/my-verses?filter=due-for-review"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+              >
+                <p className={`text-2xl font-bold ${stageCounts.dueForReview > 0 ? 'text-amber-400' : 'text-cream/20'}`}>
+                  {stageCounts.dueForReview}
                 </p>
-                <p className="text-cream/40 text-xs mt-0.5">
-                  Keep your memory fresh — a quick review goes a long way.
+                <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Due for Review</p>
+              </Link>
+              <Link
+                to="/my-verses?filter=not-started"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+              >
+                <p className={`text-2xl font-bold ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`}>
+                  {stageCounts.notPractised}
                 </p>
-              </div>
-              <ArrowRight className="w-5 h-5 text-cream/30 shrink-0 group-hover:text-amber-400 transition-colors" />
-            </Link>
-          )}
-          {stageCounts.learning > 0 && (
-            <Link
-              to="/my-verses"
-              className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
-            >
-              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0 group-hover:bg-blue-500/20 transition-colors">
-                <BookOpen className="w-5 h-5 text-blue-400" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-cream font-medium text-sm">
-                  {stageCounts.learning} passage{stageCounts.learning > 1 ? 's' : ''} in learning stage
-                </p>
-                <p className="text-cream/40 text-xs mt-0.5">
-                  Keep practising to move them toward memorisation.
-                </p>
-              </div>
-              <ArrowRight className="w-5 h-5 text-cream/30 shrink-0 group-hover:text-blue-400 transition-colors" />
-            </Link>
-          )}
-          {stageCounts.memorising > 0 && (
-            <Link
-              to="/my-verses"
-              className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
-            >
-              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0 group-hover:bg-purple-500/20 transition-colors">
-                <Star className="w-5 h-5 text-purple-400" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-cream font-medium text-sm">
-                  {stageCounts.memorising} passage{stageCounts.memorising > 1 ? 's' : ''} in memorising stage
-                </p>
-                <p className="text-cream/40 text-xs mt-0.5">
-                  Almost there — try recitation or first letters to reach retention.
-                </p>
-              </div>
-              <ArrowRight className="w-5 h-5 text-cream/30 shrink-0 group-hover:text-purple-400 transition-colors" />
-            </Link>
-          )}
-          {stageCounts.notPractised > 0 && (
-            <Link
-              to="/my-verses"
-              className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
-            >
-              <div className="w-10 h-10 rounded-lg bg-cream/5 flex items-center justify-center shrink-0 group-hover:bg-cream/10 transition-colors">
-                <BookMarked className="w-5 h-5 text-cream/40" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-cream font-medium text-sm">
-                  {stageCounts.notPractised} saved passage{stageCounts.notPractised > 1 ? 's' : ''} not practised yet
-                </p>
-                <p className="text-cream/40 text-xs mt-0.5">
-                  Start practising to begin your memorisation journey.
-                </p>
-              </div>
-              <ArrowRight className="w-5 h-5 text-cream/30 shrink-0 group-hover:text-cream/60 transition-colors" />
-            </Link>
-          )}
+                <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Not Started</p>
+              </Link>
+              {stageCounts.nearestReview && (
+                <div className="rounded-lg bg-navy-700 p-3">
+                  <p className={`text-2xl font-bold ${stageCounts.dueForReview > 0 ? 'text-amber-400' : 'text-cream/40'}`}>
+                    {stageCounts.dueForReview > 0 ? '!' : '✓'}
+                  </p>
+                  <p className="text-cream/40 text-xs mt-0.5">
+                    {stageCounts.dueForReview > 0
+                      ? 'Review now'
+                      : `Next: ${formatReviewDate(stageCounts.nearestReview)}`}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </section>
       )}
 
@@ -305,43 +296,6 @@ export default function HomePage() {
           </Link>
         )}
       </section>
-
-      {/* Quick Stats */}
-      {hasAnyData ? (
-        <Link to="/progress" className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto group">
-          <div className="card flex items-center gap-4 group-hover:border-gold-500/30 transition-colors !p-4">
-            <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
-              <Trophy className="w-5 h-5 text-gold-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-cream">{progress.totalXp}</p>
-              <p className="text-cream/40 text-xs">Total XP</p>
-            </div>
-          </div>
-          <div className="card flex items-center gap-4 group-hover:border-gold-500/30 transition-colors !p-4">
-            <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
-              <Flame className="w-5 h-5 text-gold-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-cream">
-                {progress.dailyStreak}
-              </p>
-              <p className="text-cream/40 text-xs">Day Streak</p>
-            </div>
-          </div>
-          <div className="card flex items-center gap-4 group-hover:border-gold-500/30 transition-colors !p-4">
-            <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
-              <BookOpen className="w-5 h-5 text-gold-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-cream">
-                {progress.passagesMemorized.length}
-              </p>
-              <p className="text-cream/40 text-xs">Passages Memorised</p>
-            </div>
-          </div>
-        </Link>
-      ) : null}
 
       {/* About */}
       <section className="text-center">
