@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
 import { useCollections } from '../hooks/useCollections';
+import { toCollectionSlug } from '../lib/collections';
 import { getBookBySlug } from '../lib/book-metadata';
 import {
   getPassageStage,
@@ -39,7 +40,7 @@ interface UnifiedEntry {
 }
 
 export default function CollectionDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { progress } = useProgress();
   const { savedVerses, addVerse, setFavourite, isSaved, isFavourite } = useSavedVerses();
@@ -50,7 +51,7 @@ export default function CollectionDetailPage() {
     removePassageFromCollection,
   } = useCollections();
 
-  const collection = collections.find((c) => c.id === id);
+  const collection = collections.find((c) => toCollectionSlug(c.name) === slug);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
@@ -398,7 +399,12 @@ export default function CollectionDetailPage() {
         onClose={() => setEditDialogOpen(false)}
         onSave={(name, description, icon) => {
           updateCollection(collection.id, { name, description, icon });
-        }}
+          // Update URL if the name (and therefore slug) changed
+          const newSlug = toCollectionSlug(name);
+          if (newSlug !== slug) {
+            navigate(`/my-verses/collection/${newSlug}`, { replace: true });
+          }
+        }}}
         onDelete={() => {
           if (window.confirm(`Delete "${collection.name}"? Passages will not be removed from My Verses.`)) {
             deleteCollection(collection.id);

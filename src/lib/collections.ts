@@ -10,6 +10,14 @@ export interface Collection {
 
 const STORAGE_KEY = 'biblequest_collections';
 
+export function toCollectionSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export function getCollections(): Collection[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -18,6 +26,10 @@ export function getCollections(): Collection[] {
   } catch {
     return [];
   }
+}
+
+export function getCollectionBySlug(slug: string): Collection | undefined {
+  return getCollections().find((c) => toCollectionSlug(c.name) === slug);
 }
 
 function persist(collections: Collection[]): Collection[] {

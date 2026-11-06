@@ -23,7 +23,7 @@ export default function App() {
           <Route path="/library/:book" element={<BookChaptersPage />} />
           <Route path="/read/:book/:chapter" element={<ReadPage />} />
           <Route path="/memorize" element={<MemorizePage />} />
-          <Route path="/my-verses/collection/:id" element={<CollectionDetailPage />} />
+          <Route path="/my-verses/collection/:slug" element={<CollectionDetailPage />} />
           <Route path="/my-verses" element={<MyVersesPage />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/about" element={<AboutPage />} />

@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
 import { useCollections } from '../hooks/useCollections';
+import { toCollectionSlug } from '../lib/collections';
 import { getBookBySlug } from '../lib/book-metadata';
 import {
   getPassageStage,
@@ -336,7 +337,10 @@ export default function MyVersesPage() {
         <>
           <CollectionsOverview
             collections={collections}
-            onNavigateToCollection={(collectionId) => navigate(`/my-verses/collection/${collectionId}`)}
+            onNavigateToCollection={(collectionId) => {
+              const col = collections.find((c) => c.id === collectionId);
+              if (col) navigate(`/my-verses/collection/${toCollectionSlug(col.name)}`);
+            }}
           />
           <CreateCollectionDialog
             isOpen={createCollectionOpen}
