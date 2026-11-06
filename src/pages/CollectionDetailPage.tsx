@@ -404,7 +404,7 @@ export default function CollectionDetailPage() {
           if (newSlug !== slug) {
             navigate(`/my-verses/collection/${newSlug}`, { replace: true });
           }
-        }}}
+        }}
         onDelete={() => {
           if (window.confirm(`Delete "${collection.name}"? Passages will not be removed from My Verses.`)) {
             deleteCollection(collection.id);
