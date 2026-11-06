@@ -7,7 +7,6 @@ import {
   Plus,
   BookOpen,
   Heart,
-  Check,
   Loader2,
   X,
   BookmarkPlus,
@@ -45,7 +44,7 @@ export default function ReadPage() {
   const [selectedVerses, setSelectedVerses] = useState<Set<number>>(new Set());
 
   const { markChapterExplored, progress } = useProgress();
-  const { addVerses, isSaved } = useSavedVerses();
+  const { addVerse, addVerses, removeVerse, isSaved, isFavourite, setFavourite } = useSavedVerses();
   const { speak, stop, isSpeaking, isSupported: ttsSupported } = useTextToSpeech();
   const toastedChapterRef = useRef<string | null>(null);
 
@@ -107,12 +106,12 @@ export default function ReadPage() {
     );
   }, [selectedVerses, isSaved, bookSlug, num]);
 
-  const anySelectedSaved = useMemo(() => {
+  const allSelectedFavourited = useMemo(() => {
     if (selectedVerses.size === 0 || !bookSlug) return false;
-    return Array.from(selectedVerses).some((v) =>
-      isSaved(bookSlug, num, v),
+    return Array.from(selectedVerses).every((v) =>
+      isFavourite(bookSlug, num, v),
     );
-  }, [selectedVerses, isSaved, bookSlug, num]);
+  }, [selectedVerses, isFavourite, bookSlug, num]);
 
   if (!meta) {
     return (
@@ -156,23 +155,63 @@ export default function ReadPage() {
     });
   }
 
-  function handleAddSelectedToMyVerses() {
+  function handleToggleSave() {
     if (!chapter || !bookSlug) return;
-    const versesToAdd = chapter.verses
-      .filter((v) => selectedVerses.has(v.verse))
-      .map((v) => ({
-        book: bookSlug,
-        chapter: num,
-        verse: v.verse,
-        text: v.text,
-        reference: formatReference(bookName, num, v.verse),
-      }));
-    addVerses(versesToAdd);
-    const count = versesToAdd.length;
-    showToast(
-      `Added ${count} verse${count > 1 ? 's' : ''} to favourites`,
-      'success',
-    );
+    if (allSelectedSaved) {
+      // Unsave all selected
+      for (const v of selectedVerses) {
+        if (isSaved(bookSlug, num, v)) {
+          removeVerse(bookSlug, num, v);
+        }
+      }
+      showToast('Removed from My Verses', 'info');
+    } else {
+      // Save all selected
+      const versesToAdd = chapter.verses
+        .filter((v) => selectedVerses.has(v.verse))
+        .map((v) => ({
+          book: bookSlug,
+          chapter: num,
+          verse: v.verse,
+          text: v.text,
+          reference: formatReference(bookName, num, v.verse),
+          favourite: false,
+        }));
+      addVerses(versesToAdd);
+      showToast(`Saved ${versesToAdd.length} verse${versesToAdd.length > 1 ? 's' : ''}`, 'success');
+    }
+  }
+
+  function handleToggleFavourite() {
+    if (!chapter || !bookSlug) return;
+    if (allSelectedFavourited) {
+      // Unfavourite all selected
+      for (const v of selectedVerses) {
+        if (isFavourite(bookSlug, num, v)) {
+          setFavourite(bookSlug, num, v, false);
+        }
+      }
+      showToast('Removed from favourites', 'info');
+    } else {
+      // Favourite all selected (auto-save if needed)
+      for (const v of selectedVerses) {
+        if (!isSaved(bookSlug, num, v)) {
+          const verse = chapter.verses.find((cv) => cv.verse === v);
+          if (verse) {
+            addVerse({
+              book: bookSlug,
+              chapter: num,
+              verse: v,
+              text: verse.text,
+              reference: formatReference(bookName, num, v),
+            });
+          }
+        } else if (!isFavourite(bookSlug, num, v)) {
+          setFavourite(bookSlug, num, v, true);
+        }
+      }
+      showToast('Added to favourites', 'success');
+    }
   }
 
   return (
@@ -320,26 +359,30 @@ export default function ReadPage() {
           </Link>
           <button
             type="button"
-            onClick={handleAddSelectedToMyVerses}
-            disabled={allSelectedSaved}
-            className={`btn-outline inline-flex items-center gap-2 shadow-lg shadow-navy-900/50 text-sm ${allSelectedSaved ? 'opacity-50 cursor-default' : ''}`}
+            onClick={handleToggleSave}
+            className={`btn-outline inline-flex items-center gap-2 text-sm ${
+              allSelectedSaved ? 'border-blue-400/30 text-blue-400' : ''
+            }`}
           >
-            {allSelectedSaved ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Heart className="w-4 h-4" />
-            )}
-            {allSelectedSaved ? 'Saved' : 'Favourite'}
+            <Bookmark
+              className="w-4 h-4"
+              fill={allSelectedSaved ? 'currentColor' : 'none'}
+            />
+            {allSelectedSaved ? 'Saved' : 'Save'}
           </button>
-          {anySelectedSaved && (
-            <Link
-              to={`/my-verses?search=${encodeURIComponent(bookName + ' ' + num)}`}
-              className="btn-outline inline-flex items-center gap-2 text-sm"
-            >
-              <Bookmark className="w-4 h-4" />
-              View in My Verses
-            </Link>
-          )}
+          <button
+            type="button"
+            onClick={handleToggleFavourite}
+            className={`btn-outline inline-flex items-center gap-2 text-sm ${
+              allSelectedFavourited ? 'border-red-400/30 text-red-400' : ''
+            }`}
+          >
+            <Heart
+              className="w-4 h-4"
+              fill={allSelectedFavourited ? 'currentColor' : 'none'}
+            />
+            {allSelectedFavourited ? 'Favourited' : 'Favourite'}
+          </button>
           <button
             type="button"
             onClick={() => {
