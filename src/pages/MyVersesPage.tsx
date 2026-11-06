@@ -89,7 +89,7 @@ export default function MyVersesPage() {
     new Set(['learning', 'memorising', 'retention']),
   );
   const [stageDropdownOpen, setStageDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') ?? '');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
   const [addToCollectionKey, setAddToCollectionKey] = useState<string | null>(null);

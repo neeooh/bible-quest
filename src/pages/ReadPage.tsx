@@ -11,6 +11,7 @@ import {
   Loader2,
   X,
   BookmarkPlus,
+  Bookmark,
   Copy,
   Share2,
   Volume2,
@@ -102,6 +103,13 @@ export default function ReadPage() {
   const allSelectedSaved = useMemo(() => {
     if (selectedVerses.size === 0 || !bookSlug) return false;
     return Array.from(selectedVerses).every((v) =>
+      isSaved(bookSlug, num, v),
+    );
+  }, [selectedVerses, isSaved, bookSlug, num]);
+
+  const anySelectedSaved = useMemo(() => {
+    if (selectedVerses.size === 0 || !bookSlug) return false;
+    return Array.from(selectedVerses).some((v) =>
       isSaved(bookSlug, num, v),
     );
   }, [selectedVerses, isSaved, bookSlug, num]);
@@ -238,6 +246,7 @@ export default function ReadPage() {
       >
         {chapter.verses.map((v) => {
           const isSelected = selectedVerses.has(v.verse);
+          const isSavedVerse = bookSlug ? isSaved(bookSlug, num, v.verse) : false;
           return (
             <span key={v.verse}>
               {v.verse > 1 && v.verse % 6 === 1 && (
@@ -257,7 +266,9 @@ export default function ReadPage() {
                 className={`inline cursor-pointer rounded px-0.5 -mx-0.5 transition-colors ${
                   isSelected
                     ? 'bg-gold-500/20 text-cream'
-                    : 'hover:bg-gold-500/10'
+                    : isSavedVerse
+                      ? 'bg-blue-500/10 hover:bg-blue-500/20'
+                      : 'hover:bg-gold-500/10'
                 }`}
               >
                 <sup className="verse-number">{v.verse}</sup>
@@ -320,6 +331,15 @@ export default function ReadPage() {
             )}
             {allSelectedSaved ? 'Saved' : 'Favourite'}
           </button>
+          {anySelectedSaved && (
+            <Link
+              to={`/my-verses?search=${encodeURIComponent(bookName + ' ' + num)}`}
+              className="btn-outline inline-flex items-center gap-2 text-sm"
+            >
+              <Bookmark className="w-4 h-4" />
+              View in My Verses
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => {
