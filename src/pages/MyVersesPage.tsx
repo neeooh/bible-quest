@@ -510,17 +510,6 @@ export default function MyVersesPage() {
                   <p className="text-base text-gold-400 font-serif font-semibold">
                     {entry.reference}
                   </p>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
-                      entry.stage === 'learning'
-                        ? 'bg-blue-500/15 text-blue-400'
-                        : entry.stage === 'memorising'
-                          ? 'bg-amber-500/15 text-amber-400'
-                          : 'bg-green-500/15 text-green-400'
-                    }`}
-                  >
-                    {entry.stageLabel}
-                  </span>
                   {entry.nextReview && (
                     <span className={`text-xs shrink-0 ${entry.dueForReview ? 'text-red-400 font-medium' : 'text-cream/30'}`}>
                       {entry.dueForReview ? '⏰ ' : ''}{formatReviewDate(entry.nextReview)}
@@ -547,48 +536,50 @@ export default function MyVersesPage() {
                     &ldquo;{entry.text}&rdquo;
                   </p>
                 )}
-                {entry.timesCompleted > 0 ? (
-                  <p className="text-cream/40 text-xs mt-3 flex items-center gap-2">
-                    <span className="flex items-center gap-1">
-                      <Target className="w-3 h-3" />
-                      Best: {Math.round(entry.bestAccuracy * 100)}%
-                    </span>
-                    <span className="text-cream/20">&middot;</span>
-                    <span>{entry.timesCompleted} session{entry.timesCompleted > 1 ? 's' : ''}</span>
-                    {entry.lastPractised > 0 && (
-                      <>
-                        <span className="text-cream/20">&middot;</span>
-                        <span className="flex items-center gap-1 text-cream/25">
-                          <Clock className="w-3 h-3" />
-                          {timeAgo(entry.lastPractised)}
-                        </span>
-                      </>
-                    )}
-                  </p>
-                ) : (
-                  <div className="flex items-center gap-3 mt-3">
-                    {/* Stage progress bar */}
-                    <div className="flex items-center gap-1.5">
-                      {(['learning', 'memorising', 'retention'] as const).map((s) => (
-                        <div
-                          key={s}
-                          className={`h-1.5 w-6 rounded-full ${
-                            s === 'learning' && entry.stage === 'learning'
+                {/* Stage progress bar — always visible */}
+                <div className="flex items-center gap-3 mt-3">
+                  <div className="flex items-center gap-1.5">
+                    {(['learning', 'memorising', 'retention'] as const).map((s) => (
+                      <div
+                        key={s}
+                        className={`h-1.5 w-6 rounded-full ${
+                          entry.timesCompleted === 0
+                            ? 'bg-cream/10'
+                            : s === 'learning'
                               ? 'bg-blue-400'
                               : s === 'memorising' && (entry.stage === 'memorising' || entry.stage === 'retention')
                                 ? 'bg-amber-400'
                                 : s === 'retention' && entry.stage === 'retention'
                                   ? 'bg-green-400'
                                   : 'bg-cream/10'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-cream/25 text-xs">
-                      Stage: {entry.stageLabel} · Not practised yet
-                    </span>
+                        }`}
+                      />
+                    ))}
                   </div>
-                )}
+                  {entry.timesCompleted > 0 ? (
+                    <span className="text-cream/40 text-xs flex items-center gap-2">
+                      <span className="flex items-center gap-1">
+                        <Target className="w-3 h-3" />
+                        Best: {Math.round(entry.bestAccuracy * 100)}%
+                      </span>
+                      <span className="text-cream/20">&middot;</span>
+                      <span>{entry.timesCompleted} session{entry.timesCompleted > 1 ? 's' : ''}</span>
+                      {entry.lastPractised > 0 && (
+                        <>
+                          <span className="text-cream/20">&middot;</span>
+                          <span className="flex items-center gap-1 text-cream/25">
+                            <Clock className="w-3 h-3" />
+                            {timeAgo(entry.lastPractised)}
+                          </span>
+                        </>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="text-cream/25 text-xs">
+                      Stage: Not practised yet
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-row flex-wrap sm:flex-col gap-2 shrink-0 w-full sm:w-auto items-center sm:items-stretch">
