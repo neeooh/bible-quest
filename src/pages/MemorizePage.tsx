@@ -236,7 +236,7 @@ export default function MemorizePage() {
                         speak(passageText);
                       }
                     }}
-                    className="btn-gold text-sm inline-flex items-center gap-1.5"
+                    className="btn-outline text-sm inline-flex items-center gap-1.5"
                     aria-label={isSpeaking ? 'Stop listening' : 'Listen to passage'}
                   >
                     {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
