@@ -599,7 +599,7 @@ export default function MyVersesPage() {
                   <Brain className="w-3.5 h-3.5" />
                   Practise
                 </Link>
-                <div className="flex items-center gap-2">
+                <div className="contents sm:flex sm:items-center sm:gap-2">
                   <Link
                     to={`/read/${entry.book}/${entry.chapterNumber}?verse=${entry.startVerse}`}
                     className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
