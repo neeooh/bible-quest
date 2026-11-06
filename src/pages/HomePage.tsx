@@ -208,13 +208,13 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="flex flex-wrap justify-center gap-4">
+      <section className="flex flex-wrap justify-center gap-4 items-center">
         <Link
           to="/library"
-          className="btn-gold inline-flex items-center gap-2 text-base px-8 py-3.5"
+          className="text-gold-400 hover:text-gold-300 hover:underline transition-colors inline-flex items-center gap-1.5 text-sm"
         >
           Explore the Bible
-          <ArrowRight className="w-5 h-5" />
+          <ArrowRight className="w-4 h-4" />
         </Link>
         {lastRead && (
           <Link
