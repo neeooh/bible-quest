@@ -1,14 +1,19 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronLeft, BookOpen, Heart, Brain } from 'lucide-react';
+import { ChevronLeft, BookOpen, Heart, Brain, FolderPlus } from 'lucide-react';
 import { getTopicBySlug, TOPICS } from '../lib/topics';
 import { useSavedVerses } from '../hooks/useSavedVerses';
+import { useCollections } from '../hooks/useCollections';
 import TopicIcon from '../components/TopicIcon';
+import AddToCollectionDialog from '../components/collections/AddToCollectionDialog';
 import { showToast } from '../components/Toast';
 
 export default function TopicPage() {
   const { slug } = useParams<{ slug: string }>();
   const topic = slug ? getTopicBySlug(slug) : undefined;
   const { addVerse, isSaved, isFavourite, setFavourite } = useSavedVerses();
+  const { collections, createCollection, addPassageToCollections } = useCollections();
+  const [collectionDialogKey, setCollectionDialogKey] = useState<string | null>(null);
 
   if (!topic) {
     return (
@@ -127,12 +132,44 @@ export default function TopicPage() {
                     fill={isFav ? 'currentColor' : 'none'}
                   />
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Ensure the passage is saved before adding to a collection
+                      if (!isSaved(passage.book, passage.chapter, passage.startVerse)) {
+                        addVerse({
+                          book: passage.book,
+                          chapter: passage.chapter,
+                          verse: passage.startVerse,
+                          text: passage.preview,
+                          reference: passage.reference,
+                        });
+                      }
+                      setCollectionDialogKey(
+                        `${passage.book}:${passage.chapter}:${passage.startVerse}-${passage.endVerse}`,
+                      );
+                    }}
+                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/30 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                    aria-label={`Add ${passage.reference} to collection`}
+                    title="Add to collection"
+                  >
+                    <FolderPlus className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      <AddToCollectionDialog
+        isOpen={collectionDialogKey !== null}
+        onClose={() => setCollectionDialogKey(null)}
+        passageKey={collectionDialogKey ?? ''}
+        collections={collections}
+        onAddPassageToCollections={addPassageToCollections}
+        onCreateCollection={createCollection}
+      />
     </div>
   );
 }
