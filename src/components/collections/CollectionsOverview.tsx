@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { FolderPlus, Search, FolderOpen, X } from 'lucide-react';
+import { Search, FolderOpen, X } from 'lucide-react';
 import type { Collection } from '../../lib/collections';
 
 interface CollectionsOverviewProps {
   collections: Collection[];
-  onCreateCollection: () => void;
   onNavigateToCollection: (id: string) => void;
 }
 
 export default function CollectionsOverview({
   collections,
-  onCreateCollection,
   onNavigateToCollection,
 }: CollectionsOverviewProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,18 +21,6 @@ export default function CollectionsOverview({
 
   return (
     <div className="space-y-4">
-      {/* Header row */}
-      <div className="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={onCreateCollection}
-          className="btn-gold text-sm inline-flex items-center gap-2"
-        >
-          <FolderPlus className="w-4 h-4" />
-          Create Collection
-        </button>
-      </div>
-
       {/* Search */}
       {collections.length > 0 && (
         <div className="relative">

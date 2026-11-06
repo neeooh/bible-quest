@@ -297,7 +297,7 @@ export default function MyVersesPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setActiveTab('all-passages')}
@@ -320,13 +320,22 @@ export default function MyVersesPage() {
         >
           My Collections
         </button>
+        {activeTab === 'my-collections' && (
+          <button
+            type="button"
+            onClick={() => setCreateCollectionOpen(true)}
+            className="btn-outline text-sm inline-flex items-center gap-2 px-4 py-2.5 sm:ml-auto"
+          >
+            <FolderPlus className="w-4 h-4" />
+            Create Collection
+          </button>
+        )}
       </div>
 
       {activeTab === 'my-collections' ? (
         <>
           <CollectionsOverview
             collections={collections}
-            onCreateCollection={() => setCreateCollectionOpen(true)}
             onNavigateToCollection={(collectionId) => navigate(`/my-verses/collection/${collectionId}`)}
           />
           <CreateCollectionDialog
