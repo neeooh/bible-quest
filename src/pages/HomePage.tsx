@@ -21,7 +21,7 @@ import { getDailyVerse } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
-import { getPassageStage, formatReviewDate } from '../lib/learning-stage';
+import { getPassageStage, formatReviewDate, daysUntilReview } from '../lib/learning-stage';
 import { showToast } from '../components/Toast';
 import type { DailyVerse } from '../lib/types';
 
@@ -301,12 +301,10 @@ export default function HomePage() {
                 >
                   <CalendarDays className={`w-5 h-5 mx-auto mb-2 ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-gold-400'}`} />
                   <p className={`text-3xl font-bold ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-gold-400'}`}>
-                    {stageCounts.dueForReview > 0 ? '!' : '✓'}
+                    {daysUntilReview(stageCounts.nearestReview) ?? 0}
                   </p>
                   <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">
-                    {stageCounts.dueForReview > 0
-                      ? 'Review now'
-                      : `Next: ${formatReviewDate(stageCounts.nearestReview)}`}
+                    {stageCounts.dueForReview > 0 ? 'Due Today' : `Next Review`}
                   </p>
                 </Link>
               )}

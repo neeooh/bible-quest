@@ -181,3 +181,15 @@ export function formatReviewDate(nextReview: string | null): string {
   );
   return `In ${diff} days`;
 }
+
+/**
+ * Return the number of days until the next review (0 = due today, negative = overdue).
+ */
+export function daysUntilReview(nextReview: string | null): number | null {
+  if (!nextReview) return null;
+  const today = todayISO();
+  return Math.round(
+    (new Date(nextReview).getTime() - new Date(today).getTime()) /
+      (1000 * 60 * 60 * 24),
+  );
+}
