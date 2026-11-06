@@ -23,7 +23,7 @@ export default function AddToCollectionDialog({
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
 
-  // Only reset selections when the dialog opens (not when collections change)
+  // Reset selections when the dialog opens
   useEffect(() => {
     if (isOpen) {
       const initial = new Set<string>();
@@ -33,6 +33,11 @@ export default function AddToCollectionDialog({
         }
       }
       setSelected(initial);
+      setShowCreate(false);
+      setNewName('');
+    } else {
+      // Clear state immediately on close so stale selections don't flash next open
+      setSelected(new Set());
       setShowCreate(false);
       setNewName('');
     }
@@ -56,6 +61,18 @@ export default function AddToCollectionDialog({
   function handleCreateInline() {
     const trimmed = newName.trim();
     if (!trimmed) return;
+
+    // If a collection with this name already exists (case-insensitive), just select it
+    const existing = collections.find(
+      (c) => c.name.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (existing) {
+      setSelected((prev) => new Set([...prev, existing.id]));
+      setNewName('');
+      setShowCreate(false);
+      return;
+    }
+
     const newId = onCreateCollection(trimmed, '');
     setSelected((prev) => new Set([...prev, newId]));
     setNewName('');

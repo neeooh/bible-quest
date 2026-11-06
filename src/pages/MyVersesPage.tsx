@@ -327,7 +327,6 @@ export default function MyVersesPage() {
           <CollectionsOverview
             collections={collections}
             onCreateCollection={() => setCreateCollectionOpen(true)}
-            onDeleteCollection={deleteCollection}
             onNavigateToCollection={(collectionId) => navigate(`/my-verses/collection/${collectionId}`)}
           />
           <CreateCollectionDialog

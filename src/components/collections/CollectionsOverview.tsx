@@ -1,18 +1,16 @@
 import { useState } from 'react';
-import { FolderPlus, Search, Trash2, FolderOpen, X } from 'lucide-react';
+import { FolderPlus, Search, FolderOpen, X } from 'lucide-react';
 import type { Collection } from '../../lib/collections';
 
 interface CollectionsOverviewProps {
   collections: Collection[];
   onCreateCollection: () => void;
-  onDeleteCollection: (id: string) => void;
   onNavigateToCollection: (id: string) => void;
 }
 
 export default function CollectionsOverview({
   collections,
   onCreateCollection,
-  onDeleteCollection,
   onNavigateToCollection,
 }: CollectionsOverviewProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,34 +85,18 @@ export default function CollectionsOverview({
               onClick={() => onNavigateToCollection(c.id)}
               className="card text-left hover:border-gold-500/30 transition-colors group"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-cream font-semibold text-base truncate">
-                    {c.name}
+              <div className="min-w-0">
+                <p className="text-cream font-semibold text-base truncate">
+                  {c.name}
+                </p>
+                <p className="text-cream/40 text-xs mt-1">
+                  {c.passageKeys.length} passage{c.passageKeys.length !== 1 ? 's' : ''}
+                </p>
+                {c.description && (
+                  <p className="text-cream/30 text-sm mt-2 line-clamp-2">
+                    {c.description}
                   </p>
-                  <p className="text-cream/40 text-xs mt-1">
-                    {c.passageKeys.length} passage{c.passageKeys.length !== 1 ? 's' : ''}
-                  </p>
-                  {c.description && (
-                    <p className="text-cream/30 text-sm mt-2 line-clamp-2">
-                      {c.description}
-                    </p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (window.confirm(`Delete "${c.name}"? Passages will not be removed.`)) {
-                      onDeleteCollection(c.id);
-                    }
-                  }}
-                  className="text-cream/20 hover:text-red-400 transition-colors shrink-0 p-1"
-                  aria-label={`Delete ${c.name}`}
-                  title="Delete collection"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                )}
               </div>
             </button>
           ))}
