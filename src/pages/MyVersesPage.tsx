@@ -96,6 +96,7 @@ export default function MyVersesPage() {
     return new Set(['learning', 'memorising', 'retention']);
   });
   const [stageDropdownOpen, setStageDropdownOpen] = useState(false);
+  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') ?? '');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [createCollectionOpen, setCreateCollectionOpen] = useState(false);
@@ -388,7 +389,7 @@ export default function MyVersesPage() {
       {/* Filters */}
       {entries.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center">
-          {FILTERS.map((f) => (
+          {FILTERS.slice(0, 3).map((f) => (
             <button
               key={f.key}
               type="button"
@@ -402,6 +403,42 @@ export default function MyVersesPage() {
               {f.label}
             </button>
           ))}
+
+          {/* More filters dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMoreFiltersOpen((v) => !v)}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-1.5 ${
+                FILTERS.slice(3).some((f) => f.key === filter)
+                  ? 'bg-gold-500 text-navy-900'
+                  : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
+              }`}
+            >
+              {FILTERS.slice(3).find((f) => f.key === filter)?.label ?? 'More'}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreFiltersOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {moreFiltersOpen && (
+              <div className="absolute top-full mt-2 left-0 z-50 bg-navy-800 border border-gold-500/20 rounded-xl p-2 shadow-lg shadow-navy-900/50 min-w-[180px]">
+                {FILTERS.slice(3).map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => {
+                      setFilter(f.key);
+                      setMoreFiltersOpen(false);
+                    }}
+                    className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors hover:bg-navy-700 ${
+                      filter === f.key ? 'text-cream' : 'text-cream/50'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Stage dropdown */}
           <div className="relative">
