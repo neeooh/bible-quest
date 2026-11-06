@@ -11,6 +11,11 @@ import {
   Loader2,
   BookMarked,
   Share2,
+  Brain,
+  Shield,
+  Bell,
+  Clock,
+  CalendarDays,
 } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
@@ -209,13 +214,6 @@ export default function HomePage() {
 
       {/* CTA */}
       <section className="flex flex-wrap justify-center gap-4 items-center">
-        <Link
-          to="/library"
-          className="text-gold-400 hover:text-gold-300 hover:underline transition-colors inline-flex items-center gap-1.5 text-sm"
-        >
-          Explore the Bible
-          <ArrowRight className="w-4 h-4" />
-        </Link>
         {lastRead && (
           <Link
             to={`/read/${lastRead.book}/${lastRead.chapter}`}
@@ -225,6 +223,13 @@ export default function HomePage() {
             Continue: {lastRead.bookName} {lastRead.chapter}
           </Link>
         )}
+        <Link
+          to="/library"
+          className="text-gold-400 hover:text-gold-300 hover:underline transition-colors inline-flex items-center gap-1.5 text-sm"
+        >
+          Explore the Bible
+          <ArrowRight className="w-4 h-4" />
+        </Link>
       </section>
 
       {/* Your Progress — persistent summary card */}
@@ -240,59 +245,77 @@ export default function HomePage() {
                 </Link>
               )}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <Link
                 to="/my-verses?stage=learning"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group"
               >
-                <p className="text-2xl font-bold text-blue-400">{stageCounts.learning}</p>
-                <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Learning</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <BookOpen className="w-4 h-4 text-blue-400" />
+                  <p className="text-3xl font-bold text-blue-400">{stageCounts.learning}</p>
+                </div>
+                <p className="text-cream/40 text-xs group-hover:text-cream/60 transition-colors">Learning</p>
               </Link>
               <Link
                 to="/my-verses?stage=memorising"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group"
               >
-                <p className="text-2xl font-bold text-purple-400">{stageCounts.memorising}</p>
-                <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Memorising</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <Brain className="w-4 h-4 text-amber-400" />
+                  <p className="text-3xl font-bold text-amber-400">{stageCounts.memorising}</p>
+                </div>
+                <p className="text-cream/40 text-xs group-hover:text-cream/60 transition-colors">Memorising</p>
               </Link>
               <Link
                 to="/my-verses?stage=retention"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group"
               >
-                <p className="text-2xl font-bold text-green-400">{stageCounts.retention}</p>
-                <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Retention</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <Shield className="w-4 h-4 text-green-400" />
+                  <p className="text-3xl font-bold text-green-400">{stageCounts.retention}</p>
+                </div>
+                <p className="text-cream/40 text-xs group-hover:text-cream/60 transition-colors">Retention</p>
               </Link>
               <Link
                 to="/my-verses?filter=due-for-review"
-                className={`rounded-lg transition-colors p-3 group ${
+                className={`rounded-lg transition-colors p-4 group ${
                   stageCounts.dueForReview > 0
-                    ? 'bg-amber-500/10 hover:bg-amber-500/20 ring-1 ring-amber-500/30'
+                    ? 'bg-red-500/10 hover:bg-red-500/20 ring-1 ring-red-500/30'
                     : 'bg-navy-700 hover:bg-navy-600'
                 }`}
               >
-                <p className={`text-2xl font-bold ${stageCounts.dueForReview > 0 ? 'text-amber-400' : 'text-cream/20'}`}>
-                  {stageCounts.dueForReview}
-                </p>
-                <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Due for Review</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <Bell className={`w-4 h-4 ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-cream/20'}`} />
+                  <p className={`text-3xl font-bold ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-cream/20'}`}>
+                    {stageCounts.dueForReview}
+                  </p>
+                </div>
+                <p className="text-cream/40 text-xs group-hover:text-cream/60 transition-colors">Due for Review</p>
               </Link>
               <Link
                 to="/my-verses?filter=not-started"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group"
               >
-                <p className={`text-2xl font-bold ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`}>
-                  {stageCounts.notPractised}
-                </p>
-                <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">Not Started</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock className={`w-4 h-4 ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`} />
+                  <p className={`text-3xl font-bold ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`}>
+                    {stageCounts.notPractised}
+                  </p>
+                </div>
+                <p className="text-cream/40 text-xs group-hover:text-cream/60 transition-colors">Not Started</p>
               </Link>
               {stageCounts.nearestReview && (
                 <Link
                   to="/my-verses?stage=retention"
-                  className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group"
+                  className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group"
                 >
-                  <p className={`text-2xl font-bold ${stageCounts.dueForReview > 0 ? 'text-amber-400' : 'text-cream/40'}`}>
-                    {stageCounts.dueForReview > 0 ? '!' : '✓'}
-                  </p>
-                  <p className="text-cream/40 text-xs mt-0.5 group-hover:text-cream/60 transition-colors">
+                  <div className="flex items-center gap-2 mb-1">
+                    <CalendarDays className={`w-4 h-4 ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-gold-400'}`} />
+                    <p className={`text-3xl font-bold ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-gold-400'}`}>
+                      {stageCounts.dueForReview > 0 ? '!' : '✓'}
+                    </p>
+                  </div>
+                  <p className="text-cream/40 text-xs group-hover:text-cream/60 transition-colors">
                     {stageCounts.dueForReview > 0
                       ? 'Review now'
                       : `Next: ${formatReviewDate(stageCounts.nearestReview)}`}
