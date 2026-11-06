@@ -387,13 +387,13 @@ export default function MyVersesPage() {
 
       {/* Filters */}
       {entries.length > 0 && (
-        <div className="flex gap-2 items-center overflow-x-auto pb-2 scrollbar-thin -mx-2 px-2" style={stageDropdownOpen ? { overflow: 'visible' } : undefined}>
+        <div className="flex flex-wrap gap-2 items-center">
           {FILTERS.map((f) => (
             <button
               key={f.key}
               type="button"
               onClick={() => setFilter(f.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all shrink-0 ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 filter === f.key
                   ? 'bg-gold-500 text-navy-900'
                   : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
@@ -404,7 +404,7 @@ export default function MyVersesPage() {
           ))}
 
           {/* Stage dropdown */}
-          <div className="relative shrink-0">
+          <div className="relative">
             <button
               type="button"
               onClick={() => setStageDropdownOpen((v) => !v)}
@@ -419,9 +419,7 @@ export default function MyVersesPage() {
             </button>
 
             {stageDropdownOpen && (
-              <>
-                <div className="fixed inset-0 z-40 sm:hidden" onClick={() => setStageDropdownOpen(false)} />
-                <div className="fixed left-4 right-4 top-48 z-50 sm:absolute sm:top-full sm:mt-2 sm:left-auto sm:right-0 sm:inset-auto bg-navy-800 border border-gold-500/20 rounded-xl p-2 shadow-lg shadow-navy-900/50 sm:min-w-[180px]">
+              <div className="absolute top-full mt-2 right-0 z-50 bg-navy-800 border border-gold-500/20 rounded-xl p-2 shadow-lg shadow-navy-900/50 min-w-[180px]">
                 {([
                   { key: 'learning' as LearningStage, label: 'Learning', color: 'bg-blue-500' },
                   { key: 'memorising' as LearningStage, label: 'Memorising', color: 'bg-amber-500' },
@@ -466,7 +464,6 @@ export default function MyVersesPage() {
                   );
                 })}
               </div>
-              </>
             )}
           </div>
         </div>
