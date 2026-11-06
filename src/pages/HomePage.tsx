@@ -13,15 +13,13 @@ import {
   Share2,
   Brain,
   Shield,
-  Bell,
   Clock,
-  CalendarDays,
 } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
-import { getPassageStage, formatReviewDate, daysUntilReview } from '../lib/learning-stage';
+import { getPassageStage } from '../lib/learning-stage';
 import { showToast } from '../components/Toast';
 import type { DailyVerse } from '../lib/types';
 
@@ -51,9 +49,7 @@ export default function HomePage() {
     let learning = 0;
     let memorising = 0;
     let retention = 0;
-    let dueForReview = 0;
     let notPractised = 0;
-    let nearestReview: string | null = null;
 
     // Count stages from exercise history
     for (const e of progress.exerciseHistory) {
@@ -70,10 +66,6 @@ export default function HomePage() {
       if (stage.stage === 'learning') learning++;
       if (stage.stage === 'memorising') memorising++;
       if (stage.stage === 'retention') retention++;
-      if (stage.dueForReview) dueForReview++;
-      if (stage.nextReview && (!nearestReview || stage.nextReview < nearestReview)) {
-        nearestReview = stage.nextReview;
-      }
     }
 
     // Count saved verses that have never been practised
@@ -84,7 +76,7 @@ export default function HomePage() {
       }
     }
 
-    return { learning, memorising, retention, dueForReview, notPractised, nearestReview };
+    return { learning, memorising, retention, notPractised };
   }, [progress.exerciseHistory, savedVerses]);
 
   function handleCopy() {
@@ -271,22 +263,8 @@ export default function HomePage() {
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Retention</p>
               </Link>
               <Link
-                to="/my-verses?filter=due-for-review"
-                className={`rounded-lg transition-colors p-4 group text-center ${
-                  stageCounts.dueForReview > 0
-                    ? 'bg-red-500/10 hover:bg-red-500/20 ring-1 ring-red-500/30'
-                    : 'bg-navy-700 hover:bg-navy-600'
-                }`}
-              >
-                <Bell className={`w-5 h-5 mx-auto mb-2 ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-cream/20'}`} />
-                <p className={`text-3xl font-bold ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-cream/20'}`}>
-                  {stageCounts.dueForReview}
-                </p>
-                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Due for Review</p>
-              </Link>
-              <Link
                 to="/my-verses?filter=not-started"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center col-span-3"
               >
                 <Clock className={`w-5 h-5 mx-auto mb-2 ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`} />
                 <p className={`text-3xl font-bold ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`}>
@@ -294,20 +272,6 @@ export default function HomePage() {
                 </p>
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Not Started</p>
               </Link>
-              {stageCounts.nearestReview && (
-                <Link
-                  to="/my-verses?stage=retention"
-                  className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center"
-                >
-                  <CalendarDays className={`w-5 h-5 mx-auto mb-2 ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-gold-400'}`} />
-                  <p className={`text-3xl font-bold ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-gold-400'}`}>
-                    {daysUntilReview(stageCounts.nearestReview) ?? 0}
-                  </p>
-                  <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">
-                    {stageCounts.dueForReview > 0 ? 'Due Today' : `Next Review`}
-                  </p>
-                </Link>
-              )}
             </div>
           </div>
         </section>
