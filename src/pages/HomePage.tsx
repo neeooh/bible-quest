@@ -24,7 +24,7 @@ import type { DailyVerse } from '../lib/types';
 
 export default function HomePage() {
   const { progress } = useProgress();
-  const { addVerse, isSaved, isFavourite, setFavourite } = useSavedVerses();
+  const { addVerse, isSaved, isFavourite, setFavourite, savedVerses } = useSavedVerses();
   const [copied, setCopied] = useState(false);
   const [daily, setDaily] = useState<DailyVerse | null>(null);
   const lastRead = getLastRead();
@@ -42,9 +42,15 @@ export default function HomePage() {
     progress.chaptersExplored.length > 0 ||
     progress.passagesMemorized.length > 0;
 
-  const dueForReviewCount = useMemo(() => {
+  const stageCounts = useMemo(() => {
     const seen = new Set<string>();
-    let count = 0;
+    let learning = 0;
+    let memorising = 0;
+    let retention = 0;
+    let dueForReview = 0;
+    let notPractised = 0;
+
+    // Count stages from exercise history
     for (const e of progress.exerciseHistory) {
       const key = `${e.book ?? 'matthew'}:${e.chapterNumber}:${e.startVerse}-${e.endVerse}`;
       if (seen.has(key)) continue;
@@ -56,10 +62,22 @@ export default function HomePage() {
         e.startVerse,
         e.endVerse,
       );
-      if (stage.dueForReview) count++;
+      if (stage.stage === 'learning') learning++;
+      if (stage.stage === 'memorising') memorising++;
+      if (stage.stage === 'retention') retention++;
+      if (stage.dueForReview) dueForReview++;
     }
-    return count;
-  }, [progress.exerciseHistory]);
+
+    // Count saved verses that have never been practised
+    for (const sv of savedVerses) {
+      const key = `${sv.book}:${sv.chapter}:${sv.verse}-${sv.verse}`;
+      if (!seen.has(key)) {
+        notPractised++;
+      }
+    }
+
+    return { learning, memorising, retention, dueForReview, notPractised };
+  }, [progress.exerciseHistory, savedVerses]);
 
   function handleCopy() {
     if (!daily) return;
@@ -186,26 +204,85 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Review nudge */}
-      {dueForReviewCount > 0 && (
-        <section className="max-w-2xl mx-auto">
-          <Link
-            to="/my-verses?filter=due-for-review"
-            className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
-          >
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 group-hover:bg-amber-500/20 transition-colors">
-              <Bell className="w-5 h-5 text-amber-400" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-cream font-medium text-sm">
-                {dueForReviewCount} passage{dueForReviewCount > 1 ? 's' : ''} due for review
-              </p>
-              <p className="text-cream/40 text-xs mt-0.5">
-                Keep your memory fresh — a quick review goes a long way.
-              </p>
-            </div>
-            <ArrowRight className="w-5 h-5 text-cream/30 shrink-0 group-hover:text-amber-400 transition-colors" />
-          </Link>
+      {/* Learning nudges */}
+      {(stageCounts.dueForReview > 0 || stageCounts.learning > 0 || stageCounts.notPractised > 0 || stageCounts.memorising > 0) && (
+        <section className="max-w-2xl mx-auto space-y-3">
+          {stageCounts.dueForReview > 0 && (
+            <Link
+              to="/my-verses?filter=due-for-review"
+              className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
+            >
+              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 group-hover:bg-amber-500/20 transition-colors">
+                <Bell className="w-5 h-5 text-amber-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-cream font-medium text-sm">
+                  {stageCounts.dueForReview} passage{stageCounts.dueForReview > 1 ? 's' : ''} due for review
+                </p>
+                <p className="text-cream/40 text-xs mt-0.5">
+                  Keep your memory fresh — a quick review goes a long way.
+                </p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-cream/30 shrink-0 group-hover:text-amber-400 transition-colors" />
+            </Link>
+          )}
+          {stageCounts.learning > 0 && (
+            <Link
+              to="/my-verses"
+              className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
+            >
+              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0 group-hover:bg-blue-500/20 transition-colors">
+                <BookOpen className="w-5 h-5 text-blue-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-cream font-medium text-sm">
+                  {stageCounts.learning} passage{stageCounts.learning > 1 ? 's' : ''} in learning stage
+                </p>
+                <p className="text-cream/40 text-xs mt-0.5">
+                  Keep practising to move them toward memorisation.
+                </p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-cream/30 shrink-0 group-hover:text-blue-400 transition-colors" />
+            </Link>
+          )}
+          {stageCounts.memorising > 0 && (
+            <Link
+              to="/my-verses"
+              className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
+            >
+              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0 group-hover:bg-purple-500/20 transition-colors">
+                <Star className="w-5 h-5 text-purple-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-cream font-medium text-sm">
+                  {stageCounts.memorising} passage{stageCounts.memorising > 1 ? 's' : ''} in memorising stage
+                </p>
+                <p className="text-cream/40 text-xs mt-0.5">
+                  Almost there — try recitation or first letters to reach retention.
+                </p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-cream/30 shrink-0 group-hover:text-purple-400 transition-colors" />
+            </Link>
+          )}
+          {stageCounts.notPractised > 0 && (
+            <Link
+              to="/my-verses"
+              className="card flex items-center gap-4 group hover:border-gold-500/30 transition-all duration-200"
+            >
+              <div className="w-10 h-10 rounded-lg bg-cream/5 flex items-center justify-center shrink-0 group-hover:bg-cream/10 transition-colors">
+                <BookMarked className="w-5 h-5 text-cream/40" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-cream font-medium text-sm">
+                  {stageCounts.notPractised} saved passage{stageCounts.notPractised > 1 ? 's' : ''} not practised yet
+                </p>
+                <p className="text-cream/40 text-xs mt-0.5">
+                  Start practising to begin your memorisation journey.
+                </p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-cream/30 shrink-0 group-hover:text-cream/60 transition-colors" />
+            </Link>
+          )}
         </section>
       )}
 
