@@ -72,6 +72,7 @@ export default function MyVersesPage() {
   );
   const [stageDropdownOpen, setStageDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   const entries: UnifiedEntry[] = useMemo(() => {
     const map = new Map<string, UnifiedEntry>();
@@ -302,13 +303,13 @@ export default function MyVersesPage() {
 
       {/* Filters */}
       {entries.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex gap-2 items-center overflow-x-auto pb-2 scrollbar-thin -mx-2 px-2">
           {FILTERS.map((f) => (
             <button
               key={f.key}
               type="button"
               onClick={() => setFilter(f.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all shrink-0 ${
                 filter === f.key
                   ? 'bg-gold-500 text-navy-900'
                   : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
@@ -319,7 +320,7 @@ export default function MyVersesPage() {
           ))}
 
           {/* Stage dropdown */}
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => setStageDropdownOpen((v) => !v)}
@@ -413,7 +414,11 @@ export default function MyVersesPage() {
           {filtered.map((entry) => (
             <div
               key={entry.key}
-              className="card flex items-start justify-between gap-4"
+              className={`card flex items-start justify-between gap-4 border-l-4 ${
+                entry.isFavourite
+                  ? 'border-l-gold-500'
+                  : 'border-l-navy-600'
+              }`}
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -438,7 +443,20 @@ export default function MyVersesPage() {
                   )}
                 </div>
                 {entry.text && (
-                  <p className="text-cream/60 text-sm mt-1 italic leading-relaxed line-clamp-2">
+                  <p
+                    className={`text-cream/60 text-sm mt-1 italic leading-relaxed cursor-pointer hover:text-cream/80 transition-colors ${
+                      expandedCards.has(entry.key) ? '' : 'line-clamp-2'
+                    }`}
+                    onClick={() =>
+                      setExpandedCards((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(entry.key)) next.delete(entry.key);
+                        else next.add(entry.key);
+                        return next;
+                      })
+                    }
+                    title={expandedCards.has(entry.key) ? 'Click to collapse' : 'Click to expand'}
+                  >
                     &ldquo;{entry.text}&rdquo;
                   </p>
                 )}
@@ -461,7 +479,28 @@ export default function MyVersesPage() {
                     )}
                   </p>
                 ) : (
-                  <p className="text-cream/25 text-xs mt-3">Not practised yet</p>
+                  <div className="flex items-center gap-3 mt-3">
+                    {/* Stage progress bar */}
+                    <div className="flex items-center gap-1.5">
+                      {(['learning', 'memorising', 'retention'] as const).map((s) => (
+                        <div
+                          key={s}
+                          className={`h-1.5 w-6 rounded-full ${
+                            s === 'learning' && entry.stage === 'learning'
+                              ? 'bg-blue-400'
+                              : s === 'memorising' && (entry.stage === 'memorising' || entry.stage === 'retention')
+                                ? 'bg-amber-400'
+                                : s === 'retention' && entry.stage === 'retention'
+                                  ? 'bg-green-400'
+                                  : 'bg-cream/10'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-cream/25 text-xs">
+                      Stage: {entry.stageLabel} · Not practised yet
+                    </span>
+                  </div>
                 )}
               </div>
 
