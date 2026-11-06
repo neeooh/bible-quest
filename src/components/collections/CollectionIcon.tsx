@@ -19,6 +19,10 @@ import {
   Sword,
   Hand,
   Sparkles,
+  Scroll,
+  Church,
+  Waves,
+  Compass,
 } from 'lucide-react';
 import type { LucideProps } from 'lucide-react';
 import type { CollectionIconName } from '../../lib/collections';
@@ -44,6 +48,10 @@ const ICON_MAP: Record<CollectionIconName, React.ComponentType<LucideProps>> = {
   Sword,
   Hand,
   Sparkles,
+  Scroll,
+  Church,
+  Waves,
+  Compass,
 };
 
 interface CollectionIconProps {

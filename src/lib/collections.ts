@@ -32,6 +32,7 @@ export const COLLECTION_ICONS = [
   'Crown', 'Music', 'Mountain', 'Anchor', 'Cross',
   'Lightbulb', 'Feather', 'Gem', 'Leaf', 'Sun',
   'Moon', 'Flower2', 'Sword', 'Hand', 'Sparkles',
+  'Scroll', 'Church', 'Waves', 'Compass',
 ] as const;
 
 export type CollectionIconName = typeof COLLECTION_ICONS[number];
