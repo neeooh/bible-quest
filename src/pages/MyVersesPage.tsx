@@ -387,7 +387,7 @@ export default function MyVersesPage() {
 
       {/* Filters */}
       {entries.length > 0 && (
-        <div className="flex gap-2 items-center overflow-x-auto pb-2 scrollbar-thin -mx-2 px-2">
+        <div className="flex gap-2 items-center overflow-x-auto pb-2 scrollbar-thin -mx-2 px-2" style={stageDropdownOpen ? { overflow: 'visible' } : undefined}>
           {FILTERS.map((f) => (
             <button
               key={f.key}

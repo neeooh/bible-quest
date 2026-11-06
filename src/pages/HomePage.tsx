@@ -11,9 +11,6 @@ import {
   Loader2,
   BookMarked,
   Share2,
-  Brain,
-  Shield,
-  Clock,
 } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
@@ -242,7 +239,6 @@ export default function HomePage() {
                 to="/my-verses?filter=not-started"
                 className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center aspect-square flex flex-col items-center justify-center"
               >
-                <Clock className={`w-5 h-5 mb-2 ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`} />
                 <p className={`text-3xl font-bold ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`}>
                   {stageCounts.notPractised}
                 </p>
@@ -252,7 +248,6 @@ export default function HomePage() {
                 to="/my-verses?stage=learning"
                 className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center aspect-square flex flex-col items-center justify-center"
               >
-                <BookOpen className="w-5 h-5 text-blue-400 mb-2" />
                 <p className="text-3xl font-bold text-blue-400">{stageCounts.learning}</p>
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Learning</p>
               </Link>
@@ -260,7 +255,6 @@ export default function HomePage() {
                 to="/my-verses?stage=memorising"
                 className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center aspect-square flex flex-col items-center justify-center"
               >
-                <Brain className="w-5 h-5 text-amber-400 mb-2" />
                 <p className="text-3xl font-bold text-amber-400">{stageCounts.memorising}</p>
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Memorising</p>
               </Link>
@@ -268,7 +262,6 @@ export default function HomePage() {
                 to="/my-verses?stage=retention"
                 className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center aspect-square flex flex-col items-center justify-center"
               >
-                <Shield className="w-5 h-5 text-green-400 mb-2" />
                 <p className="text-3xl font-bold text-green-400">{stageCounts.retention}</p>
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Retention</p>
               </Link>
