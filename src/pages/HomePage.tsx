@@ -111,7 +111,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-7rem)] flex flex-col justify-center space-y-12">
+    <div className="min-h-[calc(100vh-7rem)] flex flex-col justify-center space-y-12 py-8">
 
       {/* Daily Verse */}
       <section className="card max-w-2xl mx-auto space-y-5 p-4 sm:p-6">
