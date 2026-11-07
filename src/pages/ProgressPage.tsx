@@ -5,7 +5,6 @@ import {
   Flame,
   BookOpen,
   Brain,
-  Target,
   Star,
   ArrowRight,
 } from 'lucide-react';

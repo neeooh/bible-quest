@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from 'react';
 import { RotateCcw, Eye, CheckCircle, Lightbulb } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { normalizeWord, wordsMatch } from '../../lib/word-compare';
-import { formatReference } from '../../lib/bible';
 import { getEncouragement } from '../../lib/encouragement';
 
 interface WordEntry {
@@ -36,10 +35,6 @@ function shuffle(arr: number[]): number[] {
 
 export default function MissingWords({
   verses,
-  bookName,
-  chapter,
-  startVerse,
-  endVerse,
   onComplete,
 }: ExerciseProps) {
   const [hidePercent, setHidePercent] = useState(0.15);
@@ -95,13 +90,6 @@ export default function MissingWords({
     return new Set(picked.slice(0, hideCount));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attempt, words, hideCount]);
-
-  const reference = formatReference(
-    bookName,
-    chapter,
-    startVerse,
-    startVerse !== endVerse ? endVerse : undefined,
-  );
 
   /* ---- sorted hidden indices for keyboard navigation ------------- */
   const sortedHiddenIndices = useMemo(

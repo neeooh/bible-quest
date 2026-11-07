@@ -1,22 +1,16 @@
 import { useState, useMemo, useCallback } from 'react';
-import { RotateCcw, Check, Eye, EyeOff, Mic, MicOff } from 'lucide-react';
+import { RotateCcw, Check, Mic, MicOff } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { compareTexts, type CompareResult } from '../../lib/word-compare';
-import { formatReference } from '../../lib/bible';
 import { getEncouragement } from '../../lib/encouragement';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
 export default function Recitation({
   verses,
-  bookName,
-  chapter,
-  startVerse,
-  endVerse,
   onComplete,
 }: ExerciseProps) {
   const [userInput, setUserInput] = useState('');
   const [result, setResult] = useState<CompareResult | null>(null);
-  const [showOriginal, setShowOriginal] = useState(false);
 
   const {
     isListening,
@@ -30,13 +24,6 @@ export default function Recitation({
   const fullText = useMemo(
     () => verses.map((v) => v.text).join(' '),
     [verses],
-  );
-
-  const reference = formatReference(
-    bookName,
-    chapter,
-    startVerse,
-    startVerse !== endVerse ? endVerse : undefined,
   );
 
   // Sync transcript into the text input
@@ -65,7 +52,6 @@ export default function Recitation({
   const handleReset = useCallback(() => {
     setUserInput('');
     setResult(null);
-    setShowOriginal(false);
     resetTranscript();
   }, [resetTranscript]);
 

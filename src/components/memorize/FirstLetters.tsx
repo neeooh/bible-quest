@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from 'react';
 import { RotateCcw, CheckCircle, Eye, Lightbulb } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { normalizeWord, wordsMatch } from '../../lib/word-compare';
-import { formatReference } from '../../lib/bible';
 import { getEncouragement } from '../../lib/encouragement';
 
 interface WordEntry {
@@ -20,10 +19,6 @@ function getFirstLetter(word: string): string {
 
 export default function FirstLetters({
   verses,
-  bookName,
-  chapter,
-  startVerse,
-  endVerse,
   onComplete,
 }: ExerciseProps) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -45,13 +40,6 @@ export default function FirstLetters({
       }));
     });
   }, [verses]);
-
-  const reference = formatReference(
-    bookName,
-    chapter,
-    startVerse,
-    startVerse !== endVerse ? endVerse : undefined,
-  );
 
   const sortedIndices = useMemo(
     () => words.map((w) => w.globalIndex),

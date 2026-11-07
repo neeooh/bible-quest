@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { COLLECTION_ICONS, DEFAULT_COLLECTION_ICON } from '../../lib/collections';
-import CollectionIcon, { ICON_MAP } from './CollectionIcon';
+import { ICON_MAP } from './CollectionIcon';
 import type { CollectionIconName } from '../../lib/collections';
 
 interface CreateCollectionDialogProps {

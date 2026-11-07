@@ -76,7 +76,6 @@ export default function MyVersesPage() {
   const {
     collections,
     createCollection,
-    deleteCollection,
     addPassageToCollections,
     removePassageFromAllCollections,
   } = useCollections();

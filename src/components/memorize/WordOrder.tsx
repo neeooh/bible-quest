@@ -28,10 +28,6 @@ function shuffle<T>(arr: T[]): T[] {
 
 export default function WordOrder({
   verses,
-  bookName,
-  chapter,
-  startVerse,
-  endVerse,
   onComplete,
 }: ExerciseProps) {
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');

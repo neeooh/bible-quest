@@ -162,7 +162,7 @@ export function recordReview(
 /**
  * Return exercise type keys available for a given stage.
  */
-export function getAvailableExercises(stage: LearningStage): string[] {
+export function getAvailableExercises(_stage: LearningStage): string[] {
   return ['progressive', 'missing-words', 'first-letters', 'word-order', 'recitation'];
 }
 

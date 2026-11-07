@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from 'react';
 import { RotateCcw, ChevronRight, BookOpen, CheckCircle, Lightbulb } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { normalizeWord, wordsMatch, compareTexts } from '../../lib/word-compare';
-import { formatReference } from '../../lib/bible';
 import { getEncouragement } from '../../lib/encouragement';
 
 const PHASE_LABELS = ['Read', '25%', '50%', '75%', 'Full Recall'];
@@ -17,10 +16,6 @@ interface WordEntry {
 
 export default function Progressive({
   verses,
-  bookName,
-  chapter,
-  startVerse,
-  endVerse,
   onComplete,
 }: ExerciseProps) {
   const [phase, setPhase] = useState(1);
@@ -53,13 +48,6 @@ export default function Progressive({
   }, [verses]);
 
   const totalWords = words.length;
-
-  const reference = formatReference(
-    bookName,
-    chapter,
-    startVerse,
-    startVerse !== endVerse ? endVerse : undefined,
-  );
 
   /* Pre-shuffle indices once — each phase hides a growing prefix. */
   const shuffled = useMemo(() => {

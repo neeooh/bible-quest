@@ -2,15 +2,10 @@ import { useState, useMemo, useCallback } from 'react';
 import { Mic, MicOff, RotateCcw, AlertTriangle } from 'lucide-react';
 import type { ExerciseProps } from '../../lib/types';
 import { compareTexts, type CompareResult } from '../../lib/word-compare';
-import { formatReference } from '../../lib/bible';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
 export default function VoiceRecitation({
   verses,
-  bookName,
-  chapter,
-  startVerse,
-  endVerse,
   onComplete,
 }: ExerciseProps) {
   const {
@@ -29,13 +24,6 @@ export default function VoiceRecitation({
   const fullText = useMemo(
     () => verses.map((v) => v.text).join(' '),
     [verses],
-  );
-
-  const reference = formatReference(
-    bookName,
-    chapter,
-    startVerse,
-    startVerse !== endVerse ? endVerse : undefined,
   );
 
   /** Whichever text the user produced — voice transcript or typed fallback. */
