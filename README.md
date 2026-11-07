@@ -106,3 +106,13 @@ Output goes to `dist/`. Deploy as a static site.
 ## Bible Text
 
 The app bundles all 66 books of the Bible from the [World English Bible](https://worldenglishbible.org/) (public domain). Each book is stored as a separate JSON file under `src/data/books/` and loaded on demand.
+
+## Technical Debt
+
+### My Verses list is derived from exercise history
+
+The My Verses page builds its list by scanning `exerciseHistory` in `UserProgress`. This means the list of saved passages is not an independent data structure — it is a side effect of having practised something. Removing a passage from the list requires a `hiddenPassages` soft-delete flag instead of a simple delete, because the entry is regenerated from history on every render.
+
+**The correct architecture:** My Verses should be its own explicit collection — a list of passage keys the user has saved or bookmarked. Exercise history should only be used to enrich those cards (accuracy, stage, last practised date), not to generate the list. Adding a passage would happen explicitly (e.g. save from the Read page, or auto-add on first practice). Removing would be a straightforward delete from the list with no flags needed. Exercise history stays as an append-only log that is never modified.
+
+This refactor is not urgent — the current soft-delete approach works — but it should be done before adding features like archiving, re-adding removed passages, or syncing data to a backend.
