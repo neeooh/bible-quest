@@ -11,6 +11,7 @@ import {
   Loader2,
   BookMarked,
   Share2,
+  Trophy,
 } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
@@ -226,8 +227,11 @@ export default function HomePage() {
       {/* Your Progress — persistent summary card */}
       {hasAnyData && (
         <section className="max-w-2xl mx-auto">
-          <div className="card space-y-4">
-            <h2 className="text-sm font-medium text-cream/50">Your Progress</h2>
+          <div className="card space-y-4 p-4 sm:p-6">
+            <div className="flex items-center gap-2 text-gold-500 text-xs font-medium uppercase tracking-wider">
+              <Trophy className="w-3.5 h-3.5" />
+              <span>Your Progress</span>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               <Link
                 to="/my-verses?stage=not-started"
