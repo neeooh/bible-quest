@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Trophy,
@@ -23,7 +24,11 @@ const exerciseLabels: Record<string, string> = {
 export default function ProgressPage() {
   const { progress, level } = useProgress();
 
-  const recentHistory = progress.exerciseHistory.slice(-20).reverse();
+  const recentHistory = [...progress.exerciseHistory].reverse();
+  const [showAllHistory, setShowAllHistory] = useState(false);
+  const INITIAL_COUNT = 10;
+  const visibleHistory = showAllHistory ? recentHistory : recentHistory.slice(0, INITIAL_COUNT);
+  const hasMore = recentHistory.length > INITIAL_COUNT;
 
   return (
     <div className="py-10 space-y-10">
@@ -118,7 +123,7 @@ export default function ProgressPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {recentHistory.map((record, idx) => {
+            {visibleHistory.map((record, idx) => {
               const bookSlug = record.book ?? 'matthew';
               const bookMeta = getBookBySlug(bookSlug);
               const bookName = bookMeta?.name ?? bookSlug;
@@ -161,6 +166,17 @@ export default function ProgressPage() {
               );
             })}
           </div>
+          {hasMore && (
+            <button
+              type="button"
+              onClick={() => setShowAllHistory((v) => !v)}
+              className="w-full text-center text-sm text-gold-400 hover:text-gold-300 transition-colors py-3"
+            >
+              {showAllHistory
+                ? 'Show less'
+                : `Show ${recentHistory.length - INITIAL_COUNT} more`}
+            </button>
+          )}
         )}
       </section>
     </div>
