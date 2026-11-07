@@ -115,9 +115,9 @@ export default function HomePage() {
 
       {/* Daily Verse */}
       <section className="card max-w-2xl mx-auto space-y-5 p-4 sm:p-6">
-        <div className="flex items-center gap-2 text-gold-500 text-xs font-medium uppercase tracking-wider">
-          <Star className="w-3.5 h-3.5" />
-          <span>Verse of the Day</span>
+        <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
+          <Star className="w-3.5 h-3.5 text-gold-500" />
+          <span className="text-cream/40">Verse of the Day</span>
         </div>
 
         {daily === null ? (
@@ -213,9 +213,9 @@ export default function HomePage() {
       {/* Your Progress — persistent summary card */}
       {hasAnyData && (
         <section className="card max-w-2xl w-full mx-auto space-y-4 p-4 sm:p-6">
-            <div className="flex items-center gap-2 text-gold-500 text-xs font-medium uppercase tracking-wider">
-              <Trophy className="w-3.5 h-3.5" />
-              <span>Your Progress</span>
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
+              <Trophy className="w-3.5 h-3.5 text-gold-500" />
+              <span className="text-cream/40">Your Progress</span>
             </div>
             <div className="grid grid-cols-6 sm:grid-cols-5 gap-3">
               <Link
@@ -260,7 +260,8 @@ export default function HomePage() {
             </div>
             <Link to="/progress" className="flex items-center justify-center gap-1.5 pt-1 group">
               <Flame className="w-3.5 h-3.5 text-gold-500" />
-              <span className="text-sm font-semibold text-gold-400">{progress.dailyStreak} day streak</span>
+              <span className="text-sm font-semibold text-gold-400">{progress.dailyStreak}</span>
+              <span className="text-sm text-cream/40">day streak</span>
             </Link>
           </section>
       )}
