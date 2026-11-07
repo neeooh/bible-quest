@@ -225,18 +225,10 @@ export default function HomePage() {
       {hasAnyData && (
         <section className="max-w-2xl mx-auto">
           <div className="card space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-cream/50">Your Progress</h2>
-              {progress.dailyStreak > 0 && (
-                <Link to="/progress" className="flex items-center gap-1.5 text-xs text-gold-400 hover:text-gold-300 transition-colors">
-                  <Flame className="w-3.5 h-3.5" />
-                  {progress.dailyStreak} day streak
-                </Link>
-              )}
-            </div>
+            <h2 className="text-sm font-medium text-cream/50">Your Progress</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <Link
-                to="/my-verses?filter=not-started"
+                to="/my-verses?stage=not-started"
                 className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center aspect-square flex flex-col items-center justify-center"
               >
                 <p className={`text-3xl font-bold ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`}>
@@ -266,6 +258,11 @@ export default function HomePage() {
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Retention</p>
               </Link>
             </div>
+            <Link to="/progress" className="flex items-center justify-center gap-2 pt-2 group">
+              <Flame className="w-5 h-5 text-gold-500" />
+              <span className="text-2xl font-bold text-cream">{progress.dailyStreak}</span>
+              <span className="text-cream/50 text-sm group-hover:text-cream/70 transition-colors">day streak</span>
+            </Link>
           </div>
         </section>
       )}
