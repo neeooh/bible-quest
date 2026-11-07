@@ -231,10 +231,10 @@ export default function HomePage() {
               <Trophy className="w-3.5 h-3.5" />
               <span>Your Progress</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div className="grid grid-cols-6 sm:grid-cols-5 gap-3">
               <Link
                 to="/my-verses?stage=not-started"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center aspect-square flex flex-col items-center justify-center"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center col-span-2 sm:col-span-1 aspect-square flex flex-col items-center justify-center"
               >
                 <p className={`text-3xl font-bold ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`}>
                   {stageCounts.notPractised}
@@ -243,28 +243,28 @@ export default function HomePage() {
               </Link>
               <Link
                 to="/my-verses?stage=learning"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center aspect-square flex flex-col items-center justify-center"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center col-span-2 sm:col-span-1 aspect-square flex flex-col items-center justify-center"
               >
                 <p className="text-3xl font-bold text-blue-400">{stageCounts.learning}</p>
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Learning</p>
               </Link>
               <Link
                 to="/my-verses?stage=memorising"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center aspect-square flex flex-col items-center justify-center"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center col-span-2 sm:col-span-1 aspect-square flex flex-col items-center justify-center"
               >
                 <p className="text-3xl font-bold text-amber-400">{stageCounts.memorising}</p>
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Memorising</p>
               </Link>
               <Link
                 to="/my-verses?stage=retention"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center aspect-square flex flex-col items-center justify-center"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center col-span-3 sm:col-span-1 aspect-auto sm:aspect-square flex flex-col items-center justify-center"
               >
                 <p className="text-3xl font-bold text-green-400">{stageCounts.retention}</p>
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Retention</p>
               </Link>
               <Link
                 to="/my-verses?stage=due-for-review"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center col-span-2 sm:col-span-1 aspect-auto sm:aspect-square flex flex-col items-center justify-center"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center col-span-3 sm:col-span-1 aspect-auto sm:aspect-square flex flex-col items-center justify-center"
               >
                 <p className={`text-3xl font-bold ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-cream/20'}`}>
                   {stageCounts.dueForReview}
