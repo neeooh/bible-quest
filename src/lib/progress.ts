@@ -34,7 +34,8 @@ export function getProgress(): UserProgress {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return getDefaultProgress();
-    return JSON.parse(raw) as UserProgress;
+    // Merge with defaults so newly added fields are always present
+    return { ...getDefaultProgress(), ...JSON.parse(raw) };
   } catch {
     return getDefaultProgress();
   }
