@@ -35,13 +35,6 @@ export default function HomePage() {
   const dailyFavourited =
     daily !== null && isFavourite(daily.book, daily.chapter, daily.verse);
 
-  const hasAnyData =
-    progress.totalXp > 0 ||
-    progress.dailyStreak > 0 ||
-    progress.chaptersExplored.length > 0 ||
-    progress.passagesMemorized.length > 0 ||
-    savedVerses.length > 0;
-
   const stageCounts = useMemo(() => {
     const seen = new Set<string>();
     let learning = 0;
@@ -211,7 +204,7 @@ export default function HomePage() {
       </section>
 
       {/* Your Progress — persistent summary card */}
-      {hasAnyData && (
+      {(
         <section className="card max-w-2xl w-full mx-auto space-y-4 p-4 sm:p-6">
             <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
               <Trophy className="w-3.5 h-3.5 text-gold-500" />
