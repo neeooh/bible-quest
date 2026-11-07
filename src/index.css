@@ -116,6 +116,15 @@
   }
 }
 
+/* Reader fullscreen mode — hides navbar and removes top padding */
+:root[data-reader-fullscreen] nav.fixed {
+  display: none;
+}
+
+:root[data-reader-fullscreen] main.pt-16 {
+  padding-top: 0;
+}
+
 .toast-container {
   position: fixed;
   bottom: 1.5rem;

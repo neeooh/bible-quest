@@ -15,7 +15,9 @@ import {
   Share2,
   Volume2,
   VolumeX,
-  Settings,
+  MoreVertical,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import { getBookBySlug } from '../lib/book-metadata';
@@ -44,6 +46,7 @@ export default function ReadPage() {
   const [fontSize, setFontSize] = useState(18);
   const [selectedVerses, setSelectedVerses] = useState<Set<number>>(new Set());
   const [showSettings, setShowSettings] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
 
   const { markChapterExplored, progress } = useProgress();
   const { addVerse, addVerses, removeVerse, isSaved, isFavourite, setFavourite } = useSavedVerses();
@@ -94,7 +97,20 @@ export default function ReadPage() {
   useEffect(() => {
     setSelectedVerses(new Set());
     setShowSettings(false);
+    setFullscreen(false);
   }, [bookSlug, num]);
+
+  // Toggle fullscreen reading mode via document attribute
+  useEffect(() => {
+    if (fullscreen) {
+      document.documentElement.setAttribute('data-reader-fullscreen', '');
+    } else {
+      document.documentElement.removeAttribute('data-reader-fullscreen');
+    }
+    return () => {
+      document.documentElement.removeAttribute('data-reader-fullscreen');
+    };
+  }, [fullscreen]);
 
   const { startV, endV } = useMemo(() => {
     if (selectedVerses.size === 0) return { startV: 0, endV: 0 };
@@ -219,119 +235,147 @@ export default function ReadPage() {
 
   return (
     <div className="py-6 sm:py-10 space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            to={`/library/${bookSlug}`}
-            className="text-cream/40 hover:text-cream transition-colors"
-            aria-label={`Back to ${bookName}`}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Link>
-          <h1 className="text-2xl md:text-3xl font-serif font-bold text-cream">
-            {bookName} {num}
-          </h1>
-        </div>
+      {/* Header — hidden in fullscreen */}
+      {!fullscreen && (
+        <>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link
+                to={`/library/${bookSlug}`}
+                className="text-cream/40 hover:text-cream transition-colors"
+                aria-label={`Back to ${bookName}`}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Link>
+              <h1 className="text-2xl md:text-3xl font-serif font-bold text-cream">
+                {bookName} {num}
+              </h1>
+            </div>
 
-        {/* Controls */}
-        <div className="flex items-center gap-3">
-          {/* Mobile: settings toggle */}
-          <button
-            type="button"
-            onClick={() => setShowSettings((s) => !s)}
-            className="sm:hidden w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
-            aria-label="Reading settings"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
+            {/* Controls */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Fullscreen toggle */}
+              <button
+                type="button"
+                onClick={() => setFullscreen(true)}
+                className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                aria-label="Enter fullscreen reading mode"
+                title="Fullscreen"
+              >
+                <Maximize2 className="w-4 h-4" />
+              </button>
 
-          {/* Desktop: inline controls */}
-          <button
-            type="button"
-            onClick={() => {
-              if (bookSlug) {
-                saveLastRead(bookSlug, bookName, num);
-                showToast(`Reading position saved: ${bookName} ${num}`, 'success');
-              }
-            }}
-            className="hidden sm:flex rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors items-center gap-1.5 px-3 py-2 text-xs"
-            aria-label="Save reading position"
-            title="Save reading position"
-          >
-            <BookmarkPlus className="w-4 h-4" />
-            Save Position
-          </button>
+              {/* Mobile: overflow menu toggle */}
+              <button
+                type="button"
+                onClick={() => setShowSettings((s) => !s)}
+                className="sm:hidden w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                aria-label="Reading settings"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
 
-          <div className="hidden sm:flex items-center gap-2">
-            <span className="text-cream/40 text-xs font-medium tracking-wide mr-1">
-              Aa
-            </span>
-            <button
-              type="button"
-              onClick={() => setFontSize((prev) => Math.max(14, prev - 2))}
-              className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
-              aria-label="Decrease font size"
-            >
-              <Minus className="w-4 h-4" />
-            </button>
-            <span className="text-cream/30 text-xs w-8 text-center">
-              {fontSize}
-            </span>
-            <button
-              type="button"
-              onClick={() => setFontSize((prev) => Math.min(28, prev + 2))}
-              className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
-              aria-label="Increase font size"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
+              {/* Desktop: inline controls */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (bookSlug) {
+                    saveLastRead(bookSlug, bookName, num);
+                    showToast(`Reading position saved: ${bookName} ${num}`, 'success');
+                  }
+                }}
+                className="hidden sm:flex rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors items-center gap-1.5 px-3 py-2 text-xs"
+                aria-label="Save reading position"
+                title="Save reading position"
+              >
+                <BookmarkPlus className="w-4 h-4" />
+                Save Position
+              </button>
+
+              <div className="hidden sm:flex items-center gap-2">
+                <span className="text-cream/40 text-xs font-medium tracking-wide mr-1">
+                  Aa
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFontSize((prev) => Math.max(14, prev - 2))}
+                  className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                  aria-label="Decrease font size"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="text-cream/30 text-xs w-8 text-center">
+                  {fontSize}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFontSize((prev) => Math.min(28, prev + 2))}
+                  className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                  aria-label="Increase font size"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Mobile settings panel */}
-      {showSettings && (
-        <div className="sm:hidden flex items-center justify-between gap-3 px-3 py-3 bg-navy-800/50 rounded-xl border border-gold-500/10">
-          <div className="flex items-center gap-2">
-            <span className="text-cream/40 text-xs font-medium tracking-wide mr-1">
-              Aa
-            </span>
-            <button
-              type="button"
-              onClick={() => setFontSize((prev) => Math.max(14, prev - 2))}
-              className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
-              aria-label="Decrease font size"
-            >
-              <Minus className="w-4 h-4" />
-            </button>
-            <span className="text-cream/30 text-xs w-8 text-center">
-              {fontSize}
-            </span>
-            <button
-              type="button"
-              onClick={() => setFontSize((prev) => Math.min(28, prev + 2))}
-              className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
-              aria-label="Increase font size"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              if (bookSlug) {
-                saveLastRead(bookSlug, bookName, num);
-                showToast(`Reading position saved: ${bookName} ${num}`, 'success');
-              }
-            }}
-            className="rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center gap-1.5 px-3 py-2 text-xs whitespace-nowrap"
-            aria-label="Save reading position"
-          >
-            <BookmarkPlus className="w-4 h-4" />
-            Save Position
-          </button>
-        </div>
+          {/* Mobile settings panel */}
+          {showSettings && (
+            <div className="sm:hidden flex items-center justify-between gap-3 px-3 py-3 bg-navy-800/50 rounded-xl border border-gold-500/10">
+              <div className="flex items-center gap-2">
+                <span className="text-cream/40 text-xs font-medium tracking-wide mr-1">
+                  Aa
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFontSize((prev) => Math.max(14, prev - 2))}
+                  className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                  aria-label="Decrease font size"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="text-cream/30 text-xs w-8 text-center">
+                  {fontSize}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFontSize((prev) => Math.min(28, prev + 2))}
+                  className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+                  aria-label="Increase font size"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (bookSlug) {
+                    saveLastRead(bookSlug, bookName, num);
+                    showToast(`Reading position saved: ${bookName} ${num}`, 'success');
+                  }
+                }}
+                className="rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center gap-1.5 px-3 py-2 text-xs whitespace-nowrap"
+                aria-label="Save reading position"
+              >
+                <BookmarkPlus className="w-4 h-4" />
+                Save Position
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Floating exit-fullscreen button */}
+      {fullscreen && (
+        <button
+          type="button"
+          onClick={() => setFullscreen(false)}
+          className="fixed top-4 right-4 z-50 w-10 h-10 rounded-full bg-navy-800/80 backdrop-blur-sm border border-gold-500/20 text-cream/40 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center shadow-lg"
+          aria-label="Exit fullscreen"
+          title="Exit fullscreen"
+        >
+          <Minimize2 className="w-4 h-4" />
+        </button>
       )}
 
       {/* Verses */}
@@ -417,7 +461,7 @@ export default function ReadPage() {
           <button
             type="button"
             onClick={handleToggleSave}
-            className={`btn-outline inline-flex items-center gap-2 text-sm ${
+            className={`btn-outline inline-flex items-center justify-center gap-2 text-sm max-sm:w-10 max-sm:h-10 max-sm:p-0 ${
               allSelectedSaved ? 'border-blue-400/30 text-blue-400' : ''
             }`}
           >
@@ -430,7 +474,7 @@ export default function ReadPage() {
           <button
             type="button"
             onClick={handleToggleFavourite}
-            className={`btn-outline inline-flex items-center gap-2 text-sm ${
+            className={`btn-outline inline-flex items-center justify-center gap-2 text-sm max-sm:w-10 max-sm:h-10 max-sm:p-0 ${
               allSelectedFavourited ? 'border-red-400/30 text-red-400' : ''
             }`}
           >
@@ -456,7 +500,7 @@ export default function ReadPage() {
                 showToast('Copied to clipboard', 'success');
               });
             }}
-            className="btn-outline inline-flex items-center gap-2 text-sm"
+            className="btn-outline inline-flex items-center justify-center gap-2 text-sm max-sm:w-10 max-sm:h-10 max-sm:p-0"
           >
             <Copy className="w-4 h-4" />
             <span className="hidden sm:inline">Copy</span>
@@ -476,7 +520,7 @@ export default function ReadPage() {
                   speak(text);
                 }
               }}
-              className="btn-outline inline-flex items-center gap-2 text-sm"
+              className="btn-outline inline-flex items-center justify-center gap-2 text-sm max-sm:w-10 max-sm:h-10 max-sm:p-0"
             >
               {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               <span className="hidden sm:inline">{isSpeaking ? 'Stop' : 'Listen'}</span>
@@ -504,7 +548,7 @@ export default function ReadPage() {
                 });
               }
             }}
-            className="btn-outline inline-flex items-center gap-2 text-sm"
+            className="btn-outline inline-flex items-center justify-center gap-2 text-sm max-sm:w-10 max-sm:h-10 max-sm:p-0"
           >
             <Share2 className="w-4 h-4" />
             <span className="hidden sm:inline">Share</span>
