@@ -226,8 +226,7 @@ export default function HomePage() {
 
       {/* Your Progress — persistent summary card */}
       {hasAnyData && (
-        <section className="max-w-2xl mx-auto">
-          <div className="card space-y-4 p-4 sm:p-6">
+        <section className="card max-w-2xl mx-auto space-y-4 p-4 sm:p-6">
             <div className="flex items-center gap-2 text-gold-500 text-xs font-medium uppercase tracking-wider">
               <Trophy className="w-3.5 h-3.5" />
               <span>Your Progress</span>
@@ -277,8 +276,7 @@ export default function HomePage() {
               <Flame className="w-3.5 h-3.5 text-gold-500" />
               <span className="text-sm font-semibold text-gold-400">{progress.dailyStreak} day streak</span>
             </Link>
-          </div>
-        </section>
+          </section>
       )}
 
       {/* About */}
