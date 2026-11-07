@@ -23,6 +23,7 @@ export function getDefaultProgress(): UserProgress {
     chaptersExplored: [],
     passagesMemorized: [],
     exerciseHistory: [],
+    hiddenPassages: [],
     dailyStreak: 0,
     lastPracticeDate: '',
     bestAccuracy: 0,
@@ -66,6 +67,10 @@ export function recordExercise(result: ExerciseResult): UserProgress {
     progress.bestAccuracy = result.accuracy;
   }
 
+  // Auto-unhide if the user practises a previously hidden passage
+  const passageKey = `${result.book ?? 'matthew'}:${result.chapterNumber}:${result.startVerse}-${result.endVerse}`;
+  progress.hiddenPassages = (progress.hiddenPassages ?? []).filter((k) => k !== passageKey);
+
   const today = new Date().toISOString().slice(0, 10);
   progress.lastPracticeDate = today;
 
@@ -102,29 +107,20 @@ export function markPassageMemorized(
   return progress;
 }
 
-/** Remove all exercise history for a passage key like "book:chapter:start-end". */
-export function removePassageHistory(passageKey: string): UserProgress {
+/** Hide a passage from My Verses without deleting exercise history or XP. */
+export function hidePassage(passageKey: string): UserProgress {
   const progress = getProgress();
-  const [book, chapterStr, verseRange] = passageKey.split(':');
-  const [startStr, endStr] = verseRange.split('-');
-  const chapter = Number(chapterStr);
-  const start = Number(startStr);
-  const end = Number(endStr);
+  if (!progress.hiddenPassages.includes(passageKey)) {
+    progress.hiddenPassages.push(passageKey);
+  }
+  saveProgress(progress);
+  return progress;
+}
 
-  progress.exerciseHistory = progress.exerciseHistory.filter(
-    (e) =>
-      !(
-        (e.book ?? 'matthew') === book &&
-        e.chapterNumber === chapter &&
-        e.startVerse === start &&
-        e.endVerse === end
-      ),
-  );
-
-  // Also remove from memorized passages if present
-  const memKey = `${book}:${chapter}:${start}-${end}`;
-  progress.passagesMemorized = progress.passagesMemorized.filter((k) => k !== memKey);
-
+/** Unhide a passage (e.g. when the user practises it again). */
+export function unhidePassage(passageKey: string): UserProgress {
+  const progress = getProgress();
+  progress.hiddenPassages = progress.hiddenPassages.filter((k) => k !== passageKey);
   saveProgress(progress);
   return progress;
 }

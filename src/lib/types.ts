@@ -38,6 +38,8 @@ export interface UserProgress {
   chaptersExplored: string[];
   passagesMemorized: string[];
   exerciseHistory: ExerciseResult[];
+  /** Passages the user removed from My Verses (but history/XP preserved). */
+  hiddenPassages: string[];
   dailyStreak: number;
   lastPracticeDate: string;
   bestAccuracy: number;

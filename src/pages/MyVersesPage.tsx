@@ -71,7 +71,7 @@ interface UnifiedEntry {
 }
 
 export default function MyVersesPage() {
-  const { progress, removePassageHistory } = useProgress();
+  const { progress, hidePassage } = useProgress();
   const { savedVerses, addVerse, removeVerse, setFavourite, isSaved, isFavourite } = useSavedVerses();
   const {
     collections,
@@ -217,7 +217,9 @@ export default function MyVersesPage() {
       entry.dueForReview = ps.dueForReview;
     }
 
-    return Array.from(map.values());
+    return Array.from(map.values()).filter(
+      (entry) => !progress.hiddenPassages?.includes(entry.key),
+    );
   }, [progress.exerciseHistory, savedVerses, isSaved]);
 
   const filtered = useMemo(() => {
@@ -591,8 +593,8 @@ export default function MyVersesPage() {
                     type="button"
                     onClick={() => {
                       if (window.confirm(`Remove ${entry.reference} from your list?`)) {
-                        // Remove from exercise history
-                        removePassageHistory(entry.key);
+                        // Hide from My Verses (preserves exercise history and XP)
+                        hidePassage(entry.key);
                         // Remove from all collections
                         removePassageFromAllCollections(entry.key);
                         // Remove saved/favourite verses
