@@ -97,7 +97,6 @@ export default function ReadPage() {
   useEffect(() => {
     setSelectedVerses(new Set());
     setShowSettings(false);
-    setFullscreen(false);
   }, [bookSlug, num]);
 
   // Toggle fullscreen reading mode via document attribute
@@ -365,17 +364,22 @@ export default function ReadPage() {
         </>
       )}
 
-      {/* Floating exit-fullscreen button */}
+      {/* Fullscreen: sticky top bar with chapter title + exit */}
       {fullscreen && (
-        <button
-          type="button"
-          onClick={() => setFullscreen(false)}
-          className="fixed top-4 right-4 z-50 w-10 h-10 rounded-full bg-navy-800/80 backdrop-blur-sm border border-gold-500/20 text-cream/40 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center shadow-lg"
-          aria-label="Exit fullscreen"
-          title="Exit fullscreen"
-        >
-          <Minimize2 className="w-4 h-4" />
-        </button>
+        <div className="sticky top-0 z-40 -mx-4 px-4 py-2 bg-navy-900 flex items-center justify-between">
+          <span className="text-cream/40 text-sm font-serif">
+            {bookName} {num}
+          </span>
+          <button
+            type="button"
+            onClick={() => setFullscreen(false)}
+            className="w-8 h-8 rounded-lg border border-gold-500/20 text-cream/40 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+            aria-label="Exit fullscreen"
+            title="Exit fullscreen"
+          >
+            <Minimize2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       )}
 
       {/* Verses */}
