@@ -127,9 +127,9 @@ export default function HomePage() {
       </section>
 
       {/* Daily Verse */}
-      <section className="card max-w-2xl mx-auto space-y-5">
-        <div className="flex items-center gap-2 text-gold-500 text-sm font-medium">
-          <Star className="w-4 h-4" />
+      <section className="card max-w-2xl mx-auto space-y-5 p-4 sm:p-6">
+        <div className="flex items-center gap-2 text-gold-500 text-xs font-medium uppercase tracking-wider">
+          <Star className="w-3.5 h-3.5" />
           <span>Verse of the Day</span>
         </div>
 
