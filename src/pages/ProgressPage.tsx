@@ -122,6 +122,7 @@ export default function ProgressPage() {
             </Link>
           </div>
         ) : (
+          <>
           <div className="space-y-2">
             {visibleHistory.map((record, idx) => {
               const bookSlug = record.book ?? 'matthew';
@@ -177,6 +178,7 @@ export default function ProgressPage() {
                 : `Show ${recentHistory.length - INITIAL_COUNT} more`}
             </button>
           )}
+          </>
         )}
       </section>
     </div>
