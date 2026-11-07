@@ -103,12 +103,17 @@ export default function ReadPage() {
   useEffect(() => {
     if (fullscreen) {
       document.documentElement.setAttribute('data-reader-fullscreen', '');
+      const handleKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setFullscreen(false);
+      };
+      window.addEventListener('keydown', handleKey);
+      return () => {
+        document.documentElement.removeAttribute('data-reader-fullscreen');
+        window.removeEventListener('keydown', handleKey);
+      };
     } else {
       document.documentElement.removeAttribute('data-reader-fullscreen');
     }
-    return () => {
-      document.documentElement.removeAttribute('data-reader-fullscreen');
-    };
   }, [fullscreen]);
 
   const { startV, endV } = useMemo(() => {
