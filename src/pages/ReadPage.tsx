@@ -15,6 +15,7 @@ import {
   Share2,
   Volume2,
   VolumeX,
+  Settings,
 } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import { getBookBySlug } from '../lib/book-metadata';
@@ -42,6 +43,7 @@ export default function ReadPage() {
   const [loading, setLoading] = useState(true);
   const [fontSize, setFontSize] = useState(18);
   const [selectedVerses, setSelectedVerses] = useState<Set<number>>(new Set());
+  const [showSettings, setShowSettings] = useState(false);
 
   const { markChapterExplored, progress } = useProgress();
   const { addVerse, addVerses, removeVerse, isSaved, isFavourite, setFavourite } = useSavedVerses();
@@ -91,6 +93,7 @@ export default function ReadPage() {
   // Clear selection on chapter change
   useEffect(() => {
     setSelectedVerses(new Set());
+    setShowSettings(false);
   }, [bookSlug, num]);
 
   const { startV, endV } = useMemo(() => {
@@ -215,7 +218,7 @@ export default function ReadPage() {
   }
 
   return (
-    <div className="py-10 space-y-6">
+    <div className="py-6 sm:py-10 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -233,7 +236,17 @@ export default function ReadPage() {
 
         {/* Controls */}
         <div className="flex items-center gap-3">
-          {/* Mark position */}
+          {/* Mobile: settings toggle */}
+          <button
+            type="button"
+            onClick={() => setShowSettings((s) => !s)}
+            className="sm:hidden w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+            aria-label="Reading settings"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+
+          {/* Desktop: inline controls */}
           <button
             type="button"
             onClick={() => {
@@ -242,41 +255,84 @@ export default function ReadPage() {
                 showToast(`Reading position saved: ${bookName} ${num}`, 'success');
               }
             }}
-            className="rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center gap-1.5 px-3 py-2 text-xs"
+            className="hidden sm:flex rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors items-center gap-1.5 px-3 py-2 text-xs"
             aria-label="Save reading position"
             title="Save reading position"
           >
             <BookmarkPlus className="w-4 h-4" />
-            Save Reading Position
+            Save Position
           </button>
 
-          {/* Font size controls */}
-          <div className="flex items-center gap-2">
-          <span className="text-cream/40 text-xs font-medium tracking-wide mr-1">
-            Aa
-          </span>
-          <button
-            type="button"
-            onClick={() => setFontSize((prev) => Math.max(14, prev - 2))}
-            className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
-            aria-label="Decrease font size"
-          >
-            <Minus className="w-4 h-4" />
-          </button>
-          <span className="text-cream/30 text-xs w-8 text-center">
-            {fontSize}
-          </span>
-          <button
-            type="button"
-            onClick={() => setFontSize((prev) => Math.min(28, prev + 2))}
-            className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
-            aria-label="Increase font size"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
+          <div className="hidden sm:flex items-center gap-2">
+            <span className="text-cream/40 text-xs font-medium tracking-wide mr-1">
+              Aa
+            </span>
+            <button
+              type="button"
+              onClick={() => setFontSize((prev) => Math.max(14, prev - 2))}
+              className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+              aria-label="Decrease font size"
+            >
+              <Minus className="w-4 h-4" />
+            </button>
+            <span className="text-cream/30 text-xs w-8 text-center">
+              {fontSize}
+            </span>
+            <button
+              type="button"
+              onClick={() => setFontSize((prev) => Math.min(28, prev + 2))}
+              className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+              aria-label="Increase font size"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile settings panel */}
+      {showSettings && (
+        <div className="sm:hidden flex items-center justify-between gap-3 px-3 py-3 bg-navy-800/50 rounded-xl border border-gold-500/10">
+          <div className="flex items-center gap-2">
+            <span className="text-cream/40 text-xs font-medium tracking-wide mr-1">
+              Aa
+            </span>
+            <button
+              type="button"
+              onClick={() => setFontSize((prev) => Math.max(14, prev - 2))}
+              className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+              aria-label="Decrease font size"
+            >
+              <Minus className="w-4 h-4" />
+            </button>
+            <span className="text-cream/30 text-xs w-8 text-center">
+              {fontSize}
+            </span>
+            <button
+              type="button"
+              onClick={() => setFontSize((prev) => Math.min(28, prev + 2))}
+              className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/50 hover:text-cream hover:border-gold-500/40 transition-colors flex items-center justify-center"
+              aria-label="Increase font size"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (bookSlug) {
+                saveLastRead(bookSlug, bookName, num);
+                showToast(`Reading position saved: ${bookName} ${num}`, 'success');
+              }
+            }}
+            className="rounded-lg border border-gold-500/20 text-cream/50 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center gap-1.5 px-3 py-2 text-xs whitespace-nowrap"
+            aria-label="Save reading position"
+          >
+            <BookmarkPlus className="w-4 h-4" />
+            Save Position
+          </button>
+        </div>
+      )}
 
       {/* Verses */}
       <div
@@ -354,8 +410,9 @@ export default function ReadPage() {
             className="btn-gold inline-flex items-center gap-2 text-sm whitespace-nowrap"
           >
             <BookOpen className="w-4 h-4" />
-            Memorise Selected ({selectedVerses.size} verse
-            {selectedVerses.size > 1 ? 's' : ''})
+            <span className="hidden sm:inline">Memorise Selected</span>
+            <span className="sm:hidden">Memorise</span>
+            ({selectedVerses.size})
           </Link>
           <button
             type="button"
@@ -368,7 +425,7 @@ export default function ReadPage() {
               className="w-4 h-4"
               fill={allSelectedSaved ? 'currentColor' : 'none'}
             />
-            {allSelectedSaved ? 'Saved' : 'Save'}
+            <span className="hidden sm:inline">{allSelectedSaved ? 'Saved' : 'Save'}</span>
           </button>
           <button
             type="button"
@@ -381,7 +438,7 @@ export default function ReadPage() {
               className="w-4 h-4"
               fill={allSelectedFavourited ? 'currentColor' : 'none'}
             />
-            {allSelectedFavourited ? 'Favourited' : 'Favourite'}
+            <span className="hidden sm:inline">{allSelectedFavourited ? 'Favourited' : 'Favourite'}</span>
           </button>
           <button
             type="button"
@@ -402,7 +459,7 @@ export default function ReadPage() {
             className="btn-outline inline-flex items-center gap-2 text-sm"
           >
             <Copy className="w-4 h-4" />
-            Copy
+            <span className="hidden sm:inline">Copy</span>
           </button>
           {ttsSupported && (
             <button
@@ -422,7 +479,7 @@ export default function ReadPage() {
               className="btn-outline inline-flex items-center gap-2 text-sm"
             >
               {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-              {isSpeaking ? 'Stop' : 'Listen'}
+              <span className="hidden sm:inline">{isSpeaking ? 'Stop' : 'Listen'}</span>
             </button>
           )}
           <button
@@ -450,7 +507,7 @@ export default function ReadPage() {
             className="btn-outline inline-flex items-center gap-2 text-sm"
           >
             <Share2 className="w-4 h-4" />
-            Share
+            <span className="hidden sm:inline">Share</span>
           </button>
           <button
             type="button"
@@ -464,14 +521,6 @@ export default function ReadPage() {
         </div>
       )}
 
-      {/* Sticky hint bar */}
-      {selectedVerses.size === 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-navy-800/90 backdrop-blur-sm border-t border-gold-500/10 py-3 text-center z-30">
-          <p className="text-cream/40 text-sm">
-            Select verses above to start memorising
-          </p>
-        </div>
-      )}
     </div>
   );
 }
