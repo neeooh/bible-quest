@@ -151,7 +151,7 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-2 pt-2">
               <Link
                 to={`/memorize?book=${daily.book}&chapter=${daily.chapter}&start=${daily.verse}&end=${daily.verse}`}
-                className="btn-gold inline-flex items-center gap-2 text-sm px-4 sm:px-6"
+                className="btn-gold inline-flex items-center gap-2 text-sm px-3 sm:px-6"
               >
                 <BookOpen className="w-4 h-4" />
                 Memorise This
