@@ -266,7 +266,7 @@ export default function HomePage() {
                 <p className={`text-3xl font-bold ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-cream/20'}`}>
                   {stageCounts.dueForReview}
                 </p>
-                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Due for Review</p>
+                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Review</p>
               </Link>
             </div>
             <Link to="/progress" className="flex items-center justify-center gap-1.5 pt-1 group">
