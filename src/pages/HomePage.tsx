@@ -258,10 +258,10 @@ export default function HomePage() {
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Retention</p>
               </Link>
             </div>
-            <Link to="/progress" className="flex items-center justify-center gap-2 pt-2 group">
+            <Link to="/progress" className="flex flex-col items-center gap-1 pt-2 group">
               <Flame className="w-5 h-5 text-gold-500" />
-              <span className="text-2xl font-bold text-cream">{progress.dailyStreak}</span>
-              <span className="text-cream/50 text-sm group-hover:text-cream/70 transition-colors">day streak</span>
+              <p className="text-3xl font-bold text-gold-400">{progress.dailyStreak}</p>
+              <p className="text-cream/40 text-xs group-hover:text-cream/60 transition-colors">day streak</p>
             </Link>
           </div>
         </section>
