@@ -159,7 +159,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={handleToggleFavourite}
-                className="btn-outline inline-flex items-center gap-2 text-sm px-3 sm:px-6"
+                className="btn-outline inline-flex items-center gap-2 text-sm p-3 sm:px-6"
               >
                 {dailyFavourited ? (
                   <Heart className="w-4 h-4 text-red-400" fill="currentColor" />
@@ -171,7 +171,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={handleCopy}
-                className="btn-outline inline-flex items-center gap-2 text-sm px-3 sm:px-6"
+                className="btn-outline inline-flex items-center gap-2 text-sm p-3 sm:px-6"
               >
                 {copied ? (
                   <Check className="w-4 h-4" />
@@ -193,7 +193,7 @@ export default function HomePage() {
                     });
                   }
                 }}
-                className="btn-outline inline-flex items-center gap-2 text-sm px-3 sm:px-6"
+                className="btn-outline inline-flex items-center gap-2 text-sm p-3 sm:px-6"
               >
                 <Share2 className="w-4 h-4" />
                 <span className="hidden sm:inline">Share</span>
