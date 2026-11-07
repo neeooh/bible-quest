@@ -112,20 +112,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-[calc(100vh-7rem)] flex flex-col justify-center space-y-12">
-      {/* Hero */}
-      <section className="text-center space-y-4 pb-2">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-2xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center">
-            <BookOpen className="w-8 h-8 text-gold-500" />
-          </div>
-        </div>
-        <h1 className="text-5xl md:text-6xl font-serif font-bold tracking-tight bg-gradient-to-r from-gold-300 via-gold-500 to-gold-300 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(214,173,96,0.3)]">
-          BibleQuest
-        </h1>
-        <p className="text-cream/50 text-lg md:text-xl font-light tracking-wide">
-          Hide His Word in your heart.
-        </p>
-      </section>
 
       {/* Daily Verse */}
       <section className="card max-w-2xl mx-auto space-y-5 p-4 sm:p-6">
