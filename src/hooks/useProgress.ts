@@ -6,6 +6,7 @@ export interface UseProgressReturn {
   progress: UserProgress;
   addXp: (amount: number) => void;
   recordExercise: (result: ExerciseResult) => void;
+  removePassageHistory: (passageKey: string) => void;
   markChapterExplored: (book: string, chapter: number) => void;
   markPassageMemorized: (
     book: string,
@@ -34,6 +35,11 @@ export function useProgress(): UseProgressReturn {
 
   const recordExercise = useCallback((result: ExerciseResult) => {
     const updated = progressLib.recordExercise(result);
+    setProgress(updated);
+  }, []);
+
+  const removePassageHistory = useCallback((passageKey: string) => {
+    const updated = progressLib.removePassageHistory(passageKey);
     setProgress(updated);
   }, []);
 
@@ -69,6 +75,7 @@ export function useProgress(): UseProgressReturn {
     progress,
     addXp,
     recordExercise,
+    removePassageHistory,
     markChapterExplored,
     markPassageMemorized,
     updateStreak: handleUpdateStreak,

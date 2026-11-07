@@ -71,7 +71,7 @@ interface UnifiedEntry {
 }
 
 export default function MyVersesPage() {
-  const { progress } = useProgress();
+  const { progress, removePassageHistory } = useProgress();
   const { savedVerses, addVerse, removeVerse, setFavourite, isSaved, isFavourite } = useSavedVerses();
   const {
     collections,
@@ -591,12 +591,14 @@ export default function MyVersesPage() {
                     type="button"
                     onClick={() => {
                       if (window.confirm(`Remove ${entry.reference} from your list?`)) {
+                        // Remove from exercise history
+                        removePassageHistory(entry.key);
+                        // Remove from all collections
                         removePassageFromAllCollections(entry.key);
-                        if (entry.isFavourite) {
-                          for (let v = entry.startVerse; v <= entry.endVerse; v++) {
-                            if (isSaved(entry.book, entry.chapterNumber, v)) {
-                              removeVerse(entry.book, entry.chapterNumber, v);
-                            }
+                        // Remove saved/favourite verses
+                        for (let v = entry.startVerse; v <= entry.endVerse; v++) {
+                          if (isSaved(entry.book, entry.chapterNumber, v)) {
+                            removeVerse(entry.book, entry.chapterNumber, v);
                           }
                         }
                       }

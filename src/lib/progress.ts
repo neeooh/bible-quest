@@ -102,6 +102,33 @@ export function markPassageMemorized(
   return progress;
 }
 
+/** Remove all exercise history for a passage key like "book:chapter:start-end". */
+export function removePassageHistory(passageKey: string): UserProgress {
+  const progress = getProgress();
+  const [book, chapterStr, verseRange] = passageKey.split(':');
+  const [startStr, endStr] = verseRange.split('-');
+  const chapter = Number(chapterStr);
+  const start = Number(startStr);
+  const end = Number(endStr);
+
+  progress.exerciseHistory = progress.exerciseHistory.filter(
+    (e) =>
+      !(
+        (e.book ?? 'matthew') === book &&
+        e.chapterNumber === chapter &&
+        e.startVerse === start &&
+        e.endVerse === end
+      ),
+  );
+
+  // Also remove from memorized passages if present
+  const memKey = `${book}:${chapter}:${start}-${end}`;
+  progress.passagesMemorized = progress.passagesMemorized.filter((k) => k !== memKey);
+
+  saveProgress(progress);
+  return progress;
+}
+
 export function updateStreak(): UserProgress {
   const progress = getProgress();
   const today = new Date();
