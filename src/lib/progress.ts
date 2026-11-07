@@ -108,7 +108,6 @@ export function updateStreak(): UserProgress {
   const todayStr = today.toISOString().slice(0, 10);
 
   if (progress.lastPracticeDate === todayStr) {
-    saveProgress(progress);
     return progress;
   }
 
@@ -119,9 +118,10 @@ export function updateStreak(): UserProgress {
   if (progress.lastPracticeDate === yesterdayStr) {
     progress.dailyStreak += 1;
   } else {
-    progress.dailyStreak = 0;
+    progress.dailyStreak = progress.lastPracticeDate ? 0 : progress.dailyStreak;
   }
 
+  progress.lastPracticeDate = todayStr;
   saveProgress(progress);
   return progress;
 }
