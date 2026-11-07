@@ -47,6 +47,7 @@ export default function HomePage() {
     let memorising = 0;
     let retention = 0;
     let notPractised = 0;
+    let dueForReview = 0;
 
     // Count stages from exercise history
     for (const e of progress.exerciseHistory) {
@@ -63,6 +64,7 @@ export default function HomePage() {
       if (stage.stage === 'learning') learning++;
       if (stage.stage === 'memorising') memorising++;
       if (stage.stage === 'retention') retention++;
+      if (stage.dueForReview) dueForReview++;
     }
 
     // Count saved verses that have never been practised
@@ -73,7 +75,7 @@ export default function HomePage() {
       }
     }
 
-    return { learning, memorising, retention, notPractised };
+    return { learning, memorising, retention, notPractised, dueForReview };
   }, [progress.exerciseHistory, savedVerses]);
 
   function handleCopy() {
@@ -226,7 +228,7 @@ export default function HomePage() {
         <section className="max-w-2xl mx-auto">
           <div className="card space-y-4">
             <h2 className="text-sm font-medium text-cream/50">Your Progress</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               <Link
                 to="/my-verses?stage=not-started"
                 className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center aspect-square flex flex-col items-center justify-center"
@@ -256,6 +258,15 @@ export default function HomePage() {
               >
                 <p className="text-3xl font-bold text-green-400">{stageCounts.retention}</p>
                 <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Retention</p>
+              </Link>
+              <Link
+                to="/my-verses?stage=due-for-review"
+                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-4 group text-center col-span-2 sm:col-span-1 aspect-auto sm:aspect-square flex flex-col items-center justify-center"
+              >
+                <p className={`text-3xl font-bold ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-cream/20'}`}>
+                  {stageCounts.dueForReview}
+                </p>
+                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Due for Review</p>
               </Link>
             </div>
             <Link to="/progress" className="flex items-center justify-center gap-1.5 pt-1 group">

@@ -14,10 +14,9 @@ const links = [
 interface NavbarProps {
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
-  dueForReviewCount: number;
 }
 
-export default function Navbar({ theme, onToggleTheme, dueForReviewCount }: NavbarProps) {
+export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -42,11 +41,6 @@ export default function Navbar({ theme, onToggleTheme, dueForReviewCount }: Navb
               }
             >
               {link.label}
-              {link.to === '/my-verses' && dueForReviewCount > 0 && (
-                <span className="absolute -top-2 -right-3 w-4 h-4 rounded-full bg-amber-500 text-navy-900 text-[10px] font-bold flex items-center justify-center">
-                  {dueForReviewCount}
-                </span>
-              )}
             </NavLink>
           ))}
           <button
@@ -100,11 +94,6 @@ export default function Navbar({ theme, onToggleTheme, dueForReviewCount }: Navb
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
-                {link.to === '/my-verses' && dueForReviewCount > 0 && (
-                  <span className="absolute top-2 right-3 w-4 h-4 rounded-full bg-amber-500 text-navy-900 text-[10px] font-bold flex items-center justify-center">
-                    {dueForReviewCount}
-                  </span>
-                )}
               </NavLink>
             ))}
           </div>
