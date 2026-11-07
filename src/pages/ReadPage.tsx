@@ -36,6 +36,7 @@ export default function ReadPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const targetVerse = searchParams.get('verse');
+  const targetEndVerse = searchParams.get('end');
 
   const meta = bookSlug ? getBookBySlug(bookSlug) : undefined;
   const bookName = meta?.name ?? bookSlug ?? '';
@@ -78,21 +79,29 @@ export default function ReadPage() {
     }
   }, [bookSlug, num, chapter]);
 
-  // Scroll to target verse
+  // Scroll to target verse (and highlight range if end is specified)
   useEffect(() => {
     if (!targetVerse) return;
-    const verseNum = Number(targetVerse);
-    if (!verseNum) return;
+    const startNum = Number(targetVerse);
+    if (!startNum) return;
+    const endNum = Number(targetEndVerse) || startNum;
     const timer = setTimeout(() => {
-      const el = document.getElementById(`verse-${verseNum}`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('verse-flash');
-        setTimeout(() => el.classList.remove('verse-flash'), 3000);
+      // Scroll to the first verse
+      const firstEl = document.getElementById(`verse-${startNum}`);
+      if (firstEl) {
+        firstEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      // Highlight all verses in the range
+      for (let v = startNum; v <= endNum; v++) {
+        const el = document.getElementById(`verse-${v}`);
+        if (el) {
+          el.classList.add('verse-flash');
+          setTimeout(() => el.classList.remove('verse-flash'), 3000);
+        }
       }
     }, 100);
     return () => clearTimeout(timer);
-  }, [targetVerse, loading]);
+  }, [targetVerse, targetEndVerse, loading]);
 
   // Clear selection on chapter change
   useEffect(() => {

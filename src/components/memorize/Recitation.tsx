@@ -186,7 +186,7 @@ export default function Recitation({
             <p className="text-cream/40 text-xs font-medium mb-3">
               Word-by-word breakdown:
             </p>
-            <div className="leading-relaxed font-serif text-lg">
+            <div className="leading-relaxed font-serif text-lg overflow-hidden">
               {result.words.map((w, i) => {
                 let cls = '';
                 let title = '';
@@ -210,8 +210,8 @@ export default function Recitation({
                     break;
                 }
                 return (
-                  <span key={i} className={`${cls} mr-1`} title={title}>
-                    {w.word}
+                  <span key={i} className={cls} title={title}>
+                    {w.word}{' '}
                   </span>
                 );
               })}

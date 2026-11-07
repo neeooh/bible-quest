@@ -108,7 +108,7 @@ export default function MemorizePage() {
   /** Surrounding verses for context (3 before + selected + 3 after). */
   const contextVerses = useMemo(() => {
     if (!chapter) return [];
-    const CONTEXT = 3;
+    const CONTEXT = 1;
     const minV = Math.max(1, startVerse - CONTEXT);
     const maxV = Math.min(
       chapter.verses[chapter.verses.length - 1]?.verse ?? endVerse,
@@ -202,10 +202,88 @@ export default function MemorizePage() {
         {/* Collapsed state */}
         {passageSelected && selectorCollapsed ? (
           <div className="space-y-3">
+            {/* Header row — matches expanded state layout */}
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-cream/50 text-xs mb-1">Currently you are practising</p>
-                <p className="text-gold-400 font-serif font-semibold">
+              <p className="text-cream/50 text-xs">Currently you are practising</p>
+              <button
+                type="button"
+                onClick={() => setSelectorCollapsed(false)}
+                className="text-cream/30 hover:text-cream/60 text-xs inline-flex items-center gap-1 transition-colors"
+              >
+                Change passage
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            {/* Passage reference + Listen */}
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-gold-400 font-serif font-semibold min-w-0">
+                {formatReference(bookName, selectedChapter, startVerse, endVerse !== startVerse ? endVerse : undefined)}
+                <span className="text-cream/30 font-sans font-normal ml-2 text-sm">
+                  ({verses.length} verse{verses.length > 1 ? 's' : ''})
+                </span>
+                {passageStage && (
+                  <span
+                    className={`font-sans font-medium ml-2 text-[10px] px-2 py-0.5 rounded-full ${
+                      passageStage.stage === 'learning'
+                        ? 'bg-blue-500/15 text-blue-400'
+                        : passageStage.stage === 'memorising'
+                          ? 'bg-amber-500/15 text-amber-400'
+                          : 'bg-green-500/15 text-green-400'
+                    }`}
+                  >
+                    {passageStage.label}
+                  </span>
+                )}
+              </p>
+              {ttsSupported && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isSpeaking) {
+                      stop();
+                    } else {
+                      speak(passageText);
+                    }
+                  }}
+                  className="text-cream/30 hover:text-cream/60 text-xs inline-flex items-center gap-1.5 shrink-0 transition-colors"
+                  aria-label={isSpeaking ? 'Stop listening' : 'Listen to passage'}
+                >
+                  {isSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                  <span className="hidden sm:inline">{isSpeaking ? 'Stop' : 'Listen'}</span>
+                </button>
+              )}
+            </div>
+            <p
+              className="text-cream/80 text-sm leading-relaxed font-serif transition-[filter] duration-200 select-none cursor-pointer"
+              style={{ filter: peeking ? 'none' : 'blur(6px)' }}
+              onPointerDown={() => setPeeking(true)}
+              onPointerUp={() => setPeeking(false)}
+              onPointerLeave={() => setPeeking(false)}
+              title="Hold to peek"
+            >
+              {passageText}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Expanded header */}
+            <div className="flex items-center justify-between">
+              <p className="text-cream/50 text-xs">{passageSelected ? 'Currently you are practising' : 'Select a Passage'}</p>
+              {passageSelected && (
+                <button
+                  type="button"
+                  onClick={() => setSelectorCollapsed(true)}
+                  className="text-cream/30 hover:text-cream/60 text-xs inline-flex items-center gap-1 transition-colors"
+                >
+                  Collapse
+                  <ChevronUp className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            {/* Passage reference + Listen (when passage selected) */}
+            {passageSelected && (
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-gold-400 font-serif font-semibold min-w-0">
                   {formatReference(bookName, selectedChapter, startVerse, endVerse !== startVerse ? endVerse : undefined)}
                   <span className="text-cream/30 font-sans font-normal ml-2 text-sm">
                     ({verses.length} verse{verses.length > 1 ? 's' : ''})
@@ -224,8 +302,6 @@ export default function MemorizePage() {
                     </span>
                   )}
                 </p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
                 {ttsSupported && (
                   <button
                     type="button"
@@ -236,50 +312,15 @@ export default function MemorizePage() {
                         speak(passageText);
                       }
                     }}
-                    className="btn-outline text-sm inline-flex items-center gap-1.5"
+                    className="text-cream/30 hover:text-cream/60 text-xs inline-flex items-center gap-1.5 shrink-0 transition-colors"
                     aria-label={isSpeaking ? 'Stop listening' : 'Listen to passage'}
                   >
-                    {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                    {isSpeaking ? 'Stop' : 'Listen to Passage'}
+                    {isSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                    <span className="hidden sm:inline">{isSpeaking ? 'Stop' : 'Listen'}</span>
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setSelectorCollapsed(false)}
-                  className="btn-outline text-sm inline-flex items-center gap-1.5"
-                >
-                  Change passage
-                  <ChevronDown className="w-4 h-4" />
-                </button>
               </div>
-            </div>
-            <p
-              className="text-cream/60 text-sm leading-relaxed font-serif transition-[filter] duration-200 select-none cursor-pointer"
-              style={{ filter: peeking ? 'none' : 'blur(6px)' }}
-              onPointerDown={() => setPeeking(true)}
-              onPointerUp={() => setPeeking(false)}
-              onPointerLeave={() => setPeeking(false)}
-              title="Hold to peek"
-            >
-              {passageText}
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* Expanded header */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-cream/50">Select a Passage</h2>
-              {passageSelected && (
-                <button
-                  type="button"
-                  onClick={() => setSelectorCollapsed(true)}
-                  className="text-cream/30 hover:text-cream/60 text-xs inline-flex items-center gap-1 transition-colors"
-                >
-                  Collapse
-                  <ChevronUp className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+            )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Book */}
           <div className="">
@@ -331,6 +372,8 @@ export default function MemorizePage() {
             </select>
           </div>
 
+          {/* Start & End Verse — side by side on mobile */}
+          <div className="grid grid-cols-2 gap-4 sm:contents">
           {/* Start Verse */}
           <div className="">
             <label htmlFor="start-verse" className="block text-xs text-cream/40 mb-2">
@@ -373,6 +416,7 @@ export default function MemorizePage() {
               ))}
             </select>
           </div>
+          </div>{/* End Start & End Verse wrapper */}
         </div>
 
         {bookLoading && (
@@ -415,7 +459,7 @@ export default function MemorizePage() {
       {/* Exercise Area */}
       {passageSelected && (
         <section className="space-y-6">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-3 mb-3 scrollbar-none">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.key;
               const isRecommended = filteredTabs.some((t) => t.key === tab.key);
@@ -424,7 +468,7 @@ export default function MemorizePage() {
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     isActive
                       ? 'bg-gold-500 text-navy-900'
                       : isRecommended

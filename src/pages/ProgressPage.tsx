@@ -21,6 +21,28 @@ const exerciseLabels: Record<string, string> = {
   voice: 'Voice (legacy)',
 };
 
+/** Level title lookup — faith/Bible themed rank names */
+function getLevelTitle(level: number): string {
+  if (level <= 1) return 'Seeker';
+  if (level <= 3) return 'Disciple';
+  if (level <= 5) return 'Scribe';
+  if (level <= 8) return 'Scholar';
+  if (level <= 12) return 'Evangelist';
+  if (level <= 17) return 'Shepherd';
+  if (level <= 23) return 'Prophet';
+  if (level <= 30) return 'Apostle';
+  if (level <= 40) return 'Elder';
+  return 'Saint';
+}
+
+/** Badge tier ring color based on level */
+function getBadgeTier(level: number): { ring: string; glow: string } {
+  if (level <= 3) return { ring: 'border-amber-700/60', glow: 'shadow-[0_0_20px_rgba(180,130,60,0.25)]' };
+  if (level <= 8) return { ring: 'border-slate-300/60', glow: 'shadow-[0_0_20px_rgba(200,200,210,0.3)]' };
+  if (level <= 17) return { ring: 'border-gold-400/70', glow: 'shadow-[0_0_24px_rgba(214,173,96,0.4)]' };
+  return { ring: 'border-cyan-300/70', glow: 'shadow-[0_0_28px_rgba(140,220,255,0.4)]' };
+}
+
 export default function ProgressPage() {
   const { progress, level } = useProgress();
 
@@ -29,6 +51,11 @@ export default function ProgressPage() {
   const INITIAL_COUNT = 10;
   const visibleHistory = showAllHistory ? recentHistory : recentHistory.slice(0, INITIAL_COUNT);
   const hasMore = recentHistory.length > INITIAL_COUNT;
+
+  const levelTitle = getLevelTitle(level.level);
+  const badgeTier = getBadgeTier(level.level);
+  const progressPct = level.nextLevelXp > 0 ? Math.round((level.currentXp / level.nextLevelXp) * 100) : 0;
+  const xpRemaining = level.nextLevelXp - level.currentXp;
 
   return (
     <div className="py-10 space-y-10">
@@ -41,39 +68,78 @@ export default function ProgressPage() {
 
       {/* Level display */}
       <section className="card space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-full bg-gold-500/10 border-2 border-gold-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(214,173,96,0.2)]">
-              <span className="text-gold-400 font-bold text-2xl">
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center">
+            {/* Badge with tier-colored ring and shimmer animation */}
+            <div className={`relative w-20 h-20 sm:w-16 sm:h-16 rounded-full bg-gold-500/10 border-[3px] ${badgeTier.ring} flex items-center justify-center ${badgeTier.glow} overflow-hidden`}>
+              <span className="text-gold-400 font-bold text-3xl sm:text-2xl relative z-10">
                 {level.level}
               </span>
+              {/* Shimmer overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_3s_ease-in-out_infinite]" />
             </div>
-            <div>
-              <p className="text-cream font-semibold">Level {level.level}</p>
-              <p className="text-cream/40 text-xs">
-                {level.currentXp} / {level.nextLevelXp} XP to next level
+            <div className="text-center sm:text-left">
+              {/* Level title */}
+              <p className="text-gold-400/70 text-xs font-semibold uppercase tracking-wider">
+                {levelTitle}
               </p>
+              <p className="text-cream font-semibold text-xl sm:text-lg">Level {level.level}</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Star className="w-4 h-4 text-gold-500" />
-            <span className="text-gold-400 font-semibold">
-              {progress.totalXp} XP
-            </span>
+          {/* XP + Streak — desktop */}
+          <div className="hidden sm:flex items-center gap-4">
+            {progress.dailyStreak > 0 && (
+              <div className="flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-orange-400" />
+                <span className="text-orange-400 font-semibold text-sm">
+                  {progress.dailyStreak}d streak
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5">
+              <Star className="w-5 h-5 text-gold-500" />
+              <span className="text-gold-400 font-bold text-lg">
+                {progress.totalXp} XP
+              </span>
+            </div>
+          </div>
+          {/* XP + Streak — mobile */}
+          <div className="flex items-center justify-center gap-4 sm:hidden">
+            {progress.dailyStreak > 0 && (
+              <div className="flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-orange-400" />
+                <span className="text-orange-400 font-semibold text-sm">
+                  {progress.dailyStreak}d streak
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5">
+              <Star className="w-5 h-5 text-gold-500" />
+              <span className="text-gold-400 font-bold text-lg">
+                {progress.totalXp} XP
+              </span>
+            </div>
           </div>
         </div>
-        <div className="w-full bg-navy-700 rounded-full h-3 overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-gold-600 to-gold-400 rounded-full transition-all duration-500"
-            style={{
-              width: `${level.nextLevelXp > 0 ? (level.currentXp / level.nextLevelXp) * 100 : 0}%`,
-            }}
-          />
+
+        {/* Progress bar with percentage */}
+        <div className="space-y-1.5">
+          <div className="w-full bg-navy-700 rounded-full h-3 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-gold-600 to-gold-400 rounded-full transition-all duration-500"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          {/* Progress stats line */}
+          <div className="flex items-center justify-between text-xs text-cream/40">
+            <span>{progressPct}% complete</span>
+            <span>{xpRemaining} XP to next level</span>
+          </div>
         </div>
       </section>
 
       {/* Stats grid */}
-      <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           icon={<Trophy className="w-5 h-5 text-gold-500" />}
           value={progress.totalXp}
@@ -93,11 +159,6 @@ export default function ProgressPage() {
           icon={<BookOpen className="w-5 h-5 text-gold-500" />}
           value={progress.chaptersExplored.length}
           label="Chapters Explored"
-        />
-        <StatCard
-          icon={<Target className="w-5 h-5 text-gold-500" />}
-          value={`${Math.round(progress.bestAccuracy * 100)}%`}
-          label="Best Accuracy"
         />
       </section>
 

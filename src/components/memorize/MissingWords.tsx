@@ -54,7 +54,6 @@ export default function MissingWords({
     { label: 'Easy', percent: 0.15 },
     { label: 'Medium', percent: 0.35 },
     { label: 'Hard', percent: 0.60 },
-    { label: 'Expert', percent: 0.85 },
   ] as const;
 
   /* ---- build a flat word list from all verses -------------------- */
@@ -239,13 +238,13 @@ export default function MissingWords({
       {/* ---- difficulty buttons ---- */}
       <div className="space-y-2">
         <p className="text-xs text-cream/40">Choose difficulty</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto scrollbar-none">
         {DIFFICULTY_LEVELS.map((level) => (
           <button
             key={level.label}
             type="button"
             onClick={() => handleDifficultyChange(level.percent)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               hidePercent === level.percent
                 ? 'bg-gold-500 text-navy-900'
                 : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'

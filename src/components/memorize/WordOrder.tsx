@@ -187,13 +187,13 @@ export default function WordOrder({
       {/* Difficulty */}
       <div className="space-y-2">
         <p className="text-xs text-cream/40">Choose difficulty</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto scrollbar-none">
           {DIFFICULTY_OPTIONS.map((opt) => (
             <button
               key={opt.key}
               type="button"
               onClick={() => handleDifficultyChange(opt.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 difficulty === opt.key
                   ? 'bg-gold-500 text-navy-900'
                   : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'

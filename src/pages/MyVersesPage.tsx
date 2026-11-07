@@ -23,6 +23,7 @@ import {
   Search,
   X,
   FolderPlus,
+  Library,
 } from 'lucide-react';
 import CollectionsOverview from '../components/collections/CollectionsOverview';
 import CreateCollectionDialog from '../components/collections/CreateCollectionDialog';
@@ -301,23 +302,25 @@ export default function MyVersesPage() {
         <button
           type="button"
           onClick={() => setActiveTab('all-passages')}
-          className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+          className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all inline-flex items-center gap-2 ${
             activeTab === 'all-passages'
               ? 'bg-gold-500 text-navy-900'
               : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
           }`}
         >
+          <BookOpen className="w-4 h-4" />
           All Passages
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('my-collections')}
-          className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+          className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all inline-flex items-center gap-2 ${
             activeTab === 'my-collections'
               ? 'bg-gold-500 text-navy-900'
               : 'bg-navy-800 border border-gold-500/10 text-cream/50 hover:border-gold-500/30 hover:text-cream'
           }`}
         >
+          <Library className="w-4 h-4" />
           My Collections
         </button>
         {activeTab === 'my-collections' && (

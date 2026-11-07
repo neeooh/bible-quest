@@ -87,14 +87,11 @@ export default function TopicPage() {
                   <p className="text-gold-400 font-serif font-semibold text-base">
                     {passage.reference}
                   </p>
-                  <span className="text-cream/25 text-xs shrink-0">
-                    {passage.verseCount} verse{passage.verseCount > 1 ? 's' : ''}
-                  </span>
                 </div>
-                <p className="text-cream/60 text-sm mt-1.5 leading-relaxed line-clamp-2 font-serif">
-                  {passage.preview}
+                <p className="text-cream/80 text-base mt-3 italic leading-relaxed line-clamp-2">
+                  &ldquo;{passage.preview}&rdquo;
                 </p>
-                <p className="text-cream/40 text-sm mt-2 leading-relaxed">
+                <p className="text-cream/40 text-xs mt-2 leading-relaxed">
                   {passage.explainer}
                 </p>
               </div>
@@ -109,7 +106,7 @@ export default function TopicPage() {
                 </Link>
                 <div className="flex items-center gap-2">
                   <Link
-                    to={`/read/${passage.book}/${passage.chapter}?verse=${passage.startVerse}`}
+                    to={`/read/${passage.book}/${passage.chapter}?verse=${passage.startVerse}&end=${passage.endVerse}`}
                     className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
                     aria-label={`Read ${passage.reference}`}
                     title="Read"

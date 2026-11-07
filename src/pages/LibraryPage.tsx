@@ -171,7 +171,7 @@ export default function LibraryPage() {
       </div>
 
       {/* Testament Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
         <Link
           to="/library/testament/ot"
           className="card group hover:border-gold-500/30 transition-all duration-200 cursor-pointer flex flex-col items-center text-center py-10 space-y-3"

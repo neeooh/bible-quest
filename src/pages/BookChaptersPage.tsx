@@ -85,8 +85,8 @@ export default function BookChaptersPage() {
       {/* Passage Selector */}
       <section className="card space-y-4">
         <h2 className="text-sm font-medium text-cream/50">Go to a Passage</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-          <div className="">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 items-end">
+          <div className="col-span-2 sm:col-span-1">
             <label htmlFor="lib-chapter" className="block text-xs text-cream/40 mb-2">
               Chapter
             </label>
@@ -105,31 +105,31 @@ export default function BookChaptersPage() {
             </select>
           </div>
 
-          <div className="">
-            <label htmlFor="lib-verse" className="block text-xs text-cream/40 mb-2">
-              Verse
-            </label>
-            <select
-              id="lib-verse"
-              value={selectedVerse}
-              onChange={(e) => setSelectedVerse(Number(e.target.value))}
-              disabled={!selectedChapter}
-              className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50 disabled:opacity-40"
-            >
-              {Array.from({ length: maxVerse }, (_, i) => i + 1).map((v) => (
-                <option key={v} value={v}>
-                  Verse {v}
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="col-span-2 sm:col-span-1 flex gap-4 items-end">
+            <div className="flex-1 min-w-0">
+              <label htmlFor="lib-verse" className="block text-xs text-cream/40 mb-2">
+                Verse
+              </label>
+              <select
+                id="lib-verse"
+                value={selectedVerse}
+                onChange={(e) => setSelectedVerse(Number(e.target.value))}
+                disabled={!selectedChapter}
+                className="w-full bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-sm focus:outline-none focus:border-gold-500/50 disabled:opacity-40"
+              >
+                {Array.from({ length: maxVerse }, (_, i) => i + 1).map((v) => (
+                  <option key={v} value={v}>
+                    Verse {v}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div>
             <button
               type="button"
               onClick={handleGo}
               disabled={!selectedChapter}
-              className="btn-gold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              className="btn-gold text-sm w-20 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Go
             </button>
@@ -164,11 +164,11 @@ export default function BookChaptersPage() {
                 </div>
               )}
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div>
                   <h2 className="font-serif font-semibold text-cream group-hover:text-gold-400 transition-colors">
                     Chapter {ch.chapter}
                   </h2>
-                  <span className="text-xs text-cream/30">
+                  <span className="text-xs text-cream/30 mt-1 block">
                     {ch.verses.length} verses
                   </span>
                 </div>
