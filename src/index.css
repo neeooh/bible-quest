@@ -169,11 +169,11 @@
 }
 
 [data-theme="light"] .btn-gold {
-  background-color: #b8922e;
+  background-color: #D6AD60;
   color: #1a1510;
 }
 [data-theme="light"] .btn-gold:hover {
-  background-color: #a07e1e;
+  background-color: #c49a4a;
 }
 
 @keyframes toastIn {
