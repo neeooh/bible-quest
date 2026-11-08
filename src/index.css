@@ -27,12 +27,12 @@
   --bg-quaternary: #ddd6c8;
   --text-primary: #1a1510;
   --text-secondary: #3d3528;
-  --gold-500: #b8922e;
-  --gold-400: #a07e1e;
-  --gold-300: #8a6c14;
-  --gold-600: #9a7a1a;
-  --border-alpha: rgba(160, 126, 30, 0.15);
-  --border-alpha-hover: rgba(160, 126, 30, 0.35);
+  --gold-500: #866c16;
+  --gold-400: #725a10;
+  --gold-300: #5e4a0a;
+  --gold-600: #967a1e;
+  --border-alpha: rgba(134, 108, 22, 0.15);
+  --border-alpha-hover: rgba(134, 108, 22, 0.35);
   --toast-success-bg: rgb(220, 245, 225);
   --toast-info-bg: rgb(250, 243, 225);
   --range-track: #ddd6c8;
@@ -166,6 +166,14 @@
 
 [data-theme="light"] .toast-info {
   color: #78570a;
+}
+
+[data-theme="light"] .btn-gold {
+  background-color: #b8922e;
+  color: #1a1510;
+}
+[data-theme="light"] .btn-gold:hover {
+  background-color: #a07e1e;
 }
 
 @keyframes toastIn {
