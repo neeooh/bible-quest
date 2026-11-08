@@ -146,7 +146,7 @@ export default function Recitation({
             className="btn-gold text-sm inline-flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Check className="w-4 h-4" />
-            Check
+            Check Answers
           </button>
         </div>
       )}

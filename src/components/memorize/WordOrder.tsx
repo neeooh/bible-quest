@@ -406,7 +406,7 @@ export default function WordOrder({
               className="btn-gold text-sm inline-flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <CheckCircle className="w-4 h-4" />
-              Check Answer
+              Check Answers
             </button>
             {placed.length > 0 && (
               <button

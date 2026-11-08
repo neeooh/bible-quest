@@ -183,7 +183,7 @@ export default function VoiceRecitation({
               onClick={handleCheck}
               className="btn-gold text-sm"
             >
-              Check My Recitation
+              Check Answers
             </button>
           )}
         </div>

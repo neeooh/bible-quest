@@ -281,7 +281,7 @@ export default function FirstLetters({
               className="btn-outline text-sm inline-flex items-center gap-2"
             >
               <Eye className="w-4 h-4" />
-              Reveal Answers
+              Reveal
             </button>
           </>
         )}
