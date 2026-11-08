@@ -107,7 +107,7 @@ export default function HomePage() {
     <div className="min-h-[calc(100vh-7rem)] flex flex-col justify-center space-y-12 py-8">
 
       {/* Daily Verse */}
-      <section className="card max-w-2xl mx-auto space-y-5 p-4 sm:p-6">
+      <section className="card max-w-2xl mx-auto space-y-5">
         <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
           <Star className="w-3.5 h-3.5 text-gold-500" />
           <span className="text-cream/40">Verse of the Day</span>
@@ -205,7 +205,7 @@ export default function HomePage() {
 
       {/* Your Progress — persistent summary card */}
       {(
-        <section className="card max-w-2xl w-full mx-auto space-y-4 p-4 sm:p-6">
+        <section className="card max-w-2xl w-full mx-auto space-y-4">
             <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
               <Trophy className="w-3.5 h-3.5 text-gold-500" />
               <span className="text-cream/40">Your Progress</span>

@@ -214,7 +214,7 @@ export default function MemorizePage() {
       </div>
 
       {/* Passage Selector */}
-      <section className="card space-y-4 p-4 sm:p-6">
+      <section className="card space-y-4">
         {/* Collapsed state */}
         {passageSelected && selectorCollapsed ? (
           <div className="space-y-3">
@@ -503,7 +503,7 @@ export default function MemorizePage() {
             })}
           </div>
 
-          <div className="card p-4 sm:p-6">
+          <div className="card">
             {activeTab === 'missing-words' && (
               <MissingWords
                 verses={verses}
