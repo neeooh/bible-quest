@@ -378,7 +378,7 @@ export default function Progressive({
               className="btn-gold text-sm inline-flex items-center gap-2"
             >
               <CheckCircle className="w-4 h-4" />
-              Check
+              Check Answers
             </button>
           )}
 
@@ -430,7 +430,7 @@ export default function Progressive({
                 disabled={!userInput.trim()}
                 className="btn-gold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Check
+                Check Answers
               </button>
             </div>
           )}

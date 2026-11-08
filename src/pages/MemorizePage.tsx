@@ -8,6 +8,7 @@ import {
   getNewTestamentBooks,
 } from '../lib/book-metadata';
 import { useProgress } from '../hooks/useProgress';
+import { useSavedVerses } from '../hooks/useSavedVerses';
 import { showToast } from '../components/Toast';
 import { getPassageStage, getAvailableExercises, recordReview } from '../lib/learning-stage';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
@@ -31,6 +32,7 @@ const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
 export default function MemorizePage() {
   const [searchParams] = useSearchParams();
   const { progress, recordExercise } = useProgress();
+  const { addVerses } = useSavedVerses();
 
   const paramBook = searchParams.get('book');
   const paramChapter = searchParams.get('chapter');
@@ -118,6 +120,20 @@ export default function MemorizePage() {
   }, [chapter, startVerse, endVerse]);
 
   const passageSelected = selectedBook && selectedChapter > 0 && verses.length > 0;
+
+  // Auto-save verses to My Verses when a passage is loaded for memorisation
+  useEffect(() => {
+    if (!passageSelected || !selectedBook || verses.length === 0) return;
+    const toSave = verses.map((v) => ({
+      book: selectedBook,
+      chapter: selectedChapter,
+      verse: v.verse,
+      text: v.text,
+      reference: formatReference(bookName, selectedChapter, v.verse, v.verse),
+      favourite: false,
+    }));
+    addVerses(toSave);
+  }, [passageSelected, selectedBook, selectedChapter, verses, bookName, addVerses]);
 
   const passageStage = useMemo(() => {
     if (!passageSelected || !selectedBook) return null;

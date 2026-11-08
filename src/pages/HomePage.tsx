@@ -107,7 +107,7 @@ export default function HomePage() {
     <div className="min-h-[calc(100vh-7rem)] flex flex-col justify-center space-y-12 py-8">
 
       {/* Daily Verse */}
-      <section className="card max-w-2xl mx-auto space-y-5 p-4 sm:p-6">
+      <section className="card max-w-2xl mx-auto space-y-5">
         <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
           <Star className="w-3.5 h-3.5 text-gold-500" />
           <span className="text-cream/40">Verse of the Day</span>
@@ -128,10 +128,10 @@ export default function HomePage() {
             >
               {daily.reference}
             </Link>
-            <div className="flex flex-wrap gap-2 pt-2">
+            <div className="flex gap-2 pt-2">
               <Link
                 to={`/memorize?book=${daily.book}&chapter=${daily.chapter}&start=${daily.verse}&end=${daily.verse}`}
-                className="btn-gold inline-flex items-center gap-2 text-sm px-3 sm:px-6"
+                className="btn-gold inline-flex items-center justify-center gap-2 text-sm px-3 sm:px-6 flex-1 max-w-xs"
               >
                 <BookOpen className="w-4 h-4" />
                 Memorise This
@@ -139,7 +139,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={handleToggleFavourite}
-                className="btn-outline inline-flex items-center justify-center gap-2 text-sm w-11 h-11 !p-0 sm:w-auto sm:h-auto sm:!px-6 sm:!py-3"
+                className="btn-outline inline-flex items-center justify-center gap-2 text-sm w-11 h-11 !p-0 sm:w-auto sm:h-auto sm:!px-6 sm:!py-3 shrink-0"
               >
                 {dailyFavourited ? (
                   <Heart className="w-4 h-4 text-red-400" fill="currentColor" />
@@ -151,7 +151,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={handleCopy}
-                className="btn-outline inline-flex items-center justify-center gap-2 text-sm w-11 h-11 !p-0 sm:w-auto sm:h-auto sm:!px-6 sm:!py-3"
+                className="btn-outline inline-flex items-center justify-center gap-2 text-sm w-11 h-11 !p-0 sm:w-auto sm:h-auto sm:!px-6 sm:!py-3 shrink-0"
               >
                 {copied ? (
                   <Check className="w-4 h-4" />
@@ -173,7 +173,7 @@ export default function HomePage() {
                     });
                   }
                 }}
-                className="btn-outline inline-flex items-center justify-center gap-2 text-sm w-11 h-11 !p-0 sm:w-auto sm:h-auto sm:!px-6 sm:!py-3"
+                className="btn-outline inline-flex items-center justify-center gap-2 text-sm w-11 h-11 !p-0 sm:w-auto sm:h-auto sm:!px-6 sm:!py-3 shrink-0"
               >
                 <Share2 className="w-4 h-4" />
                 <span className="hidden sm:inline">Share</span>
@@ -205,7 +205,7 @@ export default function HomePage() {
 
       {/* Your Progress — persistent summary card */}
       {(
-        <section className="card max-w-2xl w-full mx-auto space-y-4 p-4 sm:p-6">
+        <section className="card max-w-2xl w-full mx-auto space-y-4">
             <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
               <Trophy className="w-3.5 h-3.5 text-gold-500" />
               <span className="text-cream/40">Your Progress</span>
