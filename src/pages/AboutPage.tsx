@@ -198,14 +198,14 @@ export default function AboutPage() {
       <section className="card space-y-4">
         <h2 className="text-lg font-serif font-semibold text-cream">Author</h2>
         <p className="text-cream/70 text-sm leading-relaxed">
-          Built by <span className="text-cream font-medium">Your Name</span>.
+          Built by <span className="text-cream font-medium">Mateusz Cichy</span>.
         </p>
         <div className="flex flex-wrap gap-4 text-sm">
           <a
             href="mailto:hello@example.com"
             className="text-gold-400 hover:text-gold-300 transition-colors"
           >
-            hello@example.com
+            mateusz@causewaysoft.com
           </a>
           <a
             href="https://github.com/neeooh"
@@ -216,12 +216,12 @@ export default function AboutPage() {
             GitHub
           </a>
           <a
-            href="https://twitter.com/yourhandle"
+            href="https://linkedin.com/in/mateuszcichy"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gold-400 hover:text-gold-300 transition-colors"
           >
-            Twitter / X
+            LinkedIn
           </a>
         </div>
       </section>
