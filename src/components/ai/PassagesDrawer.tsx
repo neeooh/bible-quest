@@ -187,73 +187,76 @@ export default function PassagesDrawer({
                 const ticked = !unticked.has(key);
                 const allSaved = verses.every((v) => saved.isSaved(ref.book, ref.chapter, v.verse));
                 const allFav = verses.every((v) => saved.isFavourite(ref.book, ref.chapter, v.verse));
-                const preview = verses.map((v) => v.text).join(' ');
                 return (
                   <li
                     key={key}
-                    className={`rounded-xl border p-3 transition-colors ${
+                    className={`rounded-xl border p-4 transition-colors ${
                       ticked ? 'border-gold-500/30 bg-navy-700/50' : 'border-gold-500/10 bg-transparent'
                     }`}
                   >
-                    <div className="flex items-start gap-3">
+                    {/* Tick box, reference and actions on one line */}
+                    <div className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={ticked}
                         onChange={() => toggle(key)}
                         aria-label={`Include ${formatScriptureRef(ref)}`}
-                        className="mt-2 w-4 h-4 shrink-0 accent-gold-500 cursor-pointer"
+                        className="w-4 h-4 shrink-0 accent-gold-500 cursor-pointer"
                       />
-                      <div className="flex-1 min-w-0">
-                        {/* Reference on the left, actions on the right */}
-                        <div className="flex items-center justify-between gap-2">
-                          <button
-                            type="button"
-                            onClick={() => onShowInChat(turnId, key)}
-                            title="Show in the chat"
-                            className="min-w-0 truncate text-gold-400 hover:text-gold-300 text-sm font-semibold text-left"
-                          >
-                            {formatScriptureRef(ref)}
-                          </button>
-                          <div className="flex items-center gap-0.5 shrink-0 -mr-1.5">
-                            <IconAction
-                              label={allFav ? 'Remove from favourites' : 'Add to favourites'}
-                              onClick={() => {
-                                for (const v of verses) {
-                                  if (allFav) saved.setFavourite(ref.book, ref.chapter, v.verse, false);
-                                  else if (saved.isSaved(ref.book, ref.chapter, v.verse)) saved.setFavourite(ref.book, ref.chapter, v.verse, true);
-                                  else saved.addVerse({ book: ref.book, chapter: ref.chapter, verse: v.verse, text: v.text, reference: `${ref.bookName} ${ref.chapter}:${v.verse}`, favourite: true });
-                                }
-                              }}
-                            >
-                              <Heart className={`w-4 h-4 ${allFav ? 'text-red-400' : ''}`} fill={allFav ? 'currentColor' : 'none'} />
-                            </IconAction>
-                            <IconAction
-                              label={allSaved ? 'In My Verses' : 'Add to My Verses'}
-                              disabled={allSaved}
-                              onClick={() =>
-                                saved.addVerses(
-                                  verses
-                                    .filter((v) => !saved.isSaved(ref.book, ref.chapter, v.verse))
-                                    .map((v) => ({ book: ref.book, chapter: ref.chapter, verse: v.verse, text: v.text, reference: `${ref.bookName} ${ref.chapter}:${v.verse}`, favourite: false })),
-                                )
-                              }
-                            >
-                              {allSaved ? <BookmarkCheck className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
-                            </IconAction>
-                            <Link
-                              to={readPath(ref)}
-                              onClick={onClose}
-                              aria-label={`Read ${formatScriptureRef(ref)}`}
-                              title="Read"
-                              className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-cream/50 hover:text-gold-400 hover:bg-gold-500/10 transition-colors"
-                            >
-                              <BookOpen className="w-4 h-4" />
-                            </Link>
-                          </div>
-                        </div>
-                        <p className="mt-1 text-cream/60 text-sm leading-snug line-clamp-2 font-serif">{preview}</p>
+                      <button
+                        type="button"
+                        onClick={() => onShowInChat(turnId, key)}
+                        title="Show in the chat"
+                        className="flex-1 min-w-0 truncate text-gold-400 hover:text-gold-300 text-sm font-semibold text-left"
+                      >
+                        {formatScriptureRef(ref)}
+                      </button>
+                      <div className="flex items-center gap-0.5 shrink-0 -mr-1.5">
+                        <IconAction
+                          label={allFav ? 'Remove from favourites' : 'Add to favourites'}
+                          onClick={() => {
+                            for (const v of verses) {
+                              if (allFav) saved.setFavourite(ref.book, ref.chapter, v.verse, false);
+                              else if (saved.isSaved(ref.book, ref.chapter, v.verse)) saved.setFavourite(ref.book, ref.chapter, v.verse, true);
+                              else saved.addVerse({ book: ref.book, chapter: ref.chapter, verse: v.verse, text: v.text, reference: `${ref.bookName} ${ref.chapter}:${v.verse}`, favourite: true });
+                            }
+                          }}
+                        >
+                          <Heart className={`w-4 h-4 ${allFav ? 'text-red-400' : ''}`} fill={allFav ? 'currentColor' : 'none'} />
+                        </IconAction>
+                        <IconAction
+                          label={allSaved ? 'In My Verses' : 'Add to My Verses'}
+                          disabled={allSaved}
+                          onClick={() =>
+                            saved.addVerses(
+                              verses
+                                .filter((v) => !saved.isSaved(ref.book, ref.chapter, v.verse))
+                                .map((v) => ({ book: ref.book, chapter: ref.chapter, verse: v.verse, text: v.text, reference: `${ref.bookName} ${ref.chapter}:${v.verse}`, favourite: false })),
+                            )
+                          }
+                        >
+                          {allSaved ? <BookmarkCheck className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
+                        </IconAction>
+                        <Link
+                          to={readPath(ref)}
+                          onClick={onClose}
+                          aria-label={`Read ${formatScriptureRef(ref)}`}
+                          title="Read"
+                          className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-cream/50 hover:text-gold-400 hover:bg-gold-500/10 transition-colors"
+                        >
+                          <BookOpen className="w-4 h-4" />
+                        </Link>
                       </div>
                     </div>
+                    {/* Verse text on its own row, styled like the chat's verse cards */}
+                    <blockquote className={`mt-3 border-l-2 border-gold-500/60 pl-4 font-serif text-cream/90 text-lg leading-relaxed transition-opacity ${ticked ? '' : 'opacity-50'}`}>
+                      {verses.map((v) => (
+                        <span key={v.verse}>
+                          {verses.length > 1 && <span className="verse-number">{v.verse}</span>}
+                          {v.text}{' '}
+                        </span>
+                      ))}
+                    </blockquote>
                   </li>
                 );
               })}
