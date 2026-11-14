@@ -11,6 +11,7 @@ import CollectionDetailPage from './pages/CollectionDetailPage';
 import ProgressPage from './pages/ProgressPage';
 import AboutPage from './pages/AboutPage';
 import TopicPage from './pages/TopicPage';
+import AiSettingsPage from './pages/AiSettingsPage';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/topics/:slug" element={<TopicPage />} />
+          <Route path="/settings/ai" element={<AiSettingsPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Info, BookOpen, Brain, Puzzle, CaseSensitive, Shuffle, AlignLeft, Flame, Trophy, Star, Volume2 } from 'lucide-react';
+import { Info, BookOpen, Brain, Puzzle, CaseSensitive, Shuffle, AlignLeft, Flame, Trophy, Star, Volume2, Settings } from 'lucide-react';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
 
 export default function AboutPage() {
@@ -218,7 +218,14 @@ export default function AboutPage() {
           <p>
             If your browser asks to allow access to devices on your local network, allow it for BibleQuest.
           </p>
+          <p>
+            <span className="text-cream font-medium">4. Turn it on</span> — Open AI settings, test the connection, choose a model, and enable the assistant.
+          </p>
         </div>
+        <Link to="/settings/ai" className="btn-outline text-sm inline-flex items-center gap-2">
+          <Settings className="w-4 h-4" />
+          AI settings
+        </Link>
       </section>
 
       {/* Bible Text */}
