@@ -86,7 +86,7 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 
 ## Tech Stack
 
-React 18, TypeScript, Vite, Tailwind CSS, Lucide icons, vite-plugin-pwa. No backend. No external APIs. All data stored in LocalStorage.
+React 18, TypeScript, Vite, Tailwind CSS, Lucide icons, vite-plugin-pwa. No backend. No external APIs. All data stored in LocalStorage. Optional AI features use a locally hosted Ollama server (see below).
 
 ## Getting Started
 
@@ -102,6 +102,62 @@ npm run build
 ```
 
 Output goes to `dist/`. Deploy as a static site.
+
+## AI Assistant (Ollama) Setup
+
+BibleQuest can connect to an LLM running on your own Mac with [Ollama](https://ollama.com). Nothing goes to the cloud: the browser talks directly to Ollama at `http://localhost:11434`. The feature is in development; see [docs/200-local-llm-epic.md](docs/200-local-llm-epic.md).
+
+Recommended model: `gemma3` (`ollama pull gemma3`).
+
+### Local development (`npm run dev` / `npm run preview`)
+
+No setup needed. Ollama accepts requests from `localhost` and `127.0.0.1` pages by default.
+
+### Hosted site (https://biblequest.causewaysoft.com)
+
+By default, Ollama refuses requests from any non-local website with **403 Forbidden**. To allow the hosted app, tell Ollama to trust its address, then restart Ollama:
+
+```bash
+launchctl setenv OLLAMA_ORIGINS "https://biblequest.causewaysoft.com"
+```
+
+Then quit Ollama from the menu bar and open it again.
+
+Notes:
+
+- The origin must match exactly: `https://`, no trailing slash, no path.
+- Local origins (`localhost`, `127.0.0.1`) stay allowed in addition to the one you add. To allow several sites, separate them with commas.
+- `launchctl setenv` is **cleared when the Mac restarts**. To make it permanent, create a Launch Agent that sets it at every login:
+
+  ```bash
+  cat > ~/Library/LaunchAgents/com.biblequest.ollama-origins.plist <<'PLIST'
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+  <plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.biblequest.ollama-origins</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/bin/launchctl</string>
+      <string>setenv</string>
+      <string>OLLAMA_ORIGINS</string>
+      <string>https://biblequest.causewaysoft.com</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+  </dict>
+  </plist>
+  PLIST
+  ```
+
+- To check it worked (should print `204`, not `403`):
+
+  ```bash
+  curl -s -o /dev/null -w "%{http_code}\n" -X OPTIONS -H "Origin: https://biblequest.causewaysoft.com" -H "Access-Control-Request-Method: POST" http://localhost:11434/api/chat
+  ```
+
+- Some browsers ask for permission when a website tries to reach a service on your own computer ("local network access"). Allow it for BibleQuest.
 
 ## Bible Text
 

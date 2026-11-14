@@ -186,6 +186,41 @@ export default function AboutPage() {
         </section>
       )}
 
+      {/* Local AI Assistant setup */}
+      <section className="card space-y-4">
+        <h2 className="text-lg font-serif font-semibold text-cream">Local AI Assistant (Ollama)</h2>
+        <p className="text-cream/70 text-sm leading-relaxed">
+          BibleQuest can use an AI model running on your own Mac with{' '}
+          <a
+            href="https://ollama.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold-400 hover:text-gold-300 transition-colors"
+          >
+            Ollama
+          </a>
+          . Your messages go only to your computer, never to the cloud. Recommended model:{' '}
+          <code className="text-gold-400">gemma3</code>.
+        </p>
+        <div className="space-y-3 text-cream/70 text-sm leading-relaxed">
+          <p>
+            <span className="text-cream font-medium">1. Allow this site</span> — By default Ollama blocks requests from websites. Open Terminal on your Mac and run:
+          </p>
+          <pre className="bg-navy-700 border border-gold-500/20 rounded-lg px-3 py-2.5 text-cream text-xs overflow-x-auto select-all">
+            <code>launchctl setenv OLLAMA_ORIGINS "https://biblequest.causewaysoft.com"</code>
+          </pre>
+          <p>
+            <span className="text-cream font-medium">2. Restart Ollama</span> — Quit Ollama from the menu bar and open it again.
+          </p>
+          <p>
+            <span className="text-cream font-medium">3. After a Mac restart</span> — This setting is cleared when your Mac restarts. Run the command again, then restart Ollama. The project README explains how to make it permanent.
+          </p>
+          <p>
+            If your browser asks to allow access to devices on your local network, allow it for BibleQuest.
+          </p>
+        </div>
+      </section>
+
       {/* Bible Text */}
       <section className="card space-y-4">
         <h2 className="text-lg font-serif font-semibold text-cream">Bible Text</h2>

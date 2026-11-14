@@ -119,7 +119,7 @@ Add Vitest (dev-only) and an `npm test` script. The repo has no tests today, and
 New route `/settings/ai`, linked from the About page and from `AiSetupNotice` (§9 Q2). Toggle, base URL field, **Test connection** button, model dropdown filled from `/api/tags`, short setup help (from AI-0 findings).
 - **AC:** Test connection shows the Ollama version or a specific, human-readable error from AI-2.
 - **AC:** A **model dropdown** lists every model installed in Ollama (live from `/api/tags`, with name and size). The user's choice is saved and used by every AI feature. There is no hardcoded model list: models added later with `ollama pull` appear after a refresh.
-- **AC:** First run with no saved choice → the first installed model is preselected.
+- **AC:** First run with no saved choice → `gemma3` is preselected if installed (any tag, e.g. `gemma3:latest`); otherwise the first installed model.
 - **AC:** If the saved model is no longer installed, the settings page shows it as missing and asks the user to pick another. AI features show `AiSetupNotice` instead of failing.
 - **AC:** Empty list → "Run `ollama pull <model>`" hint.
 - **AC:** Matches existing page styling in dark and light themes and at 375px width. No changes to existing pages besides the agreed entry link.
@@ -274,7 +274,7 @@ Rough total: about 12–16 working days for one developer: foundation (AI-0 – 
 1. ~~**Supported scenarios.**~~ **Decided:** macOS only. Phones are out of scope (§3).
 2. ~~**Settings entry point.**~~ **Decided:** a link on the About page, plus a link inside each `AiSetupNotice`. The navbar is untouched.
 3. ~~**Read page placement.**~~ **Decided:** the AI action goes inside the existing "More actions" menu.
-4. ~~**Default model.**~~ **Decided:** no fixed default. The user picks from a dropdown of installed models; the first one is preselected (AI-4).
+4. ~~**Default model.**~~ **Decided:** `gemma3` is the default (preselected when installed). The user can pick any installed model from the dropdown (AI-4).
 5. ~~**Milestone 3 priority.**~~ **Decided:** AI-12 only, redesigned as AI Chat; the others are parked. Saving chat passages as a collection (AI-12.6) is parked but next in line.
 6. ~~**Chat history.**~~ **Decided:** MVP keeps the current chat for the browser session only (AI-12.2). Saved history is a parked follow-up (AI-12.7).
 7. ~~**AI-8.**~~ **Decided:** parked. AI-12 is the first feature after the foundation.
@@ -303,13 +303,13 @@ Rough total: about 12–16 working days for one developer: foundation (AI-0 – 
 |---|---|---|---|---|---|
 | `phi3:mini` | 2.2 GB | 3.8B | 0.3 s (already loaded) | ~9.5 tok/s | Invented a fake "verse" and attributed it to Psalm 34:18 |
 | `gemma3:latest` | 3.4 GB | 4.3B | 7.9 s (cold load 6.9 s) | ~8.9 tok/s | Warm, on-topic tone; quoted Psalm 23:3 correctly |
-| `gpt-oss:20b` | 13.8 GB | 20.9B | not tested | — | Close to the 16 GB RAM limit; expect heavy swapping and very slow replies |
+| `gpt-oss:20b` | 13.8 GB | 20.9B | — | — | Disregarded (too large for 16 GB RAM); no special handling planned |
 
 An ~80-word reply takes ~17 s, so streaming plus a Stop button is essential. The first message after a model switch adds several seconds of load time, so the chat should show a "Loading model…" state until the first token arrives.
 
 ### Implications for the plan
 
 1. **Both models quoted verse text despite being told not to, and one invented the wording.** This confirms the scripture guardrail is essential. AI-12.4 has a new AC: model-written quotes are never styled as Scripture, and the real WEB text appears only in verse cards.
-2. The model dropdown (AI-4) should show the size of each model, so the user can see that `gpt-oss:20b` is very large for this Mac.
+2. The model dropdown (AI-4) shows the size of each model.
 3. AI-2's error types are simplified: "not running" and "blocked by CORS" are one error with guidance for both.
-4. Recommended starting model for development: `gemma3:latest` (better instruction-following in this test).
+4. **Decided:** `gemma3` is the default model (best tone and instruction-following in this test).
