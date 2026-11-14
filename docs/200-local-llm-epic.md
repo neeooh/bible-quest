@@ -107,7 +107,7 @@ Add Vitest (dev-only) and an `npm test` script. The repo has no tests today, and
 `src/lib/ai/ollama-client.ts` with `getVersion`, `listModels`, `chatStream(messages, { model, signal, options })`.
 - **AC:** Parses NDJSON chunks across arbitrary byte boundaries. Yields text deltas, and ends on `done: true`.
 - **AC:** `AbortSignal` cancels mid-stream without an unhandled rejection.
-- **AC:** Typed errors: `unreachable`, `cors_or_blocked`, `model_not_found`, `timeout`, `bad_response`, `aborted`.
+- **AC:** Typed errors: `unreachable` (covers both "Ollama not running" and "blocked by CORS", because the browser reports both as the same `TypeError: Failed to fetch`; see AI-0 findings), `model_not_found` (HTTP 404), `timeout`, `bad_response`, `aborted`. The `unreachable` message lists both likely causes and the fix for each.
 - **AC:** Unit tests cover chunk splitting, errors and abort with a mocked `fetch`.
 
 #### AI-3 · AI settings store and hook (S)
@@ -207,6 +207,7 @@ An optional second hint level that gives a clue to the word's meaning without th
   - **Read**: navigate to `/read/:book/:chapter` with the verses highlighted.
 - Buttons show the current state (already favourited / already in My Verses), using the existing Toast for confirmation.
 - **AC:** Invalid references show no card. Duplicate references in one reply produce one card.
+- **AC:** Models quote verse text even when told not to, and sometimes invent the wording (AI-0 findings). When a quoted passage sits next to a detected reference, the app renders the quote in plain text (not styled as Scripture). The real WEB text appears only in the verse card, so a made-up quote is never presented as the Bible.
 
 ##### AI-12.5 · Chat QA (S)
 - Manual test script: 10 realistic queries (loneliness, anxiety, grief, guilt, temptation…) run against both installed models. For each: are references real, relevant and not invented? Is the tone right? Results recorded in this doc.
@@ -277,3 +278,38 @@ Rough total: about 12–16 working days for one developer: foundation (AI-0 – 
 5. ~~**Milestone 3 priority.**~~ **Decided:** AI-12 only, redesigned as AI Chat; the others are parked. Saving chat passages as a collection (AI-12.6) is parked but next in line.
 6. ~~**Chat history.**~~ **Decided:** MVP keeps the current chat for the browser session only (AI-12.2). Saved history is a parked follow-up (AI-12.7).
 7. ~~**AI-8.**~~ **Decided:** parked. AI-12 is the first feature after the foundation.
+
+## 10. AI-0 findings (2026-11-14)
+
+**Setup tested:** MacBook Pro M1, 16 GB RAM, Ollama 0.40.16 (desktop app), no `OLLAMA_ORIGINS` / `OLLAMA_HOST` set. Browser: Chromium 156 (the Claude desktop app's built-in browser), with the app on the Vite dev server (`http://localhost:5174`).
+
+### Connectivity
+
+| Check | Result |
+|---|---|
+| `GET /api/tags` from the app page | ✅ Works |
+| Streaming `POST /api/chat` (NDJSON) from the app page | ✅ Works; chunks parse cleanly with `ReadableStream` + `TextDecoder` |
+| `AbortController` cancel mid-stream | ✅ Rejects with `AbortError` |
+| CORS preflight for `http://localhost:*` and `http://127.0.0.1:*` | ✅ Allowed by default (204, `Access-Control-Allow-Origin` echoes the origin) |
+| CORS for a non-local origin (`https://…`) | ❌ 403 Forbidden. A deployed site needs `launchctl setenv OLLAMA_ORIGINS "https://<your-domain>"` and an Ollama restart |
+| Ollama not running | Browser throws `TypeError: Failed to fetch`, the **same error as a CORS block**, so the app can't tell them apart (AI-2 updated) |
+| Unknown model | HTTP 404 `{"error":"model '…' not found"}` |
+
+**Not yet tested:** Safari, and the deployed HTTPS site, since no deployment URL is configured in the repo. Both are only needed if the app will be used from the deployed site rather than `npm run dev` / `npm run preview`. To be checked in AI-14.
+
+### Installed models
+
+| Model | Size | Params | First-token latency | Speed | Notes |
+|---|---|---|---|---|---|
+| `phi3:mini` | 2.2 GB | 3.8B | 0.3 s (already loaded) | ~9.5 tok/s | Invented a fake "verse" and attributed it to Psalm 34:18 |
+| `gemma3:latest` | 3.4 GB | 4.3B | 7.9 s (cold load 6.9 s) | ~8.9 tok/s | Warm, on-topic tone; quoted Psalm 23:3 correctly |
+| `gpt-oss:20b` | 13.8 GB | 20.9B | not tested | — | Close to the 16 GB RAM limit; expect heavy swapping and very slow replies |
+
+An ~80-word reply takes ~17 s, so streaming plus a Stop button is essential. The first message after a model switch adds several seconds of load time, so the chat should show a "Loading model…" state until the first token arrives.
+
+### Implications for the plan
+
+1. **Both models quoted verse text despite being told not to, and one invented the wording.** This confirms the scripture guardrail is essential. AI-12.4 has a new AC: model-written quotes are never styled as Scripture, and the real WEB text appears only in verse cards.
+2. The model dropdown (AI-4) should show the size of each model, so the user can see that `gpt-oss:20b` is very large for this Mac.
+3. AI-2's error types are simplified: "not running" and "blocked by CORS" are one error with guidance for both.
+4. Recommended starting model for development: `gemma3:latest` (better instruction-following in this test).
