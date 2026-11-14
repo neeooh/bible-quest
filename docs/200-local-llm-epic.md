@@ -213,7 +213,11 @@ An optional second hint level that gives a clue to the word's meaning without th
 - Manual test script: 10 realistic queries (loneliness, anxiety, grief, guilt, temptation…) run against both installed models. For each: are references real, relevant and not invented? Is the tone right? Results recorded in this doc.
 - **AC:** No model-generated verse text appears anywhere; crisis notice appears for crisis test phrases.
 
-#### ⏸ AI-12.6 (parked, high priority next) · Save chat passages as a collection (S)
+#### ✅ AI-12.6 · Passages in this chat + save to a collection (M)
+
+> **Built 2026-11-15**, expanded from the original story: a "Passages (N)" button in the chat header opens a panel (slides in from the right; a bottom sheet on phones) listing every passage from the whole conversation once, with checkboxes (all ticked by default), Favourite / Add to My Verses / Read actions, and a link back to the card in the chat. "Save N to a collection" adds the ticked passages to a new collection (name suggested from the first question, made unique) or an existing one, and to My Verses, since collection pages show passages from there.
+
+Original description:
 A "Save these passages as a collection" button on the chat. It creates a collection (named from the first query) containing every valid passage from the conversation, using the existing Collections feature. To be done soon after the MVP.
 
 #### ⏸ AI-12.7 (parked, next after AI-12.6) · Saved chat history (S)

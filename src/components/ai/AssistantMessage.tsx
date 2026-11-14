@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { collectVerseRefs, parseMessage, type InlineToken } from '../../lib/ai/message-format';
@@ -18,13 +18,18 @@ interface AssistantMessageProps {
   /** True while the reply is still arriving. */
   streaming: boolean;
   saved: UseSavedVersesReturn;
+  /**
+   * Lets the page show a passage's card from outside (e.g. the passages panel).
+   * Called with a function that shows the card for a passage key, or null on unmount.
+   */
+  registerShowCard?: (show: ((key: string) => boolean) | null) => void;
 }
 
 /**
  * Renders a mentor reply: light formatting, highlighted references that link
  * to the Read page, and a card with the real WEB text for each cited passage.
  */
-export default function AssistantMessage({ content: raw, streaming, saved }: AssistantMessageProps) {
+export default function AssistantMessage({ content: raw, streaming, saved, registerShowCard }: AssistantMessageProps) {
   const content = useMemo(() => stripPetNameOpener(raw), [raw]);
   const blocks = useMemo(() => parseMessage(content), [content]);
   const refs = useMemo(() => collectVerseRefs(content, streaming), [content, streaming]);
@@ -58,6 +63,17 @@ export default function AssistantMessage({ content: raw, streaming, saved }: Ass
       );
     });
   };
+
+  useEffect(() => {
+    if (!registerShowCard) return;
+    registerShowCard((key) => {
+      const i = cardIndex.get(key);
+      if (i === undefined) return false;
+      showCard(i);
+      return true;
+    });
+    return () => registerShowCard(null);
+  });
 
   return (
     <div className="space-y-4">

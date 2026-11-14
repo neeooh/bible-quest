@@ -1,12 +1,16 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MessageSquarePlus, Send, Sparkles, Square } from 'lucide-react';
+import { BookOpen, MessageSquarePlus, Send, Sparkles, Square } from 'lucide-react';
 import { useAiChat, type ChatTurn } from '../hooks/useAiChat';
 import { useAiSettings } from '../hooks/useAiSettings';
 import { useOllamaStatus } from '../hooks/useOllamaStatus';
 import { useSavedVerses, type UseSavedVersesReturn } from '../hooks/useSavedVerses';
 import { suggestsCrisis } from '../lib/ai/safety';
 import CrisisNotice from '../components/ai/CrisisNotice';
+import PassagesDrawer, { type DrawerPassage } from '../components/ai/PassagesDrawer';
+import { collectChatPassages, suggestCollectionName } from '../lib/ai/chat-passages';
+import { MAX_CARD_VERSES } from '../lib/ai/scripture-guard';
+import { useResolvedPassages } from '../hooks/useResolvedPassages';
 import { buildMentorMessages } from '../lib/ai/prompts';
 import AiSetupNotice from '../components/ai/AiSetupNotice';
 import AiDisclaimer from '../components/ai/AiDisclaimer';
@@ -32,6 +36,44 @@ export default function ChatPage() {
   const chat = useAiChat({ buildMessages: buildMentorMessages, sessionKey: SESSION_KEY });
   const { turns, phase, busy, send, retry, stop, reset } = chat;
   const saved = useSavedVerses();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Every passage cited so far (the reply still streaming is left out until it's done).
+  const streamingTurnId = busy ? turns[turns.length - 1]?.id : undefined;
+  const chatRefs = useMemo(() => collectChatPassages(turns, streamingTurnId), [turns, streamingTurnId]);
+  const resolvedChat = useResolvedPassages(useMemo(() => chatRefs.map((r) => r.ref), [chatRefs]));
+  const chatPassages = useMemo<DrawerPassage[]>(
+    () =>
+      chatRefs.flatMap(({ key, turnId }) => {
+        const passage = resolvedChat.get(key);
+        return passage && passage.verses.length <= MAX_CARD_VERSES ? [{ key, passage, turnId }] : [];
+      }),
+    [chatRefs, resolvedChat],
+  );
+
+  // Each reply registers how to show one of its cards, so the panel can jump to it.
+  const showCardFns = useRef(new Map<string, (key: string) => boolean>());
+  const registerShowCard = useCallback(
+    (turnId: string) => (show: ((key: string) => boolean) | null) => {
+      if (show) showCardFns.current.set(turnId, show);
+      else showCardFns.current.delete(turnId);
+    },
+    [],
+  );
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+  // Jump after the panel has closed: its cleanup (which unlocks page scrolling)
+  // runs before this effect in the same commit.
+  const pendingJump = useRef<{ turnId: string; key: string } | null>(null);
+  useEffect(() => {
+    if (drawerOpen || !pendingJump.current) return;
+    const { turnId, key } = pendingJump.current;
+    pendingJump.current = null;
+    showCardFns.current.get(turnId)?.(key);
+  }, [drawerOpen]);
+  const showInChat = (turnId: string, key: string) => {
+    pendingJump.current = { turnId, key };
+    setDrawerOpen(false);
+  };
   const location = useLocation();
   const navigate = useNavigate();
   const [draft, setDraft] = useState('');
@@ -84,14 +126,31 @@ export default function ChatPage() {
         <h1 className="text-3xl font-serif font-bold text-cream">AI Chat</h1>
       </div>
       {settings.enabled && turns.length > 0 && (
-        <button
-          type="button"
-          onClick={newChat}
-          className="btn-outline text-sm inline-flex items-center gap-2 !px-4 !py-2"
-        >
-          <MessageSquarePlus className="w-4 h-4" />
-          New chat
-        </button>
+        <div className="flex items-center gap-2">
+          {chatPassages.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              aria-label={`Passages in this chat (${chatPassages.length})`}
+              className="btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 !py-2"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Passages</span>
+              <span className="min-w-5 h-5 px-1.5 rounded-full bg-gold-500/20 text-gold-300 text-xs font-semibold inline-flex items-center justify-center">
+                {chatPassages.length}
+              </span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={newChat}
+            aria-label="New chat"
+            className="btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 !py-2"
+          >
+            <MessageSquarePlus className="w-4 h-4" />
+            <span className="hidden sm:inline">New chat</span>
+          </button>
+        </div>
       )}
     </div>
   );
@@ -146,6 +205,7 @@ export default function ChatPage() {
                 streaming={busy && i === turns.length - 1}
                 onRetry={!busy && i === turns.length - 1 ? retry : undefined}
                 saved={saved}
+                registerShowCard={registerShowCard(turn.id)}
               />
             ))}
             <div ref={endRef} />
@@ -195,6 +255,15 @@ export default function ChatPage() {
           <AiDisclaimer />
         </div>
       )}
+
+      <PassagesDrawer
+        open={drawerOpen}
+        onClose={closeDrawer}
+        passages={chatPassages}
+        saved={saved}
+        suggestedName={suggestCollectionName(turns)}
+        onShowInChat={showInChat}
+      />
     </div>
   );
 }
@@ -205,9 +274,10 @@ interface ChatBubbleProps {
   streaming: boolean;
   onRetry?: () => void;
   saved: UseSavedVersesReturn;
+  registerShowCard: (show: ((key: string) => boolean) | null) => void;
 }
 
-function ChatBubble({ turn, waiting, streaming, onRetry, saved }: ChatBubbleProps) {
+function ChatBubble({ turn, waiting, streaming, onRetry, saved, registerShowCard }: ChatBubbleProps) {
   if (turn.role === 'user') {
     return (
       <div className="space-y-4">
@@ -226,7 +296,7 @@ function ChatBubble({ turn, waiting, streaming, onRetry, saved }: ChatBubbleProp
       {waiting && !turn.content ? (
         <ThinkingIndicator />
       ) : (
-        <AssistantMessage content={turn.content} streaming={streaming} saved={saved} />
+        <AssistantMessage content={turn.content} streaming={streaming} saved={saved} registerShowCard={registerShowCard} />
       )}
       {turn.stopped && <p className="text-cream/40 text-xs">Stopped.</p>}
       {turn.error && <AiSetupNotice error={turn.error} onRetry={onRetry} />}

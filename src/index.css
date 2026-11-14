@@ -305,3 +305,40 @@ input[type="range"]::-moz-range-thumb {
     animation: none;
   }
 }
+
+/* Passages drawer: slides up from the bottom on phones, in from the right on larger screens */
+.drawer-backdrop {
+  animation: drawerFade 200ms ease-out;
+}
+
+.drawer-panel {
+  animation: sheetUp 240ms ease-out;
+}
+
+@media (min-width: 640px) {
+  .drawer-panel {
+    animation: drawerInRight 240ms ease-out;
+  }
+}
+
+@keyframes drawerFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes drawerInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer-backdrop,
+  .drawer-panel {
+    animation: none;
+  }
+}
