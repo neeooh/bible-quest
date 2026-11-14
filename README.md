@@ -75,6 +75,15 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 - Level system with XP thresholds.
 - Progress tiles on the home page show your pipeline at a glance.
 
+### AI Mentor Chat (optional, local)
+
+- Type what's on your heart into the glowing search box on the Home page (for example, "I'm feeling lonely").
+- An empathetic, faith-based AI mentor replies on the **AI Chat** page and points you to Bible passages.
+- Every passage it cites becomes a card with the exact World English Bible text, plus **Favourite**, **Add to My Verses** and **Read** buttons. References that don't exist are never shown as Scripture.
+- Ask follow-up questions, stop a reply, or start a new chat. The conversation lasts for the browser session.
+- If a message suggests someone may be in crisis, a fixed notice with emergency and crisis-line contacts appears.
+- Runs entirely on your own Mac with [Ollama](https://ollama.com); nothing is sent to the cloud. Off by default: turn it on in **About → AI settings** (`/settings/ai`), where you can also pick the model.
+
 ### Other
 
 - **Light and dark theme** — Toggle from the navigation bar. Scrollbars and all UI elements match the active theme.
@@ -95,6 +104,12 @@ npm install
 npm run dev
 ```
 
+Run the unit tests (Vitest):
+
+```bash
+npm test
+```
+
 Production build:
 
 ```bash
@@ -105,7 +120,9 @@ Output goes to `dist/`. Deploy as a static site.
 
 ## AI Assistant (Ollama) Setup
 
-BibleQuest can connect to an LLM running on your own Mac with [Ollama](https://ollama.com). Nothing goes to the cloud: the browser talks directly to Ollama at `http://localhost:11434`. The feature is in development; see [docs/200-local-llm-epic.md](docs/200-local-llm-epic.md).
+BibleQuest can connect to an LLM running on your own Mac with [Ollama](https://ollama.com). Nothing goes to the cloud: the browser talks directly to Ollama at `http://localhost:11434`. Design and decisions: [docs/200-local-llm-epic.md](docs/200-local-llm-epic.md).
+
+Once Ollama is set up, open **About → AI settings**, press **Test connection**, choose a model and turn the assistant on.
 
 Recommended model: `gemma3` (`ollama pull gemma3`).
 
