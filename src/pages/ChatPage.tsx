@@ -4,6 +4,9 @@ import { MessageSquarePlus, Send, Sparkles, Square } from 'lucide-react';
 import { useAiChat, type ChatTurn } from '../hooks/useAiChat';
 import { useAiSettings } from '../hooks/useAiSettings';
 import { useOllamaStatus } from '../hooks/useOllamaStatus';
+import { useSavedVerses, type UseSavedVersesReturn } from '../hooks/useSavedVerses';
+import { suggestsCrisis } from '../lib/ai/safety';
+import CrisisNotice from '../components/ai/CrisisNotice';
 import { buildMentorMessages } from '../lib/ai/prompts';
 import AiSetupNotice from '../components/ai/AiSetupNotice';
 import AiDisclaimer from '../components/ai/AiDisclaimer';
@@ -28,6 +31,7 @@ export default function ChatPage() {
   const { status, refresh } = useOllamaStatus(settings.baseUrl, settings.enabled);
   const chat = useAiChat({ buildMessages: buildMentorMessages, sessionKey: SESSION_KEY });
   const { turns, phase, busy, send, retry, stop, reset } = chat;
+  const saved = useSavedVerses();
   const location = useLocation();
   const navigate = useNavigate();
   const [draft, setDraft] = useState('');
@@ -139,7 +143,9 @@ export default function ChatPage() {
                 key={turn.id}
                 turn={turn}
                 waiting={phase === 'waiting' && i === turns.length - 1}
+                streaming={busy && i === turns.length - 1}
                 onRetry={!busy && i === turns.length - 1 ? retry : undefined}
+                saved={saved}
               />
             ))}
             <div ref={endRef} />
@@ -196,16 +202,21 @@ export default function ChatPage() {
 interface ChatBubbleProps {
   turn: ChatTurn;
   waiting: boolean;
+  streaming: boolean;
   onRetry?: () => void;
+  saved: UseSavedVersesReturn;
 }
 
-function ChatBubble({ turn, waiting, onRetry }: ChatBubbleProps) {
+function ChatBubble({ turn, waiting, streaming, onRetry, saved }: ChatBubbleProps) {
   if (turn.role === 'user') {
     return (
-      <div className="flex justify-end">
-        <p className="max-w-[85%] bg-gold-500/10 border border-gold-500/20 rounded-2xl rounded-br-sm px-4 py-3 text-cream text-base leading-relaxed whitespace-pre-wrap break-words">
-          {turn.content}
-        </p>
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <p className="max-w-[85%] bg-gold-500/10 border border-gold-500/20 rounded-2xl rounded-br-sm px-4 py-3 text-cream text-base leading-relaxed whitespace-pre-wrap break-words">
+            {turn.content}
+          </p>
+        </div>
+        {suggestsCrisis(turn.content) && <CrisisNotice />}
       </div>
     );
   }
@@ -215,7 +226,7 @@ function ChatBubble({ turn, waiting, onRetry }: ChatBubbleProps) {
       {waiting && !turn.content ? (
         <ThinkingIndicator />
       ) : (
-        <AssistantMessage content={turn.content} />
+        <AssistantMessage content={turn.content} streaming={streaming} saved={saved} />
       )}
       {turn.stopped && <p className="text-cream/40 text-xs">Stopped.</p>}
       {turn.error && <AiSetupNotice error={turn.error} onRetry={onRetry} />}

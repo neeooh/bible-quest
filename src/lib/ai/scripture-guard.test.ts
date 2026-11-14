@@ -95,7 +95,7 @@ describe('formatting helpers', () => {
     expect(readPath(range)).toBe('/read/romans/8?verse=38&end=39');
 
     const [chapter] = parse('Psalm 23');
-    expect(formatScriptureRef(chapter)).toBe('Psalms 23');
+    expect(formatScriptureRef(chapter)).toBe('Psalm 23');
     expect(readPath(chapter)).toBe('/read/psalms/23');
   });
 });

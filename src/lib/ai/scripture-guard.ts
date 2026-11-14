@@ -187,11 +187,13 @@ export function refKey(ref: ScriptureRef): string {
 
 /** Canonical display form, e.g. "Romans 8:38–39". */
 export function formatScriptureRef(ref: ScriptureRef): string {
-  if (ref.startVerse === undefined) return `${ref.bookName} ${ref.chapter}`;
+  // A single psalm is "Psalm 23", not "Psalms 23".
+  const name = ref.book === 'psalms' ? 'Psalm' : ref.bookName;
+  if (ref.startVerse === undefined) return `${name} ${ref.chapter}`;
   const end = ref.endVerse ?? ref.startVerse;
   return end === ref.startVerse
-    ? `${ref.bookName} ${ref.chapter}:${ref.startVerse}`
-    : `${ref.bookName} ${ref.chapter}:${ref.startVerse}–${end}`;
+    ? `${name} ${ref.chapter}:${ref.startVerse}`
+    : `${name} ${ref.chapter}:${ref.startVerse}–${end}`;
 }
 
 /** Link to the passage on the Read page. */
