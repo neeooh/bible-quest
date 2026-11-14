@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from 'react';
+import { Fragment, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { collectVerseRefs, parseMessage, type InlineToken } from '../../lib/ai/message-format';
 import { stripPetNameOpener } from '../../lib/ai/tone';
@@ -10,7 +10,7 @@ import {
 } from '../../lib/ai/scripture-guard';
 import { useResolvedPassages } from '../../hooks/useResolvedPassages';
 import type { UseSavedVersesReturn } from '../../hooks/useSavedVerses';
-import VerseCard from './VerseCard';
+import VerseCarousel, { type CarouselCard } from './VerseCarousel';
 
 interface AssistantMessageProps {
   content: string;
@@ -29,9 +29,34 @@ export default function AssistantMessage({ content: raw, streaming, saved }: Ass
   const refs = useMemo(() => collectVerseRefs(content, streaming), [content, streaming]);
   const resolved = useResolvedPassages(refs);
 
-  const cards = refs
-    .map((ref) => resolved.get(refKey(ref)))
-    .filter((p): p is ResolvedPassage => !!p && p.verses.length <= MAX_CARD_VERSES);
+  const cards = useMemo(() => {
+    const out: CarouselCard[] = [];
+    for (const ref of refs) {
+      const key = refKey(ref);
+      const passage = resolved.get(key);
+      if (passage && passage.verses.length <= MAX_CARD_VERSES) out.push({ key, passage });
+    }
+    return out;
+  }, [refs, resolved]);
+  const cardIndex = useMemo(() => new Map(cards.map((c, i) => [c.key, i])), [cards]);
+
+  const [index, setIndex] = useState(0);
+  const carouselRef = useRef<HTMLElement>(null);
+
+  /** A reference in the text was clicked: show its card and bring it into view. */
+  const showCard = (i: number) => {
+    setIndex(i);
+    const el = carouselRef.current;
+    if (!el) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+    requestAnimationFrame(() => {
+      el.querySelector('[data-current]')?.animate(
+        [{ backgroundColor: 'rgba(214, 173, 96, 0.35)' }, { backgroundColor: 'transparent' }],
+        { duration: 1200, easing: 'ease-out' },
+      );
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -42,7 +67,7 @@ export default function AssistantMessage({ content: raw, streaming, saved }: Ass
               {block.lines.map((line, j) => (
                 <Fragment key={j}>
                   {j > 0 && <br />}
-                  <Inline tokens={line} resolved={resolved} />
+                  <Inline tokens={line} resolved={resolved} cardIndex={cardIndex} onShowCard={showCard} />
                 </Fragment>
               ))}
             </p>
@@ -50,7 +75,7 @@ export default function AssistantMessage({ content: raw, streaming, saved }: Ass
             <ListBlock key={i} ordered={block.ordered}>
               {block.items.map((item, j) => (
                 <li key={j}>
-                  <Inline tokens={item} resolved={resolved} />
+                  <Inline tokens={item} resolved={resolved} cardIndex={cardIndex} onShowCard={showCard} />
                 </li>
               ))}
             </ListBlock>
@@ -59,11 +84,13 @@ export default function AssistantMessage({ content: raw, streaming, saved }: Ass
       </div>
 
       {cards.length > 0 && (
-        <div className="space-y-3">
-          {cards.map((passage) => (
-            <VerseCard key={refKey(passage.ref)} passage={passage} saved={saved} />
-          ))}
-        </div>
+        <VerseCarousel
+          ref={carouselRef}
+          cards={cards}
+          index={index}
+          onIndexChange={setIndex}
+          saved={saved}
+        />
       )}
     </div>
   );
@@ -80,9 +107,14 @@ function ListBlock({ ordered, children }: { ordered: boolean; children: React.Re
 function Inline({
   tokens,
   resolved,
+  cardIndex,
+  onShowCard,
 }: {
   tokens: InlineToken[];
   resolved: Map<string, ResolvedPassage | null>;
+  /** refKey → position of that passage's card in the carousel. */
+  cardIndex: Map<string, number>;
+  onShowCard: (index: number) => void;
 }) {
   return (
     <>
@@ -99,10 +131,37 @@ function Inline({
         }
 
         const { ref, raw } = t.match;
+        const key = refKey(ref);
+
+        // A reference with a card jumps to that card in the carousel below.
+        const cardAt = cardIndex.get(key);
+        if (cardAt !== undefined) {
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => onShowCard(cardAt)}
+              title="Show this passage below"
+              className={`inline p-0 bg-transparent text-left text-gold-400 hover:text-gold-300 underline decoration-gold-500/40 underline-offset-2 cursor-pointer ${className}`}
+            >
+              {raw}
+            </button>
+          );
+        }
+
         // A verse reference that turned out not to exist stays plain text.
-        if (ref.startVerse !== undefined && resolved.get(refKey(ref)) === null) {
+        if (ref.startVerse !== undefined && resolved.get(key) === null) {
           return (
             <span key={i} className={className} title="Not found in the World English Bible">
+              {raw}
+            </span>
+          );
+        }
+        // Whole chapters and very long ranges have no card: open the Read page.
+        // A verse still being looked up is shown highlighted but not clickable yet.
+        if (ref.startVerse !== undefined && !resolved.has(key)) {
+          return (
+            <span key={i} className={`text-gold-400 ${className}`}>
               {raw}
             </span>
           );
