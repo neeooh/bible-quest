@@ -343,7 +343,7 @@ Deviations from the plan:
 | | `gemma3:latest` | `phi3:mini` |
 |---|---|---|
 | Replies with at least one detected reference | 10 / 10 | 9 / 10 |
-| References detected | 37 | 26 |
+| References detected | 38 | 29 |
 | References that don't exist in the WEB | **0** | **0** |
 | Replies quoting verse text despite the prompt | 0 | 2 (with invented wording) |
 | Average reply time | ~37 s (one cold start of 121 s) | ~13 s |
