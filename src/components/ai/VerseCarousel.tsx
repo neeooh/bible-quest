@@ -51,7 +51,7 @@ const VerseCarousel = forwardRef<HTMLElement, VerseCarouselProps>(function Verse
       className="space-y-3 scroll-mt-24 scroll-mb-48"
     >
       {/* Controls sit above the cards, so they stay put while card heights vary */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-center gap-4">
         <button
           type="button"
           onClick={() => go(current - 1)}
@@ -61,7 +61,7 @@ const VerseCarousel = forwardRef<HTMLElement, VerseCarouselProps>(function Verse
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <p className="text-cream/60 text-sm" aria-live="polite">
+        <p className="text-cream/60 text-sm min-w-[8.5rem] text-center tabular-nums" aria-live="polite">
           Verse <span className="text-cream font-medium">{current + 1}</span> out of{' '}
           <span className="text-cream font-medium">{total}</span>
         </p>
