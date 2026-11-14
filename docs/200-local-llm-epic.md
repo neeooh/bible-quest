@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Draft — awaiting decisions in §9 |
-| **Epic key** | `AI` (stories `AI-0` … `AI-14`) |
+| **Status** | Ready — all decisions in §9 made |
+| **Epic key** | `AI` (in scope: AI-0 – AI-7, AI-12.1 – AI-12.5, AI-14) |
 | **Created** | 2026-11-14 |
 | **Depends on** | Nothing. Independent of the My Verses refactor (see README → Technical Debt). |
 
@@ -21,7 +21,7 @@ No cloud service, no API key, no account, no backend. The app talks to Ollama st
 
 1. A single, tested **AI platform layer** (client, settings, prompts, guardrails) that every feature reuses.
 2. **Opt-in.** AI is off by default and enabled from a settings screen with a connection test.
-3. **Design unchanged.** New UI is additive only and uses the existing tokens (`navy-*`, `gold-*`, `cream`), fonts, card styles, dialog and toast patterns. Nothing existing is restyled or moved.
+3. **Design unchanged.** New UI is additive only (approved additions: the Home AI search box and the AI Chat page) and uses the existing tokens (`navy-*`, `gold-*`, `cream`), fonts, card styles, dialog and toast patterns. Nothing existing is restyled or moved.
 4. **Scripture integrity.** The LLM never becomes a source of Bible text. Every verse shown comes from the bundled WEB JSON (this follows the rule in `prod-spec.md`).
 5. **Streaming responses** with cancel, so a local model on an M1 feels responsive.
 
@@ -116,7 +116,7 @@ Add Vitest (dev-only) and an `npm test` script. The repo has no tests today, and
 - **AC:** Corrupt or missing storage falls back to defaults. Unit tested.
 
 #### AI-4 · AI settings page (M)
-New route `/settings/ai` (entry point: see §9 Q2). Toggle, base URL field, **Test connection** button, model dropdown filled from `/api/tags`, short setup help (from AI-0 findings).
+New route `/settings/ai`, linked from the About page and from `AiSetupNotice` (§9 Q2). Toggle, base URL field, **Test connection** button, model dropdown filled from `/api/tags`, short setup help (from AI-0 findings).
 - **AC:** Test connection shows the Ollama version or a specific, human-readable error from AI-2.
 - **AC:** A **model dropdown** lists every model installed in Ollama (live from `/api/tags`, with name and size). The user's choice is saved and used by every AI feature. There is no hardcoded model list: models added later with `ollama pull` appear after a refresh.
 - **AC:** First run with no saved choice → the first installed model is preselected.
@@ -140,38 +140,88 @@ New route `/settings/ai` (entry point: see §9 Q2). Toggle, base URL field, **Te
 - **AC:** Workbox `NetworkOnly` for AI requests. Verified that the installed PWA's offline mode still works and AI shows `AiSetupNotice` when offline.
 - **AC:** No change to the manifest, icons or precache contents.
 
-### Milestone 2 — First feature, end-to-end (vertical slice)
+### Milestone 2 — (parked)
 
-#### AI-8 · Read page: "Ask about this passage" (M)
-Add an AI action to the existing verse-selection action bar (next to Copy / Listen / Share), or inside its "More actions" menu (see §9 Q3). It opens a sheet with quick prompts — *Explain this*, *Historical context*, *How does this apply today?* — plus a free-text follow-up box.
+> **Decision (2026-11-14):** AI-8 is **parked**; AI Chat (AI-12) covers similar ground and becomes the first feature after the foundation.
+
+#### ⏸ AI-8 (parked) · Read page: "Ask about this passage" (M)
+Add an AI action inside the existing verse-selection bar's "More actions" menu (§9 Q3). It opens a sheet with quick prompts — *Explain this*, *Historical context*, *How does this apply today?* — plus a free-text follow-up box.
 - **AC:** Uses the selected verses' WEB text as grounding. Follow-up questions keep the conversation in memory for that sheet only.
 - **AC:** References in answers are validated and linked by AI-6.
 - **AC:** Fullscreen reading mode is unaffected.
 
-**Release checkpoint:** after AI-8, ship it behind the settings toggle and gather feedback before Milestone 3.
-
 ### Milestone 3 — More features
 
-#### AI-9 · Memorise: memory aid (M)
+> **Decision (2026-11-14):** AI-12 is the only Milestone 3 feature in scope. AI-9, AI-10, AI-11 and AI-13 are **parked**: kept here for reference, not planned.
+
+#### ⏸ AI-9 (parked) · Memorise: memory aid (M)
 On `MemorizePage`, an "AI memory tip" action. It suggests chunking, a mnemonic or imagery for the current passage.
 - **AC:** Never reveals the passage in a way that defeats the active exercise (the prompt forbids restating the full text, and the tip is shown before or after the exercise, not during scoring).
 - **AC:** No effect on XP or stage.
 
-#### AI-10 · Recitation: explain my mistakes (M)
+#### ⏸ AI-10 (parked) · Recitation: explain my mistakes (M)
 After Full Recitation / Voice Recitation, an optional "Explain my mistakes" button. It sends the deterministic diff from `word-compare` (not raw free text) and returns friendly guidance, e.g. "you swapped 'faith' and 'hope'; the order follows…".
 - **AC:** The accuracy score shown is still the deterministic one. AI output is advisory only.
 
-#### AI-11 · Missing Words: meaning-based hint (S)
+#### ⏸ AI-11 (parked) · Missing Words: meaning-based hint (S)
 An optional second hint level that gives a clue to the word's meaning without the word itself (the existing letter hint stays unchanged).
 - **AC:** If the model's hint contains the target word, it is rejected and the existing hint is used instead.
 - **AC:** Using an AI hint counts as a hint in scoring, exactly like today's hint.
 
-#### AI-12 · Topics / My Verses: "Find passages about…" (L)
-Free-text query ("verses about patience in suffering") → model suggests references → only validated references are shown. Each card is built from bundled WEB text, with the existing Add-to-list / Add-to-collection actions.
-- **AC:** Zero model-generated scripture text appears on cards.
-- **AC:** Duplicates of already-saved passages are marked, not re-added.
+#### AI-12 · AI Chat: faith-based mentor (L, split into AI-12.1 – AI-12.5)
 
-#### AI-13 · Home: daily verse reflection (S)
+> **Redesigned 2026-11-14** from "Find passages about…" into a chat feature.
+
+**User story.** As a user, I type what's on my heart (e.g. *"I'm feeling lonely"*) into a search box on the Home page. I land on an **AI Chat** page where an empathetic, faith-based mentor answers in a conversational way and points me to Bible passages. Each passage it mentions appears as a highlighted quote with the real WEB text, plus buttons to favourite it, add it to My Verses, or open it on the Read page. I can keep chatting with follow-up questions.
+
+**How verses get into the chat.** The model is told to *cite* references (e.g. "Psalm 34:18") but not to write out the verse text. The app detects each reference with the scripture guard (AI-6, regex-based, works while text is streaming). It validates the reference against the bundled Bible and renders a verse card underneath using the **real WEB text**. References that don't exist are shown as plain text, with no card. This keeps the "never show model-generated Scripture" rule (§4). Ollama's JSON mode is not used here, because it doesn't suit a streamed, conversational answer.
+
+##### AI-12.1 · Home page AI search box (S)
+- A search box on the Home page with an animated, glowing shadow in the brand gold (`gold-500`). It respects `prefers-reduced-motion` (glow stays, animation stops) and works in both themes.
+- **Enter** or the search button navigates to `/chat` and passes the query in router state, not in the URL, so private queries don't end up in browser history.
+- Shown only when AI is enabled in settings. When AI is disabled, the Home page is unchanged.
+- Empty query → nothing happens.
+
+##### AI-12.2 · AI Chat page (M)
+- New route `/chat` ("AI Chat"), built from existing tokens and card styles. The navbar is unchanged; the page is reached from the Home search box.
+- The first message is the query from the Home page, sent automatically. A text box at the bottom handles follow-ups (Enter sends, Shift+Enter adds a new line).
+- Messages appear as a simple thread (your message / mentor reply). Replies stream in, with Stop and Retry (AI-5).
+- "New chat" clears the conversation.
+- The current conversation is kept in `sessionStorage` (§9 Q6). It survives going to the Read page and back, and a page refresh. It is cleared by **New chat** or by closing the tab. No long-term history in the MVP.
+- With AI disabled or unreachable, the page shows `AiSetupNotice`.
+
+##### AI-12.3 · Mentor persona and safety (M)
+- A versioned system prompt (AI-6): warm, empathetic, non-judgemental, grounded in Scripture. It cites 1–4 passages per reply, never writes out verse text, and keeps replies short enough to read on one screen.
+- The prompt tells the mentor that it is not a pastor, counsellor or doctor, and to gently suggest talking to trusted people or a professional when appropriate.
+- **Crisis safety:** if the message suggests self-harm, suicide, abuse or danger, the app shows a fixed (not AI-generated) notice above the reply. It encourages contacting local emergency services or a crisis line, alongside the mentor's response.
+- A small, always-visible line on the page: "AI-generated guidance, may contain mistakes. Prompts stay on your Mac."
+- **AC:** Prompt snapshot tests; crisis-keyword detection unit tested.
+
+##### AI-12.4 · Verse detection and verse cards (M)
+- Uses the scripture guard (AI-6) on streamed text: references become highlighted links and get a quote card. A card appears once its reference is complete in the stream.
+- Ranges ("Romans 8:38–39") render as one card with all verses.
+- Card text always comes from the bundled WEB data, loaded with the existing `getVerses`.
+- Each card has three actions, reusing existing logic:
+  - **Favourite**: `addSavedVerse(s)` with `favourite: true` / `setVerseFavourite`.
+  - **Add to My Verses**: `addSavedVerses` with `favourite: false`.
+  - **Read**: navigate to `/read/:book/:chapter` with the verses highlighted.
+- Buttons show the current state (already favourited / already in My Verses), using the existing Toast for confirmation.
+- **AC:** Invalid references show no card. Duplicate references in one reply produce one card.
+
+##### AI-12.5 · Chat QA (S)
+- Manual test script: 10 realistic queries (loneliness, anxiety, grief, guilt, temptation…) run against both installed models. For each: are references real, relevant and not invented? Is the tone right? Results recorded in this doc.
+- **AC:** No model-generated verse text appears anywhere; crisis notice appears for crisis test phrases.
+
+#### ⏸ AI-12.6 (parked, high priority next) · Save chat passages as a collection (S)
+A "Save these passages as a collection" button on the chat. It creates a collection (named from the first query) containing every valid passage from the conversation, using the existing Collections feature. To be done soon after the MVP.
+
+#### ⏸ AI-12.7 (parked, next after AI-12.6) · Saved chat history (S)
+Save recent chats on the device so the user can return to a helpful conversation.
+- A "Recent chats" list on the chat page: reopen, delete one, or clear all.
+- Stored in localStorage as text only (references, not verse text; cards are rebuilt from the bundled WEB data). Capped at the 20 most recent chats.
+- A "Save chat history" switch in AI settings (on by default), with a note that chats are stored unencrypted on this device. Turning it off deletes saved chats after a confirmation.
+
+#### ⏸ AI-13 (parked) · Home: daily verse reflection (S)
 Optional "Reflect" action on the Daily Verse card: a short reflection and one question to think about.
 - **AC:** Cached per day in memory, so re-renders don't re-prompt. The card layout is unchanged when AI is disabled.
 
@@ -193,10 +243,10 @@ AI-0 ─► AI-1 ─► AI-2 ─► AI-3 ─► AI-4
                   └► AI-6
          AI-7 (any time after AI-2)
                     ▼
-                  AI-8  ── release checkpoint ──►  AI-9 · AI-10 · AI-11 · AI-12 · AI-13 (any order)  ─►  AI-14
+                 AI-12 (12.1 → 12.5)  ─►  AI-14  ── release checkpoint ──►  AI-12.6 ─► AI-12.7
 ```
 
-Rough total: about 14–19 working days for one developer. Milestones 0–2 (to the first usable feature) take about 6–8 days.
+Rough total: about 12–16 working days for one developer: foundation (AI-0 – AI-7) about 5–7 days, AI Chat (AI-12.1 – 12.5) about 6–8 days, release (AI-14) about 1 day.
 
 ## 7. Workflow and definition of done
 
@@ -221,7 +271,9 @@ Rough total: about 14–19 working days for one developer. Milestones 0–2 (to 
 ## 9. Open decisions (need your input)
 
 1. ~~**Supported scenarios.**~~ **Decided:** macOS only. Phones are out of scope (§3).
-2. **Settings entry point:** there is no settings screen today. Options: (a) a link in the About page, (b) a small icon in the navbar next to the theme toggle, (c) a link inside each `AiSetupNotice`. *Recommendation: (a) + (c), which leaves the navbar untouched.*
-3. **Read page placement:** a visible button in the selection action bar, or inside "More actions"? *Recommendation: "More actions" first, the least visual change.*
+2. ~~**Settings entry point.**~~ **Decided:** a link on the About page, plus a link inside each `AiSetupNotice`. The navbar is untouched.
+3. ~~**Read page placement.**~~ **Decided:** the AI action goes inside the existing "More actions" menu.
 4. ~~**Default model.**~~ **Decided:** no fixed default. The user picks from a dropdown of installed models; the first one is preselected (AI-4).
-5. **Priority order for Milestone 3** features.
+5. ~~**Milestone 3 priority.**~~ **Decided:** AI-12 only, redesigned as AI Chat; the others are parked. Saving chat passages as a collection (AI-12.6) is parked but next in line.
+6. ~~**Chat history.**~~ **Decided:** MVP keeps the current chat for the browser session only (AI-12.2). Saved history is a parked follow-up (AI-12.7).
+7. ~~**AI-8.**~~ **Decided:** parked. AI-12 is the first feature after the foundation.
