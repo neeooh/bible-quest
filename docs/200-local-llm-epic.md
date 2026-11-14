@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready — all decisions in §9 made |
+| **Status** | Implemented on `feature/ai-enabled` (2026-11-14); see §11 |
 | **Epic key** | `AI` (in scope: AI-0 – AI-7, AI-12.1 – AI-12.5, AI-14) |
 | **Created** | 2026-11-14 |
 | **Depends on** | Nothing. Independent of the My Verses refactor (see README → Technical Debt). |
@@ -90,7 +90,7 @@ Sizes: **S** ≈ ½ day, **M** ≈ 1–2 days, **L** ≈ 3+ days.
 
 ### Milestone 0 — Discovery
 
-#### AI-0 · Spike: Mac connectivity check (S, ~2 hours)
+#### ✅ AI-0 · Spike: Mac connectivity check (S, ~2 hours)
 Confirm the browser can call Ollama in the two Mac scenarios in §3, and record the setup steps.
 - **AC:** A short findings note (append to this doc) covering Chrome and Safari on the Mac against the local dev server and against the deployed site. It includes the exact `OLLAMA_ORIGINS` setup that worked, and the error each browser shows when the call is blocked (these feed the error messages in AI-2 and AI-4).
 - **AC:** Confirms `/api/tags` returns both installed models with names and sizes.
@@ -99,23 +99,23 @@ Confirm the browser can call Ollama in the two Mac scenarios in §3, and record 
 
 ### Milestone 1 — Platform foundation
 
-#### AI-1 · Test infrastructure (S)
+#### ✅ AI-1 · Test infrastructure (S)
 Add Vitest (dev-only) and an `npm test` script. The repo has no tests today, and the AI layer needs them.
 - **AC:** `npm test` runs in CI-like conditions with no network. One example test passes. `npm run build` is unaffected.
 
-#### AI-2 · Ollama client (M)
+#### ✅ AI-2 · Ollama client (M)
 `src/lib/ai/ollama-client.ts` with `getVersion`, `listModels`, `chatStream(messages, { model, signal, options })`.
 - **AC:** Parses NDJSON chunks across arbitrary byte boundaries. Yields text deltas, and ends on `done: true`.
 - **AC:** `AbortSignal` cancels mid-stream without an unhandled rejection.
 - **AC:** Typed errors: `unreachable` (covers both "Ollama not running" and "blocked by CORS", because the browser reports both as the same `TypeError: Failed to fetch`; see AI-0 findings), `model_not_found` (HTTP 404), `timeout`, `bad_response`, `aborted`. The `unreachable` message lists both likely causes and the fix for each.
 - **AC:** Unit tests cover chunk splitting, errors and abort with a mocked `fetch`.
 
-#### AI-3 · AI settings store and hook (S)
+#### ✅ AI-3 · AI settings store and hook (S)
 `ai-settings.ts` + `useAiSettings`: `enabled` (default `false`), `baseUrl` (default `http://localhost:11434`), `model`, `temperature`.
 - **AC:** Follows the merge-with-defaults loading pattern from `progress.ts` (see commit `c5877c7`).
 - **AC:** Corrupt or missing storage falls back to defaults. Unit tested.
 
-#### AI-4 · AI settings page (M)
+#### ✅ AI-4 · AI settings page (M)
 New route `/settings/ai`, linked from the About page and from `AiSetupNotice` (§9 Q2). Toggle, base URL field, **Test connection** button, model dropdown filled from `/api/tags`, short setup help (from AI-0 findings).
 - **AC:** Test connection shows the Ollama version or a specific, human-readable error from AI-2.
 - **AC:** A **model dropdown** lists every model installed in Ollama (live from `/api/tags`, with name and size). The user's choice is saved and used by every AI feature. There is no hardcoded model list: models added later with `ollama pull` appear after a refresh.
@@ -124,19 +124,19 @@ New route `/settings/ai`, linked from the About page and from `AiSetupNotice` (�
 - **AC:** Empty list → "Run `ollama pull <model>`" hint.
 - **AC:** Matches existing page styling in dark and light themes and at 375px width. No changes to existing pages besides the agreed entry link.
 
-#### AI-5 · Streaming chat hook and UI primitives (M)
+#### ✅ AI-5 · Streaming chat hook and UI primitives (M)
 `useAiChat`, `AiResponsePanel`, `AiActionButton`, `AiSetupNotice`.
 - **AC:** Text streams in progressively. A Stop button cancels. Retry re-runs the same prompt.
 - **AC:** With AI disabled, `AiActionButton` renders nothing (verified: no DOM output).
 - **AC:** Accessible: `aria-live="polite"` on the response region, and keyboard-operable controls.
 - **AC:** Panel unmount aborts the request.
 
-#### AI-6 · Prompt library and scripture guard (M)
+#### ✅ AI-6 · Prompt library and scripture guard (M)
 `prompts.ts` (one builder per feature, versioned) and `scripture-guard.ts`.
 - **AC:** Every builder injects the WEB passage text and reference. Snapshot tests per builder.
 - **AC:** The guard handles common forms ("John 3:16", "1 Cor 13:4-7", "Ps. 23", en-dashes, book abbreviations). It rejects out-of-range chapters and verses. Unit tested against `book-metadata`.
 
-#### AI-7 · PWA and service-worker rules (S)
+#### ✅ AI-7 · PWA and service-worker rules (S)
 - **AC:** AI requests are never handled or cached by the service worker. *(Implemented 2026-11-14: no Workbox route matches Ollama requests, so the browser sends them straight to the network; verified in a production build with the service worker active. A `NetworkOnly` rule was not added because routing streams through the worker adds risk to streaming and cancel with no benefit.)*
 - **AC:** No change to the manifest, icons or precache contents.
 
@@ -168,7 +168,7 @@ An optional second hint level that gives a clue to the word's meaning without th
 - **AC:** If the model's hint contains the target word, it is rejected and the existing hint is used instead.
 - **AC:** Using an AI hint counts as a hint in scoring, exactly like today's hint.
 
-#### AI-12 · AI Chat: faith-based mentor (L, split into AI-12.1 – AI-12.5)
+#### ✅ AI-12 · AI Chat: faith-based mentor (L, split into AI-12.1 – AI-12.5)
 
 > **Redesigned 2026-11-14** from "Find passages about…" into a chat feature.
 
@@ -176,13 +176,13 @@ An optional second hint level that gives a clue to the word's meaning without th
 
 **How verses get into the chat.** The model is told to *cite* references (e.g. "Psalm 34:18") but not to write out the verse text. The app detects each reference with the scripture guard (AI-6, regex-based, works while text is streaming). It validates the reference against the bundled Bible and renders a verse card underneath using the **real WEB text**. References that don't exist are shown as plain text, with no card. This keeps the "never show model-generated Scripture" rule (§4). Ollama's JSON mode is not used here, because it doesn't suit a streamed, conversational answer.
 
-##### AI-12.1 · Home page AI search box (S)
+##### ✅ AI-12.1 · Home page AI search box (S)
 - A search box on the Home page with an animated, glowing shadow in the brand gold (`gold-500`). It respects `prefers-reduced-motion` (glow stays, animation stops) and works in both themes.
 - **Enter** or the search button navigates to `/chat` and passes the query in router state, not in the URL, so private queries don't end up in browser history.
 - Shown only when AI is enabled in settings. When AI is disabled, the Home page is unchanged.
 - Empty query → nothing happens.
 
-##### AI-12.2 · AI Chat page (M)
+##### ✅ AI-12.2 · AI Chat page (M)
 - New route `/chat` ("AI Chat"), built from existing tokens and card styles. The navbar is unchanged; the page is reached from the Home search box.
 - The first message is the query from the Home page, sent automatically. A text box at the bottom handles follow-ups (Enter sends, Shift+Enter adds a new line).
 - Messages appear as a simple thread (your message / mentor reply). Replies stream in, with Stop and Retry (AI-5).
@@ -190,14 +190,14 @@ An optional second hint level that gives a clue to the word's meaning without th
 - The current conversation is kept in `sessionStorage` (§9 Q6). It survives going to the Read page and back, and a page refresh. It is cleared by **New chat** or by closing the tab. No long-term history in the MVP.
 - With AI disabled or unreachable, the page shows `AiSetupNotice`.
 
-##### AI-12.3 · Mentor persona and safety (M)
+##### ✅ AI-12.3 · Mentor persona and safety (M)
 - A versioned system prompt (AI-6): warm, empathetic, non-judgemental, grounded in Scripture. It cites 1–4 passages per reply, never writes out verse text, and keeps replies short enough to read on one screen.
 - The prompt tells the mentor that it is not a pastor, counsellor or doctor, and to gently suggest talking to trusted people or a professional when appropriate.
 - **Crisis safety:** if the message suggests self-harm, suicide, abuse or danger, the app shows a fixed (not AI-generated) notice above the reply. It encourages contacting local emergency services or a crisis line, alongside the mentor's response.
 - A small, always-visible line on the page: "AI-generated guidance, may contain mistakes. Prompts stay on your Mac."
 - **AC:** Prompt snapshot tests; crisis-keyword detection unit tested.
 
-##### AI-12.4 · Verse detection and verse cards (M)
+##### ✅ AI-12.4 · Verse detection and verse cards (M)
 - Uses the scripture guard (AI-6) on streamed text: references become highlighted links and get a quote card. A card appears once its reference is complete in the stream.
 - Ranges ("Romans 8:38–39") render as one card with all verses.
 - Card text always comes from the bundled WEB data, loaded with the existing `getVerses`.
@@ -209,7 +209,7 @@ An optional second hint level that gives a clue to the word's meaning without th
 - **AC:** Invalid references show no card. Duplicate references in one reply produce one card.
 - **AC:** Models quote verse text even when told not to, and sometimes invent the wording (AI-0 findings). When a quoted passage sits next to a detected reference, the app renders the quote in plain text (not styled as Scripture). The real WEB text appears only in the verse card, so a made-up quote is never presented as the Bible.
 
-##### AI-12.5 · Chat QA (S)
+##### ✅ AI-12.5 · Chat QA (S)
 - Manual test script: 10 realistic queries (loneliness, anxiety, grief, guilt, temptation…) run against both installed models. For each: are references real, relevant and not invented? Is the tone right? Results recorded in this doc.
 - **AC:** No model-generated verse text appears anywhere; crisis notice appears for crisis test phrases.
 
@@ -228,7 +228,7 @@ Optional "Reflect" action on the Daily Verse card: a short reflection and one qu
 
 ### Milestone 4 — Hardening and release
 
-#### AI-14 · Docs, QA and release (S)
+#### ✅ AI-14 · Docs, QA and release (S)
 - **AC:** README: replace "No external APIs" with an accurate note on the optional local AI, and add an "AI Assistant (Ollama)" setup section based on AI-0.
 - **AC:** About page gets a short privacy note: prompts go only to the user's own Ollama server.
 - **AC:** `RELEASE_NOTES.md` updated.
@@ -313,3 +313,48 @@ An ~80-word reply takes ~17 s, so streaming plus a Stop button is essential. The
 2. The model dropdown (AI-4) shows the size of each model.
 3. AI-2's error types are simplified: "not running" and "blocked by CORS" are one error with guidance for both.
 4. **Decided:** `gemma3` is the default model (best tone and instruction-following in this test).
+
+## 11. Implementation notes (2026-11-14)
+
+Everything in scope is on `feature/ai-enabled`, one commit per story.
+
+| Story | Where |
+|---|---|
+| AI-1 | `vitest.config.ts`, `npm test`, test step in `.github/workflows/actions.yaml` |
+| AI-2 | `src/lib/ai/ollama-client.ts`, `ndjson.ts`, `errors.ts`, `types.ts` |
+| AI-3 | `src/lib/ai/ai-settings.ts`, `src/hooks/useAiSettings.ts`, `useOllamaStatus.ts` |
+| AI-4 | `src/pages/AiSettingsPage.tsx` (`/settings/ai`), link on the About page |
+| AI-5 | `src/hooks/useAiChat.ts`, `src/components/ai/` (AiOnly, AiSetupNotice, ThinkingIndicator, AiDisclaimer) |
+| AI-6 | `src/lib/ai/scripture-guard.ts`, `prompts.ts` (`mentor-v1`) |
+| AI-7 | No Workbox route matches Ollama requests (comment in `vite.config.ts`) |
+| AI-12.1–12.2 | `src/components/ai/AiSearchBox.tsx`, `src/pages/ChatPage.tsx` (`/chat`) |
+| AI-12.3–12.4 | `src/lib/ai/safety.ts`, `message-format.ts`, `src/components/ai/CrisisNotice.tsx`, `VerseCard.tsx`, `AssistantMessage.tsx` |
+
+Deviations from the plan:
+
+- **AI-6:** the mentor prompt has no passage to ground on (the user starts from a feeling, not a verse), so grounding happens afterwards: every cited reference is checked and shown with the real WEB text.
+- **AI-7:** no `NetworkOnly` rule (see the AC note).
+- **Whole-chapter references** ("Psalm 23") become links to the Read page, not cards. Ranges longer than 12 verses also get a link only.
+
+## 12. AI-12.5 chat QA results (2026-11-14, prompt `mentor-v1`)
+
+10 realistic queries × 2 models, run through the app's own prompt, reference detection and WEB lookup (temperature 0.7).
+
+| | `gemma3:latest` | `phi3:mini` |
+|---|---|---|
+| Replies with at least one detected reference | 10 / 10 | 9 / 10 |
+| References detected | 37 | 26 |
+| References that don't exist in the WEB | **0** | **0** |
+| Replies quoting verse text despite the prompt | 0 | 2 (with invented wording) |
+| Average reply time | ~37 s (one cold start of 121 s) | ~13 s |
+| Crisis query ("I don't want to live anymore") | Fixed notice shown; reply urges contacting emergency services | Fixed notice shown; reply quotes and misattributes verses |
+
+**Observations**
+
+1. **No invented references reached the screen.** Every detected reference was a real passage, so every card showed genuine WEB text.
+2. **The model's one-line explanation sometimes doesn't match the passage.** For example, gemma3 described Psalm 85:10 as "God restoring our guilt", and in AI-0 it described John 14:6 with words from Matthew 18:20. The card underneath always shows the real text, so the reader can see the difference, but the explanations shouldn't be treated as reliable.
+3. **gemma3 is clearly better:** a warm tone, always cites in the requested format, and never quoted verses. Its picks are mostly apt (Psalm 34:18 for grief, 1 John 1:9 for guilt, 1 Corinthians 10:13 for temptation, Isaiah 41:10 for exam fear). Weaker picks: 1 Corinthians 13:4–7 is over-used, including in the crisis reply.
+4. **phi3:mini is not recommended:** it invents quotations, sometimes cites without a book name ("(6:26)") or in prose ("Psalms, chapter 23:6"), which the app correctly ignores, and picks loosely related passages (Proverbs 1:5 for exam fear, Exodus 2:24 for doubt).
+5. Keyword crisis detection fired only on the crisis query (no false positives in this set).
+
+**Follow-up ideas (not planned):** a second, cheap model call that checks each explanation against the real WEB text; steering the prompt away from 1 Corinthians 13 as a default.
