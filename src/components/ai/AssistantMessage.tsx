@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { BookOpen } from 'lucide-react';
 import { collectVerseRefs, parseMessage, type InlineToken } from '../../lib/ai/message-format';
 import { stripPetNameOpener } from '../../lib/ai/tone';
 import {
@@ -84,13 +85,24 @@ export default function AssistantMessage({ content: raw, streaming, saved }: Ass
       </div>
 
       {cards.length > 0 && (
-        <VerseCarousel
+        <div className="space-y-4 pt-2">
+          {/* Divider between the mentor's words and the Scripture passages */}
+          <div className="flex items-center gap-3" role="separator" aria-label="Passages">
+            <span className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/60" />
+            <span className="flex items-center gap-1.5 text-gold-500 text-[11px] font-medium uppercase tracking-[0.2em]">
+              <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
+              Passages
+            </span>
+            <span className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/60" />
+          </div>
+          <VerseCarousel
           ref={carouselRef}
           cards={cards}
           index={index}
           onIndexChange={setIndex}
           saved={saved}
-        />
+          />
+        </div>
       )}
     </div>
   );
