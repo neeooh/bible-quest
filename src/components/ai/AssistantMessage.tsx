@@ -1,6 +1,7 @@
 import { Fragment, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { collectVerseRefs, parseMessage, type InlineToken } from '../../lib/ai/message-format';
+import { stripPetNameOpener } from '../../lib/ai/tone';
 import {
   MAX_CARD_VERSES,
   readPath,
@@ -22,7 +23,8 @@ interface AssistantMessageProps {
  * Renders a mentor reply: light formatting, highlighted references that link
  * to the Read page, and a card with the real WEB text for each cited passage.
  */
-export default function AssistantMessage({ content, streaming, saved }: AssistantMessageProps) {
+export default function AssistantMessage({ content: raw, streaming, saved }: AssistantMessageProps) {
+  const content = useMemo(() => stripPetNameOpener(raw), [raw]);
   const blocks = useMemo(() => parseMessage(content), [content]);
   const refs = useMemo(() => collectVerseRefs(content, streaming), [content, streaming]);
   const resolved = useResolvedPassages(refs);

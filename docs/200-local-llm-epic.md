@@ -358,3 +358,12 @@ Deviations from the plan:
 5. Keyword crisis detection fired only on the crisis query (no false positives in this set).
 
 **Follow-up ideas (not planned):** a second, cheap model call that checks each explanation against the real WEB text; steering the prompt away from 1 Corinthians 13 as a default.
+
+### Tone fix: prompt `mentor-v2` (2026-11-14)
+
+User testing found the pet-name openings ("Oh my dear,", "Oh, sweetheart,") off-putting. Changes:
+
+- The prompt now asks for the tone of a calm, grounded friend: no pet names or terms of endearment, no "Oh" opener, and either a short natural opening ("Hey, that sounds really hard.") or straight to the point.
+- Safety net (`src/lib/ai/tone.ts`): if a model still opens with a pet name used as a form of address, the app removes it before showing the reply. It also removes it from the history sent back to the model, so the model doesn't copy it.
+
+Re-test with `gemma3:latest`, 6 queries (loneliness, grief, guilt, crisis, exam fear, doubt): all 6 openings were natural ("It sounds like you're carrying a significant weight right now.", "That sounds incredibly painful."), and none needed the safety net.

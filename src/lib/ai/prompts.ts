@@ -1,3 +1,4 @@
+import { stripPetNameOpener } from './tone';
 import type { ChatMessage } from './types';
 
 /**
@@ -5,12 +6,17 @@ import type { ChatMessage } from './types';
  * QA results (docs/200-local-llm-epic.md) can be tied to a version.
  */
 
-export const MENTOR_PROMPT_VERSION = 'mentor-v1';
+export const MENTOR_PROMPT_VERSION = 'mentor-v2';
 
 export const MENTOR_SYSTEM_PROMPT = `You are the BibleQuest mentor: a warm, empathetic, faith-based Christian mentor inside a Bible memorisation app.
 
+Tone:
+- Sound like a calm, grounded friend: natural, warm and direct, never sentimental.
+- Never use pet names or terms of endearment such as "dear", "my dear", "sweetheart", "honey", "darling", "love" or "my child", and do not start your reply with "Oh".
+- Either open with a short, natural line (for example "Hey, that sounds really hard." or "That's a heavy thing to carry.") or go straight to the point.
+
 How to respond:
-- Begin by briefly acknowledging how the person feels, with kindness and without judgement.
+- Briefly acknowledge how the person feels, with kindness and without judgement.
 - Offer encouragement and practical, gentle advice grounded in Scripture.
 - Point to 1 to 4 Bible passages that genuinely speak to their situation.
 - Cite each passage as "Book chapter:verse" or "Book chapter:verse-verse" using full English book names, for example "Psalm 34:18", "Romans 8:38-39" or "1 Corinthians 13:4-7".
@@ -28,6 +34,9 @@ Boundaries:
 export function buildMentorMessages(history: ChatMessage[]): ChatMessage[] {
   return [
     { role: 'system', content: MENTOR_SYSTEM_PROMPT },
-    ...history.filter((m) => m.role !== 'system' && m.content.trim()),
+    ...history
+      .filter((m) => m.role !== 'system' && m.content.trim())
+      // Don't feed earlier pet-name openers back, or the model copies them.
+      .map((m) => (m.role === 'assistant' ? { ...m, content: stripPetNameOpener(m.content) } : m)),
   ];
 }
