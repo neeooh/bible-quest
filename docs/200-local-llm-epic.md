@@ -137,7 +137,7 @@ New route `/settings/ai`, linked from the About page and from `AiSetupNotice` (�
 - **AC:** The guard handles common forms ("John 3:16", "1 Cor 13:4-7", "Ps. 23", en-dashes, book abbreviations). It rejects out-of-range chapters and verses. Unit tested against `book-metadata`.
 
 #### AI-7 · PWA and service-worker rules (S)
-- **AC:** Workbox `NetworkOnly` for AI requests. Verified that the installed PWA's offline mode still works and AI shows `AiSetupNotice` when offline.
+- **AC:** AI requests are never handled or cached by the service worker. *(Implemented 2026-11-14: no Workbox route matches Ollama requests, so the browser sends them straight to the network; verified in a production build with the service worker active. A `NetworkOnly` rule was not added because routing streams through the worker adds risk to streaming and cancel with no benefit.)*
 - **AC:** No change to the manifest, icons or precache contents.
 
 ### Milestone 2 — (parked)
