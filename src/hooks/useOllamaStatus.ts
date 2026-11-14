@@ -42,6 +42,8 @@ export function useOllamaStatus(baseUrl: string, active = true) {
 
   useEffect(() => {
     if (!active) return;
+    // setState only runs after the network call resolves, not synchronously.
+    // oxlint-disable-next-line react/set-state-in-effect
     void check();
     return () => controllerRef.current?.abort();
   }, [active, check]);
