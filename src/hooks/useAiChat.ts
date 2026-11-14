@@ -84,8 +84,19 @@ export function useAiChat({ buildMessages, sessionKey }: UseAiChatOptions) {
     if (phase === 'idle') saveTurns(sessionKey, turns);
   }, [turns, phase, sessionKey]);
 
-  // Cancel any reply in flight when the component goes away.
-  useEffect(() => () => controllerRef.current?.abort(), []);
+  // Cancel any reply in flight when the component goes away. The check is
+  // deferred so React StrictMode's simulated unmount/remount in development
+  // doesn't cancel a reply that has just started.
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      setTimeout(() => {
+        if (!mountedRef.current) controllerRef.current?.abort();
+      }, 0);
+    };
+  }, []);
 
   /** Streams a reply to `history` (which must end with a user turn). */
   const run = useCallback(async (history: ChatTurn[]) => {

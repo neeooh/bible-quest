@@ -284,3 +284,24 @@ input[type="range"]::-moz-range-thumb {
 *::-webkit-scrollbar-thumb:hover {
   background: var(--gold-500);
 }
+
+/* AI search box on the Home page — soft, breathing gold glow */
+.ai-glow {
+  box-shadow: 0 0 18px 2px color-mix(in srgb, var(--gold-500) 30%, transparent);
+  animation: aiGlow 3.2s ease-in-out infinite;
+}
+
+.ai-glow:focus-within {
+  box-shadow: 0 0 26px 5px color-mix(in srgb, var(--gold-500) 45%, transparent);
+}
+
+@keyframes aiGlow {
+  0%, 100% { box-shadow: 0 0 14px 1px color-mix(in srgb, var(--gold-500) 22%, transparent); }
+  50% { box-shadow: 0 0 28px 6px color-mix(in srgb, var(--gold-500) 42%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-glow {
+    animation: none;
+  }
+}

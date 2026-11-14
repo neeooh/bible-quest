@@ -19,6 +19,8 @@ import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
 import { getPassageStage } from '../lib/learning-stage';
 import { showToast } from '../components/Toast';
+import AiOnly from '../components/ai/AiOnly';
+import AiSearchBox from '../components/ai/AiSearchBox';
 import type { DailyVerse } from '../lib/types';
 
 export default function HomePage() {
@@ -105,6 +107,11 @@ export default function HomePage() {
 
   return (
     <div className="min-h-[calc(100vh-7rem)] flex flex-col justify-center space-y-12 py-8">
+
+      {/* AI mentor search (only when the AI assistant is enabled) */}
+      <AiOnly>
+        <AiSearchBox />
+      </AiOnly>
 
       {/* Daily Verse */}
       <section className="card max-w-2xl mx-auto space-y-5">
