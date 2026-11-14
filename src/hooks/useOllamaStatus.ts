@@ -48,5 +48,8 @@ export function useOllamaStatus(baseUrl: string, active = true) {
     return () => controllerRef.current?.abort();
   }, [active, check]);
 
-  return { status, refresh };
+  /** Re-check in the background, keeping the current status until the result arrives. */
+  const recheck = useCallback(() => check(), [check]);
+
+  return { status, refresh, recheck };
 }

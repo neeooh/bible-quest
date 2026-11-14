@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useElementHeight } from '../hooks/useElementHeight';
 import { BookOpen, MessageSquarePlus, Send, Sparkles, Square } from 'lucide-react';
 import { useAiChat, type ChatTurn } from '../hooks/useAiChat';
 import { useAiSettings } from '../hooks/useAiSettings';
@@ -15,6 +17,7 @@ import { buildMentorMessages } from '../lib/ai/prompts';
 import AiSetupNotice from '../components/ai/AiSetupNotice';
 import AiDisclaimer from '../components/ai/AiDisclaimer';
 import ThinkingIndicator from '../components/ai/ThinkingIndicator';
+import ModelPicker from '../components/ai/ModelPicker';
 import AssistantMessage from '../components/ai/AssistantMessage';
 import type { ChatLocationState } from '../components/ai/AiSearchBox';
 
@@ -31,8 +34,8 @@ const SUGGESTIONS = [
 const consumedQueries = new Set<string>();
 
 export default function ChatPage() {
-  const { settings } = useAiSettings();
-  const { status, refresh } = useOllamaStatus(settings.baseUrl, settings.enabled);
+  const { settings, update: updateSettings } = useAiSettings();
+  const { status, refresh, recheck } = useOllamaStatus(settings.baseUrl, settings.enabled);
   const chat = useAiChat({ buildMessages: buildMentorMessages, sessionKey: SESSION_KEY });
   const { turns, phase, busy, send, retry, stop, reset } = chat;
   const saved = useSavedVerses();
@@ -77,6 +80,7 @@ export default function ChatPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [draft, setDraft] = useState('');
+  const composerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -155,6 +159,9 @@ export default function ChatPage() {
     </div>
   );
 
+  const showComposer = settings.enabled && !(status.state === 'error' && turns.length === 0);
+  const composerHeight = useElementHeight(composerRef, showComposer);
+
   if (!settings.enabled) {
     return (
       <div className="py-10 space-y-8">
@@ -213,47 +220,70 @@ export default function ChatPage() {
         </>
       )}
 
-      {/* Composer */}
+      {/* Composer: fixed to the bottom of the screen; the spacer keeps the last message clear of it */}
       {!unreachable && (
-        <div className="sticky bottom-0 -mx-4 px-4 pt-3 pb-4 bg-navy-900 space-y-3">
-          <form onSubmit={submit} className="flex items-end gap-2">
-            <label htmlFor="chat-input" className="sr-only">
-              Message
-            </label>
-            <textarea
-              id="chat-input"
-              ref={inputRef}
-              rows={1}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder={turns.length ? 'Ask a follow-up question…' : 'What’s on your heart today?'}
-              className="flex-1 min-w-0 resize-none max-h-40 field-sizing-content bg-navy-800 border border-gold-500/30 rounded-xl px-4 py-3 text-cream placeholder:text-cream/40 text-base focus:outline-none focus:border-gold-500/60"
-            />
-            {busy ? (
-              <button
-                type="button"
-                onClick={stop}
-                aria-label="Stop reply"
-                title="Stop"
-                className="btn-outline !p-0 w-12 h-12 inline-flex items-center justify-center shrink-0"
-              >
-                <Square className="w-4 h-4" fill="currentColor" />
-              </button>
-            ) : (
-              <button
-                type="submit"
-                aria-label="Send"
-                title="Send"
-                disabled={!draft.trim()}
-                className="btn-gold !p-0 w-12 h-12 inline-flex items-center justify-center shrink-0 disabled:opacity-40"
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            )}
-          </form>
-          <AiDisclaimer />
-        </div>
+        <>
+          <div aria-hidden="true" style={{ height: composerHeight }} />
+          {/* Rendered at the document root: the page's fade-in transform would otherwise
+              make "fixed" relative to the page content while it animates. */}
+          {createPortal(
+          <div
+            ref={composerRef}
+            className="fixed inset-x-0 bottom-0 z-40 bg-navy-900/95 backdrop-blur border-t border-gold-500/10"
+          >
+            <div className="max-w-5xl mx-auto px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-2">
+              <form onSubmit={submit} className="flex items-end gap-2">
+                <div className="flex-1 min-w-0 flex items-end gap-2 bg-navy-800 border border-gold-500/30 rounded-xl pl-4 pr-2 py-1.5 focus-within:border-gold-500/60 transition-colors">
+                  <label htmlFor="chat-input" className="sr-only">
+                    Message
+                  </label>
+                  <textarea
+                    id="chat-input"
+                    ref={inputRef}
+                    rows={1}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={onKeyDown}
+                    placeholder={turns.length ? 'Ask a follow-up question…' : 'What’s on your heart today?'}
+                    className="flex-1 min-w-0 resize-none max-h-40 field-sizing-content bg-transparent py-1.5 text-cream placeholder:text-cream/40 text-base focus:outline-none"
+                  />
+                  <div className="pb-0.5">
+                    <ModelPicker
+                      model={settings.model}
+                      status={status}
+                      onChange={(model) => updateSettings({ model })}
+                      onRefresh={recheck}
+                    />
+                  </div>
+                </div>
+                {busy ? (
+                  <button
+                    type="button"
+                    onClick={stop}
+                    aria-label="Stop reply"
+                    title="Stop"
+                    className="btn-outline !p-0 w-12 h-12 inline-flex items-center justify-center shrink-0"
+                  >
+                    <Square className="w-4 h-4" fill="currentColor" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    aria-label="Send"
+                    title="Send"
+                    disabled={!draft.trim()}
+                    className="btn-gold !p-0 w-12 h-12 inline-flex items-center justify-center shrink-0 disabled:opacity-40"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                )}
+              </form>
+              <AiDisclaimer />
+            </div>
+          </div>,
+          document.body,
+          )}
+        </>
       )}
 
       <PassagesDrawer

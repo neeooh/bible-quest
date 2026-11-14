@@ -85,3 +85,8 @@ export function formatModelSize(bytes: number): string {
   const gb = bytes / 1e9;
   return gb >= 1 ? `${gb.toFixed(1)} GB` : `${Math.round(bytes / 1e6)} MB`;
 }
+
+/** "gemma3:latest" → "gemma3"; other tags are kept ("phi3:mini"). */
+export function shortModelName(name: string): string {
+  return name.replace(/:latest$/, '');
+}

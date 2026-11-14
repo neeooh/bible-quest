@@ -127,7 +127,8 @@
 
 .toast-container {
   position: fixed;
-  bottom: 1.5rem;
+  /* Sits above a fixed bottom bar (e.g. the AI Chat composer) when there is one */
+  bottom: calc(1.5rem + var(--bottom-bar-height, 0px));
   right: 1.5rem;
   z-index: 9999;
   display: flex;
