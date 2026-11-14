@@ -18,6 +18,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm test
       - run: npm run build
       - name: Upload static site to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
