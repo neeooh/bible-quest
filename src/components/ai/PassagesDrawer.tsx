@@ -141,7 +141,7 @@ export default function PassagesDrawer({
         aria-modal="true"
         aria-labelledby="passages-drawer-title"
         tabIndex={-1}
-        className="drawer-panel absolute inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl sm:inset-x-auto sm:inset-y-0 sm:right-0 sm:max-h-none sm:w-[440px] sm:rounded-none sm:rounded-l-2xl bg-navy-800 border-t sm:border-t-0 sm:border-l border-gold-500/20 flex flex-col focus:outline-none"
+        className="drawer-panel absolute inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl sm:inset-x-auto sm:inset-y-0 sm:right-0 sm:max-h-none min-[640px]:w-[440px] min-[1440px]:w-[520px] sm:rounded-none sm:rounded-l-2xl bg-navy-800 border-t sm:border-t-0 sm:border-l border-gold-500/20 flex flex-col focus:outline-none"
       >
         {/* Header */}
         <div className="flex items-center justify-between gap-3 px-5 pt-5 pb-4 border-b border-gold-500/10">
@@ -181,7 +181,7 @@ export default function PassagesDrawer({
               </button>
             </div>
 
-            <ul className="flex-1 overflow-y-auto px-5 pb-4 space-y-2">
+            <ul className="flex-1 overflow-y-auto px-5 pb-4 space-y-4">
               {passages.map(({ key, passage, turnId }) => {
                 const { ref, verses } = passage;
                 const ticked = !unticked.has(key);
