@@ -19,8 +19,7 @@ interface VerseCarouselProps {
 
 /**
  * The passages cited in one reply, stacked on top of each other with
- * previous / next controls. All cards share one grid cell, so the carousel is
- * as tall as its tallest card and doesn't jump when switching.
+ * previous / next controls above. Each card keeps its natural height.
  */
 const VerseCarousel = forwardRef<HTMLElement, VerseCarouselProps>(function VerseCarousel(
   { cards, index, onIndexChange, saved },
@@ -41,6 +40,8 @@ const VerseCarousel = forwardRef<HTMLElement, VerseCarouselProps>(function Verse
     }
   };
 
+  const card = cards[current];
+
   return (
     <section
       ref={ref}
@@ -49,58 +50,50 @@ const VerseCarousel = forwardRef<HTMLElement, VerseCarouselProps>(function Verse
       onKeyDown={onKeyDown}
       className="space-y-3 scroll-mt-24 scroll-mb-48"
     >
-      <div className="relative">
-        {/* Edges of the cards underneath, so it reads as a stack */}
-        {total > 1 && (
-          <>
-            <div aria-hidden="true" className="absolute inset-x-3 -bottom-2 h-full rounded-xl border border-gold-500/10 bg-navy-700/30" />
-            {total > 2 && (
-              <div aria-hidden="true" className="absolute inset-x-6 -bottom-4 h-full rounded-xl border border-gold-500/10 bg-navy-700/20" />
-            )}
-          </>
-        )}
-        <div className="relative grid">
-          {cards.map((card, i) => (
-            <div
-              key={card.key}
-              aria-roledescription="slide"
-              aria-label={`Verse ${i + 1} out of ${total}`}
-              aria-hidden={i !== current}
-              inert={i !== current}
-              data-current={i === current || undefined}
-              className={`[grid-area:1/1] flex flex-col transition-opacity duration-200 rounded-xl bg-navy-800 ${
-                i === current ? 'opacity-100' : 'opacity-0 pointer-events-none'
-              }`}
-            >
-              <VerseCard passage={card.passage} saved={saved} />
-            </div>
-          ))}
-        </div>
+      {/* Controls sit above the cards, so they stay put while card heights vary */}
+      <div className="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => go(current - 1)}
+          disabled={current === 0}
+          aria-label="Previous verse"
+          className="btn-outline !p-0 w-10 h-10 inline-flex items-center justify-center disabled:opacity-30 disabled:active:scale-100"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <p className="text-cream/60 text-sm" aria-live="polite">
+          Verse <span className="text-cream font-medium">{current + 1}</span> out of{' '}
+          <span className="text-cream font-medium">{total}</span>
+        </p>
+        <button
+          type="button"
+          onClick={() => go(current + 1)}
+          disabled={current === total - 1}
+          aria-label="Next verse"
+          className="btn-outline !p-0 w-10 h-10 inline-flex items-center justify-center disabled:opacity-30 disabled:active:scale-100"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
 
-      <div className="flex items-center justify-between gap-3 pt-3">
-          <button
-            type="button"
-            onClick={() => go(current - 1)}
-            disabled={current === 0}
-            aria-label="Previous verse"
-            className="btn-outline !p-0 w-10 h-10 inline-flex items-center justify-center disabled:opacity-30 disabled:active:scale-100"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <p className="text-cream/60 text-sm" aria-live="polite">
-            Verse <span className="text-cream font-medium">{current + 1}</span> out of{' '}
-            <span className="text-cream font-medium">{total}</span>
-          </p>
-          <button
-            type="button"
-            onClick={() => go(current + 1)}
-            disabled={current === total - 1}
-            aria-label="Next verse"
-            className="btn-outline !p-0 w-10 h-10 inline-flex items-center justify-center disabled:opacity-30 disabled:active:scale-100"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
+      <div className={`relative ${total > 2 ? 'pb-4' : total > 1 ? 'pb-2' : ''}`}>
+        {/* Edges of the cards underneath, so it reads as a stack */}
+        {total > 2 && (
+          <div aria-hidden="true" className="absolute inset-x-6 top-4 bottom-0 rounded-xl border border-gold-500/10 bg-navy-700/20" />
+        )}
+        {total > 1 && (
+          <div aria-hidden="true" className={`absolute inset-x-3 top-2 rounded-xl border border-gold-500/10 bg-navy-700/30 ${total > 2 ? 'bottom-2' : 'bottom-0'}`} />
+        )}
+        {/* Only the current card is rendered, at its natural height */}
+        <div
+          key={card.key}
+          aria-roledescription="slide"
+          aria-label={`Verse ${current + 1} out of ${total}`}
+          data-current
+          className="page-enter relative rounded-xl bg-navy-800"
+        >
+          <VerseCard passage={card.passage} saved={saved} />
+        </div>
       </div>
     </section>
   );

@@ -54,7 +54,7 @@ export default function VerseCard({ passage, saved }: VerseCardProps) {
   };
 
   return (
-    <figure className="h-full flex flex-col gap-3 rounded-xl border border-gold-500/20 bg-navy-700/50 p-4">
+    <figure className="rounded-xl border border-gold-500/20 bg-navy-700/50 p-4 space-y-3">
       <figcaption className="flex items-center justify-between gap-3">
         <span className="text-gold-400 text-sm font-semibold">{reference}</span>
         <span className="text-cream/30 text-[10px] uppercase tracking-wider">WEB</span>
@@ -69,7 +69,7 @@ export default function VerseCard({ passage, saved }: VerseCardProps) {
         ))}
       </blockquote>
 
-      <div className="mt-auto flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={toggleFavourite}
