@@ -81,7 +81,6 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const [draft, setDraft] = useState('');
   const composerRef = useRef<HTMLDivElement>(null);
-  const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // A question typed on the Home page starts a new conversation.
@@ -95,13 +94,25 @@ export default function ChatPage() {
     navigate(location.pathname, { replace: true, state: null });
   }, [incoming, settings.enabled, location.key, location.pathname, navigate, reset, send]);
 
-  // Keep the newest message in view while it streams, unless the user scrolled up.
-  const lastContent = turns[turns.length - 1]?.content;
+  // "New page" behaviour: when a question is sent, scroll it to the top of the
+  // screen once. The reply then streams into the empty space below it; nothing
+  // auto-scrolls while it streams, so it never fights the user's own scrolling.
+  let lastUserIndex = -1;
+  for (let i = turns.length - 1; i >= 0; i--) {
+    if (turns[i].role === 'user') {
+      lastUserIndex = i;
+      break;
+    }
+  }
+  const lastUserId = lastUserIndex >= 0 ? turns[lastUserIndex].id : undefined;
+  const latestRef = useRef<HTMLDivElement>(null);
+  const seenUserId = useRef(lastUserId);
   useEffect(() => {
-    const nearBottom =
-      window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 200;
-    if (nearBottom || phase === 'waiting') endRef.current?.scrollIntoView({ block: 'end' });
-  }, [turns.length, lastContent, phase]);
+    if (!lastUserId || lastUserId === seenUserId.current) return;
+    seenUserId.current = lastUserId;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    latestRef.current?.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+  }, [lastUserId]);
 
   const submit = (e?: FormEvent) => {
     e?.preventDefault();
@@ -173,6 +184,34 @@ export default function ChatPage() {
 
   const unreachable = status.state === 'error' && turns.length === 0;
 
+  const renderTurn = (turn: ChatTurn, i: number) => (
+    <ChatBubble
+      key={turn.id}
+      turn={turn}
+      waiting={phase === 'waiting' && i === turns.length - 1}
+      streaming={busy && i === turns.length - 1}
+      onRetry={!busy && i === turns.length - 1 ? retry : undefined}
+      saved={saved}
+      registerShowCard={registerShowCard(turn.id)}
+    />
+  );
+
+  // End of the thread: the AI note and the model in use.
+  const footer = (
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-2 border-t border-gold-500/10">
+      <AiDisclaimer />
+      <div className="flex items-center gap-1.5 text-xs text-cream/40">
+        <span>Current model:</span>
+        <ModelPicker
+          model={settings.model}
+          status={status}
+          onChange={(model) => updateSettings({ model })}
+          onRefresh={recheck}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div className="py-10 space-y-8">
       {header}
@@ -204,33 +243,23 @@ export default function ChatPage() {
           )}
 
           <div className="space-y-6" aria-live="polite" aria-busy={busy}>
-            {turns.map((turn, i) => (
-              <ChatBubble
-                key={turn.id}
-                turn={turn}
-                waiting={phase === 'waiting' && i === turns.length - 1}
-                streaming={busy && i === turns.length - 1}
-                onRetry={!busy && i === turns.length - 1 ? retry : undefined}
-                saved={saved}
-                registerShowCard={registerShowCard(turn.id)}
-              />
-            ))}
+            {turns.slice(0, Math.max(lastUserIndex, 0)).map((turn, i) => renderTurn(turn, i))}
+
+            {/* The latest question and its reply get at least a screen's height,
+                so the reply has room to stream in below the question. */}
+            {lastUserIndex >= 0 && (
+              <div
+                ref={latestRef}
+                className="space-y-6 scroll-mt-20"
+                style={{ minHeight: `calc(100dvh - 5rem - ${composerHeight}px - 5.5rem)` }}
+              >
+                {turns.slice(lastUserIndex).map((turn, i) => renderTurn(turn, lastUserIndex + i))}
+                {footer}
+              </div>
+            )}
           </div>
 
-          {/* End of the thread: the AI note and the model in use */}
-          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-2 border-t border-gold-500/10">
-            <AiDisclaimer />
-            <div className="flex items-center gap-1.5 text-xs text-cream/40">
-              <span>Current model:</span>
-              <ModelPicker
-                model={settings.model}
-                status={status}
-                onChange={(model) => updateSettings({ model })}
-                onRefresh={recheck}
-              />
-            </div>
-          </div>
-          <div ref={endRef} />
+          {lastUserIndex < 0 && footer}
         </>
       )}
 
