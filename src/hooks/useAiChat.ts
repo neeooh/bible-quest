@@ -165,5 +165,13 @@ export function useAiChat({ buildMessages, sessionKey }: UseAiChatOptions) {
     setPhase('idle');
   }, []);
 
-  return { turns, phase, busy: phase !== 'idle', send, retry, stop, reset };
+  /** Replaces the conversation, e.g. to reopen a saved chat. */
+  const load = useCallback((next: ChatTurn[]) => {
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+    setTurns(next);
+    setPhase('idle');
+  }, []);
+
+  return { turns, phase, busy: phase !== 'idle', send, retry, stop, reset, load };
 }

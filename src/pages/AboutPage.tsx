@@ -199,7 +199,7 @@ export default function AboutPage() {
           >
             Ollama
           </a>
-          . Your messages go only to your computer, never to the cloud, and a chat is kept only until you close the tab. Recommended model:{' '}
+          . Your messages go only to your computer, never to the cloud. Past chats are saved on this device only, and you can turn that off in AI settings. Recommended model:{' '}
           <code className="text-gold-400">gemma3</code>.
         </p>
         <div className="space-y-3 text-cream/70 text-sm leading-relaxed">

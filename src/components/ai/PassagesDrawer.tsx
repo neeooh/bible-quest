@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -8,13 +8,13 @@ import {
   CheckCircle,
   FolderPlus,
   Heart,
-  X,
 } from 'lucide-react';
 import { formatScriptureRef, readPath, type ResolvedPassage } from '../../lib/ai/scripture-guard';
 import { toCollectionSlug, uniqueCollectionName } from '../../lib/collections';
 import { useCollections } from '../../hooks/useCollections';
 import type { UseSavedVersesReturn } from '../../hooks/useSavedVerses';
 import { showToast } from '../Toast';
+import SlideOver from './SlideOver';
 
 export interface DrawerPassage {
   /** Passage key, e.g. "psalms:34:18-18". */
@@ -56,7 +56,6 @@ export default function PassagesDrawer({
   const [step, setStep] = useState<Step>({ kind: 'list' });
   const [target, setTarget] = useState<string>(NEW);
   const [name, setName] = useState('');
-  const panelRef = useRef<HTMLDivElement>(null);
   const { collections, createCollection, addPassagesToCollection } = useCollections();
 
   const selected = useMemo(() => passages.filter((p) => !unticked.has(p.key)), [passages, unticked]);
@@ -73,20 +72,6 @@ export default function PassagesDrawer({
       setName(suggestedName);
     }
   }
-
-  // Escape closes; the page behind doesn't scroll while the panel is open.
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKey);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    panelRef.current?.focus();
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -132,44 +117,23 @@ export default function PassagesDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50" role="presentation">
-      <div className="absolute inset-0 bg-black/60 drawer-backdrop" onClick={onClose} aria-hidden="true" />
-
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="passages-drawer-title"
-        tabIndex={-1}
-        className="drawer-panel absolute inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl sm:inset-x-auto sm:inset-y-0 sm:right-0 sm:max-h-none min-[640px]:w-[440px] min-[1440px]:w-[520px] sm:rounded-none sm:rounded-l-2xl bg-navy-800 border-t sm:border-t-0 sm:border-l border-gold-500/20 flex flex-col focus:outline-none"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3 px-5 pt-5 pb-4 border-b border-gold-500/10">
-          <div className="flex items-center gap-2">
-            {step.kind === 'save' && (
-              <button
-                type="button"
-                onClick={() => setStep({ kind: 'list' })}
-                aria-label="Back to the list"
-                className="text-cream/50 hover:text-gold-400 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            )}
-            <h2 id="passages-drawer-title" className="text-lg font-serif font-semibold text-cream">
-              {step.kind === 'save' ? 'Save to a collection' : 'Passages in this chat'}
-            </h2>
-          </div>
+    <SlideOver
+      open={open}
+      onClose={onClose}
+      title={step.kind === 'save' ? 'Save to a collection' : 'Passages in this chat'}
+      headerStart={
+        step.kind === 'save' && (
           <button
             type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="text-cream/40 hover:text-cream/70 transition-colors"
+            onClick={() => setStep({ kind: 'list' })}
+            aria-label="Back to the list"
+            className="text-cream/50 hover:text-gold-400 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
-        </div>
-
+        )
+      }
+    >
         {step.kind === 'list' && (
           <>
             <div className="flex items-center justify-between px-5 py-3 text-sm">
@@ -375,8 +339,7 @@ export default function PassagesDrawer({
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </SlideOver>
   );
 }
 

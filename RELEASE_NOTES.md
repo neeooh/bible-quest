@@ -9,7 +9,10 @@ BibleQuest can now talk to an AI model running on your own Mac with Ollama. Noth
 
 - **AI settings** (`/settings/ai`, linked from the About page): turn the assistant on, set the Ollama address, test the connection, choose an installed model (`gemma3` is preselected), and adjust creativity.
 - **Home page search box** with a soft gold glow, shown only when the assistant is on. The question opens AI Chat without being stored in the URL.
-- **AI Chat** (`/chat`): an empathetic, faith-based mentor with streaming replies, follow-up questions, Stop, Retry, New chat and starter suggestions. The conversation survives a visit to the Read page and lasts for the browser session.
+- **AI Chat** (`/chat`): an empathetic, faith-based mentor with streaming replies, follow-up questions, Stop, Retry, New chat and starter suggestions. The conversation survives a visit to the Read page.
+- **Chat history:** the last 20 conversations are saved on this device (text only; verse cards are rebuilt when reopened). A History panel lets you reopen, delete one, or clear all, with confirmation; the empty chat screen lists recent chats. A "Save chat history" switch in AI settings turns it off and deletes saved chats after confirmation.
+- **AI Chat in the top navigation**, between Home and Library.
+- **Passages panel:** every passage in a conversation in one list, with checkboxes to save a selection to a new or existing collection.
 - **Verse cards:** every passage the mentor cites shows the exact World English Bible text, with Favourite, Add to My Verses and Read buttons. Invented references get no card or link, and text the model presents as a quote is never styled as Scripture.
 - **Safety:** a fixed (not AI-generated) notice with emergency and crisis-line contacts appears when a message suggests self-harm, suicide, abuse or danger. An always-visible note says the guidance is AI-generated and not a substitute for a pastor, counsellor or doctor.
 - **Setup instructions** for allowing the hosted site in Ollama (`OLLAMA_ORIGINS`) on the About page and in the README.

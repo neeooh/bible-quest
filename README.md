@@ -80,7 +80,10 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 - Type what's on your heart into the glowing search box on the Home page (for example, "I'm feeling lonely").
 - An empathetic, faith-based AI mentor replies on the **AI Chat** page and points you to Bible passages.
 - Every passage it cites becomes a card with the exact World English Bible text, plus **Favourite**, **Add to My Verses** and **Read** buttons. References that don't exist are never shown as Scripture.
-- Ask follow-up questions, stop a reply, or start a new chat. The conversation lasts for the browser session.
+- Ask follow-up questions, stop a reply, or start a new chat.
+- **Chat history:** your last 20 conversations are saved on this device. Open **History** on the AI Chat page to reopen or delete them; recent chats also appear on the empty chat screen. You can turn history off (which deletes saved chats) in AI settings.
+- **Passages panel:** see every passage from a conversation in one list and save the ones you tick to a collection.
+- **AI Chat** is also in the top navigation, between Home and Library.
 - If a message suggests someone may be in crisis, a fixed notice with emergency and crisis-line contacts appears.
 - Runs entirely on your own Mac with [Ollama](https://ollama.com); nothing is sent to the cloud. Off by default: turn it on in **About → AI settings** (`/settings/ai`), where you can also pick the model.
 

@@ -220,7 +220,11 @@ An optional second hint level that gives a clue to the word's meaning without th
 Original description:
 A "Save these passages as a collection" button on the chat. It creates a collection (named from the first query) containing every valid passage from the conversation, using the existing Collections feature. To be done soon after the MVP.
 
-#### ⏸ AI-12.7 (parked, next after AI-12.6) · Saved chat history (S)
+#### ✅ AI-12.7 · Saved chat history (M)
+
+> **Built 2026-11-15** as specified below, plus: a History button in the chat header opening a panel (shared slide-over with the passages panel), a "Recent chats" list on the empty chat screen, inline confirmations for deleting, and "AI Chat" added to the top navigation between Home and Library. A chat is saved when a reply finishes; reopening a chat doesn't move it up the list. Storage: `biblequest-ai-chats-v1`.
+
+Original description:
 Save recent chats on the device so the user can return to a helpful conversation.
 - A "Recent chats" list on the chat page: reopen, delete one, or clear all.
 - Stored in localStorage as text only (references, not verse text; cards are rebuilt from the bundled WEB data). Capped at the 20 most recent chats.

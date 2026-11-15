@@ -51,8 +51,10 @@ function Harness() {
   );
 }
 
+// The panel renders at the document root (portal), so look there.
+const screen = () => document.body;
 const button = (text: string) =>
-  [...container.querySelectorAll('button')].find((b) => b.textContent?.trim().startsWith(text))!;
+  [...screen().querySelectorAll('button')].find((b) => b.textContent?.trim().startsWith(text))!;
 const click = (el: Element) => act(() => (el as HTMLElement).click());
 
 beforeEach(() => {
@@ -70,18 +72,18 @@ afterEach(() => {
 
 describe('PassagesDrawer', () => {
   it('lists every passage, all ticked', () => {
-    const boxes = container.querySelectorAll<HTMLInputElement>('input[type=checkbox]');
+    const boxes = screen().querySelectorAll<HTMLInputElement>('input[type=checkbox]');
     expect(boxes).toHaveLength(2);
     expect([...boxes].every((b) => b.checked)).toBe(true);
-    expect(container.textContent).toContain('2 of 2 selected');
+    expect(screen().textContent).toContain('2 of 2 selected');
   });
 
   it('saves only the ticked passages to a new collection and to My Verses', () => {
-    click(container.querySelector('input[aria-label="Include Psalm 34:18"]')!);
-    expect(container.textContent).toContain('1 of 2 selected');
+    click(screen().querySelector('input[aria-label="Include Psalm 34:18"]')!);
+    expect(screen().textContent).toContain('1 of 2 selected');
 
     click(button('Save 1 to a collection'));
-    const name = container.querySelector<HTMLInputElement>('input[aria-label="Collection name"]')!;
+    const name = screen().querySelector<HTMLInputElement>('input[aria-label="Collection name"]')!;
     expect(name.value).toBe("I'm feeling lonely");
     click(button('Save 1 passage'));
 
@@ -92,7 +94,7 @@ describe('PassagesDrawer', () => {
       'romans:38:false',
       'romans:39:false',
     ]);
-    expect(container.textContent).toContain('Saved 1 passage to');
+    expect(screen().textContent).toContain('Saved 1 passage to');
   });
 
   it('can add to an existing collection instead', () => {
@@ -102,7 +104,7 @@ describe('PassagesDrawer', () => {
     act(() => root.render(<Harness />));
 
     click(button('Save 2 to a collection'));
-    click(container.querySelector(`input[type=radio]:not(:checked)`)!);
+    click(screen().querySelector(`input[type=radio]:not(:checked)`)!);
     click(button('Save 2 passages'));
 
     const comfort = getCollections().find((c) => c.id === id)!;

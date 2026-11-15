@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useElementHeight } from '../hooks/useElementHeight';
-import { BookOpen, MessageSquarePlus, Send, Sparkles, Square } from 'lucide-react';
+import { BookOpen, History, MessageSquarePlus, Send, Sparkles, Square } from 'lucide-react';
 import { useAiChat, type ChatTurn } from '../hooks/useAiChat';
 import { useAiSettings } from '../hooks/useAiSettings';
 import { useOllamaStatus } from '../hooks/useOllamaStatus';
@@ -20,8 +20,28 @@ import ThinkingIndicator from '../components/ai/ThinkingIndicator';
 import ModelPicker from '../components/ai/ModelPicker';
 import AssistantMessage from '../components/ai/AssistantMessage';
 import type { ChatLocationState } from '../components/ai/AiSearchBox';
+import ChatHistoryDrawer from '../components/ai/ChatHistoryDrawer';
+import { useSavedChats } from '../hooks/useSavedChats';
+import {
+  clearSavedChats,
+  deleteSavedChat,
+  formatChatDate,
+  newChatId,
+  saveChat,
+  type SavedChat,
+} from '../lib/ai/chat-history';
 
 const SESSION_KEY = 'biblequest-ai-chat';
+/** Id of the conversation on screen, so it keeps updating the same saved chat. */
+const CHAT_ID_KEY = 'biblequest-ai-chat-id';
+
+function initialChatId(): string {
+  try {
+    return sessionStorage.getItem(CHAT_ID_KEY) || newChatId();
+  } catch {
+    return newChatId();
+  }
+}
 
 const SUGGESTIONS = [
   'I’m feeling lonely',
@@ -37,9 +57,57 @@ export default function ChatPage() {
   const { settings, update: updateSettings } = useAiSettings();
   const { status, refresh, recheck } = useOllamaStatus(settings.baseUrl, settings.enabled);
   const chat = useAiChat({ buildMessages: buildMentorMessages, sessionKey: SESSION_KEY });
-  const { turns, phase, busy, send, retry, stop, reset } = chat;
+  const { turns, phase, busy, send, retry, stop, reset, load } = chat;
   const saved = useSavedVerses();
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // --- Chat history -------------------------------------------------------
+  const savedChats = useSavedChats();
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [chatId, setChatId] = useState(initialChatId);
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(CHAT_ID_KEY, chatId);
+    } catch {
+      // ignore
+    }
+  }, [chatId]);
+
+  // Save the conversation whenever a reply has finished. The snapshot check
+  // stops a chat being re-saved (and jumping to the top of the list) just
+  // because it was reopened or the page was reloaded.
+  const lastSaved = useRef(JSON.stringify(turns.map((t) => [t.id, t.content])));
+  useEffect(() => {
+    if (!settings.saveHistory || busy || turns.length === 0) return;
+    const snapshot = JSON.stringify(turns.map((t) => [t.id, t.content]));
+    if (snapshot === lastSaved.current) return;
+    lastSaved.current = snapshot;
+    saveChat(chatId, turns);
+  }, [turns, busy, chatId, settings.saveHistory]);
+
+  const startNewChat = useCallback(() => {
+    reset();
+    setChatId(newChatId());
+    lastSaved.current = '[]';
+  }, [reset]);
+
+  const openSavedChat = (savedChat: SavedChat) => {
+    load(savedChat.turns.map((t) => ({ ...t })));
+    setChatId(savedChat.id);
+    lastSaved.current = JSON.stringify(savedChat.turns.map((t) => [t.id, t.content]));
+    setHistoryOpen(false);
+  };
+
+  const deleteChat = (id: string) => {
+    deleteSavedChat(id);
+    if (id === chatId) startNewChat();
+  };
+
+  const clearHistory = () => {
+    clearSavedChats();
+    startNewChat();
+  };
+  const closeHistory = useCallback(() => setHistoryOpen(false), []);
 
   // Every passage cited so far (the reply still streaming is left out until it's done).
   const streamingTurnId = busy ? turns[turns.length - 1]?.id : undefined;
@@ -88,11 +156,13 @@ export default function ChatPage() {
   useEffect(() => {
     if (!incoming || !settings.enabled || consumedQueries.has(location.key)) return;
     consumedQueries.add(location.key);
-    reset();
+    // Starting the conversation from a navigation event, not derivable during render.
+    // oxlint-disable-next-line react/set-state-in-effect
+    startNewChat();
     send(incoming);
     // Drop the query from history so a refresh doesn't ask it again.
     navigate(location.pathname, { replace: true, state: null });
-  }, [incoming, settings.enabled, location.key, location.pathname, navigate, reset, send]);
+  }, [incoming, settings.enabled, location.key, location.pathname, navigate, startNewChat, send]);
 
   // "New page" behaviour: when a question is sent, scroll it to the top of the
   // screen once. The reply then streams into the empty space below it; nothing
@@ -129,7 +199,7 @@ export default function ChatPage() {
   };
 
   const newChat = () => {
-    reset();
+    startNewChat();
     setDraft('');
     inputRef.current?.focus();
   };
@@ -140,7 +210,7 @@ export default function ChatPage() {
         <Sparkles className="w-6 h-6 text-gold-500" />
         <h1 className="text-3xl font-serif font-bold text-cream">AI Chat</h1>
       </div>
-      {settings.enabled && turns.length > 0 && (
+      {settings.enabled && (
         <div className="flex items-center gap-2">
           {chatPassages.length > 0 && (
             <button
@@ -156,15 +226,28 @@ export default function ChatPage() {
               </span>
             </button>
           )}
-          <button
-            type="button"
-            onClick={newChat}
-            aria-label="New chat"
-            className="btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 !py-2"
-          >
-            <MessageSquarePlus className="w-4 h-4" />
-            <span className="hidden sm:inline">New chat</span>
-          </button>
+          {settings.saveHistory && (
+            <button
+              type="button"
+              onClick={() => setHistoryOpen(true)}
+              aria-label="Chat history"
+              className="btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 !py-2"
+            >
+              <History className="w-4 h-4" />
+              <span className="hidden sm:inline">History</span>
+            </button>
+          )}
+          {turns.length > 0 && (
+            <button
+              type="button"
+              onClick={newChat}
+              aria-label="New chat"
+              className="btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 !py-2"
+            >
+              <MessageSquarePlus className="w-4 h-4" />
+              <span className="hidden sm:inline">New chat</span>
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -239,6 +322,34 @@ export default function ChatPage() {
                   </button>
                 ))}
               </div>
+              {settings.saveHistory && savedChats.length > 0 && (
+                <div className="pt-2 space-y-2">
+                  <p className="text-cream/40 text-xs uppercase tracking-wider">Recent chats</p>
+                  <ul className="space-y-1">
+                    {savedChats.slice(0, 3).map((c) => (
+                      <li key={c.id}>
+                        <button
+                          type="button"
+                          onClick={() => openSavedChat(c)}
+                          className="w-full flex items-center justify-between gap-3 text-left px-3 py-2 -mx-3 rounded-lg hover:bg-gold-500/10 transition-colors"
+                        >
+                          <span className="text-cream/80 text-sm truncate">{c.title}</span>
+                          <span className="text-cream/40 text-xs shrink-0">{formatChatDate(c.updatedAt)}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  {savedChats.length > 3 && (
+                    <button
+                      type="button"
+                      onClick={() => setHistoryOpen(true)}
+                      className="text-gold-400 hover:text-gold-300 text-sm transition-colors"
+                    >
+                      See all {savedChats.length} chats
+                    </button>
+                  )}
+                </div>
+              )}
             </section>
           )}
 
@@ -319,6 +430,16 @@ export default function ChatPage() {
           )}
         </>
       )}
+
+      <ChatHistoryDrawer
+        open={historyOpen}
+        onClose={closeHistory}
+        chats={savedChats}
+        currentId={chatId}
+        onOpenChat={openSavedChat}
+        onDeleteChat={deleteChat}
+        onClearAll={clearHistory}
+      />
 
       <PassagesDrawer
         open={drawerOpen}
