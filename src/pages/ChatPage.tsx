@@ -361,34 +361,48 @@ export default function ChatPage() {
                   </button>
                 ))}
               </div>
-              {settings.saveHistory && savedChats.length > 0 && (
-                <div className="pt-2 space-y-2">
-                  <p className="text-cream/40 text-xs uppercase tracking-wider">Recent chats</p>
-                  <ul className="space-y-1">
-                    {savedChats.slice(0, 3).map((c) => (
-                      <li key={c.id}>
-                        <button
-                          type="button"
-                          onClick={() => openSavedChat(c)}
-                          className="w-full flex items-center justify-between gap-3 text-left px-3 py-2 -mx-3 rounded-lg hover:bg-gold-500/10 transition-colors"
-                        >
-                          <span className="text-cream/80 text-sm truncate">{c.title}</span>
-                          <span className="text-cream/40 text-xs shrink-0">{formatChatDate(c.updatedAt)}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  {savedChats.length > 3 && (
-                    <button
-                      type="button"
-                      onClick={() => setHistoryOpen(true)}
-                      className="text-gold-400 hover:text-gold-300 text-sm transition-colors"
-                    >
-                      See all {savedChats.length} chats
-                    </button>
-                  )}
-                </div>
-              )}
+            </section>
+          )}
+
+          {/* Recent chats: a quieter, separate way back into past conversations */}
+          {turns.length === 0 && settings.saveHistory && savedChats.length > 0 && (
+            <section aria-labelledby="recent-chats-heading" className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <h2
+                  id="recent-chats-heading"
+                  className="font-sans text-gold-500 text-[11px] font-medium uppercase tracking-[0.2em]"
+                >
+                  Recent chats
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setHistoryOpen(true)}
+                  className="text-gold-400 hover:text-gold-300 text-sm transition-colors"
+                >
+                  See all{savedChats.length > 3 ? ` ${savedChats.length}` : ''}
+                </button>
+              </div>
+              <ul className="divide-y divide-gold-500/10 border-y border-gold-500/10">
+                {savedChats.slice(0, 3).map((c) => {
+                  const questions = c.turns.filter((t) => t.role === 'user').length;
+                  return (
+                    <li key={c.id}>
+                      <button
+                        type="button"
+                        onClick={() => openSavedChat(c)}
+                        className="group w-[calc(100%+1.5rem)] flex items-center justify-between gap-4 text-left px-3 py-3 -mx-3 rounded-lg hover:bg-gold-500/10 transition-colors"
+                      >
+                        <span className="text-cream/80 group-hover:text-gold-300 truncate transition-colors">
+                          {c.title}
+                        </span>
+                        <span className="text-cream/40 text-xs shrink-0">
+                          {formatChatDate(c.updatedAt)} · {questions} question{questions === 1 ? '' : 's'}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             </section>
           )}
 
