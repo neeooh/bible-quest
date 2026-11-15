@@ -308,20 +308,15 @@ export default function ChatPage() {
   }, [isNewChat]);
 
   const header = (
-    <div className="flex items-center justify-between gap-4">
-      <div className="flex items-center gap-3">
-        {/* On a new chat the greeting is the headline, so the page title steps back */}
-        <Sparkles className={isNewChat ? 'w-4 h-4 text-gold-500' : 'w-6 h-6 text-gold-500'} />
-        <h1
-          className={
-            isNewChat
-              ? 'font-sans text-gold-500 text-xs font-medium uppercase tracking-[0.2em]'
-              : 'text-3xl font-serif font-bold text-cream'
-          }
-        >
-          AI Chat
-        </h1>
-      </div>
+    <div className={`flex items-center gap-4 ${isNewChat ? 'justify-end' : 'justify-between'}`}>
+      {/* On a new chat the greeting is the page's headline (a hero, like Home),
+          so the usual page title is left out there. */}
+      {!isNewChat && (
+        <div className="flex items-center gap-3">
+          <Sparkles className="w-6 h-6 text-gold-500" />
+          <h1 className="text-3xl font-serif font-bold text-cream">AI Chat</h1>
+        </div>
+      )}
       {settings.enabled && (
         <div className="flex items-center gap-2">
           {chatPassages.length > 0 && (
@@ -417,7 +412,7 @@ export default function ChatPage() {
 
   return (
     <div className="py-10 space-y-8">
-      {header}
+      {!(isNewChat && !settings.saveHistory) && header}
 
       {unreachable ? (
         <AiSetupNotice error={status.error} onRetry={() => void refresh()} />
@@ -426,7 +421,10 @@ export default function ChatPage() {
           {turns.length === 0 && (
             <section className="min-h-[45vh] flex flex-col justify-center items-center text-center gap-6 pt-4">
               <div className="space-y-4 max-w-xl">
-                <p className="text-3xl sm:text-4xl font-serif font-bold text-cream">{timeOfDayGreeting()}</p>
+                <h1 className="text-3xl sm:text-4xl font-serif font-bold text-cream">
+                  <span className="sr-only">AI Chat: </span>
+                  {timeOfDayGreeting()}
+                </h1>
                 <p className="text-cream/60 text-base leading-relaxed">
                   Share what’s on your heart. Your mentor will listen, encourage you, and point you to
                   passages of Scripture you can save and memorise.
