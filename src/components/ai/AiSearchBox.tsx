@@ -42,7 +42,7 @@ export default function AiSearchBox() {
           placeholder="What’s on your heart today?"
           autoComplete="off"
           enterKeyHint="search"
-          className="flex-1 min-w-0 bg-transparent text-cream placeholder:text-cream/40 text-base py-2 focus:outline-none"
+          className="flex-1 min-w-0 bg-transparent text-cream placeholder:text-cream/40 text-base text-center pl-3 py-2 focus:outline-none"
         />
         <button
           type="submit"
@@ -53,8 +53,8 @@ export default function AiSearchBox() {
           <ArrowRight className="w-5 h-5" />
         </button>
       </form>
-      {/* Same note as under the AI Chat box: centred on phones, left on larger screens */}
-      <div className="flex justify-center sm:justify-start px-1">
+      {/* Same note as under the AI Chat box */}
+      <div className="flex justify-center px-1">
         <AiDisclaimer />
       </div>
     </div>
