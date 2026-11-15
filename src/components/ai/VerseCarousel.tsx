@@ -48,7 +48,7 @@ const VerseCarousel = forwardRef<HTMLElement, VerseCarouselProps>(function Verse
       aria-roledescription="carousel"
       aria-label="Bible passages in this reply"
       onKeyDown={onKeyDown}
-      className="space-y-3 scroll-mt-24 scroll-mb-32"
+      className="space-y-3 scroll-mt-32 scroll-mb-32"
     >
       {/* Controls sit above the cards, so they stay put while card heights vary */}
       <div className="flex items-center justify-center gap-4">

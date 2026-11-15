@@ -36,6 +36,9 @@ import {
 /** Per-tab memory of the conversation, used only when chat history is off. */
 const SESSION_KEY = 'biblequest-ai-chat';
 
+/** Height of the fixed navbar (h-16). */
+const NAVBAR_HEIGHT = 64;
+
 const SUGGESTIONS = [
   'I’m feeling lonely',
   'I’m anxious about the future',
@@ -307,8 +310,67 @@ export default function ChatPage() {
     inputRef.current?.focus({ preventScroll: true });
   }, [isNewChat]);
 
+  // Show the compact bar once the page header has scrolled up under the navbar.
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerHidden, setHeaderHidden] = useState(false);
+  const hasTurns = turns.length > 0;
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!hasTurns || !el || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setHeaderHidden(!entry.isIntersecting && entry.boundingClientRect.top < NAVBAR_HEIGHT),
+      { rootMargin: `-${NAVBAR_HEIGHT}px 0px 0px 0px` },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasTurns]);
+  const showBar = hasTurns && headerHidden;
+
+  // Passages, History and New chat: in the page header, and in the compact bar
+  // that stays under the navbar once the header has scrolled away.
+  const actions = (compact: boolean) => (
+    <div className="flex items-center gap-2">
+      {chatPassages.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setDrawerOpen(true)}
+          aria-label={`Passages in this chat (${chatPassages.length})`}
+          className={`btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 ${compact ? '!py-1.5' : '!py-2'}`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span className="hidden sm:inline">Passages</span>
+          <span className="min-w-5 h-5 px-1.5 rounded-full bg-gold-500/20 text-gold-300 text-xs font-semibold inline-flex items-center justify-center">
+            {chatPassages.length}
+          </span>
+        </button>
+      )}
+      {settings.saveHistory && (
+        <button
+          type="button"
+          onClick={() => setHistoryOpen(true)}
+          aria-label="Chat history"
+          className={`btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 ${compact ? '!py-1.5' : '!py-2'}`}
+        >
+          <History className="w-4 h-4" />
+          <span className="hidden sm:inline">History</span>
+        </button>
+      )}
+      {turns.length > 0 && (
+        <button
+          type="button"
+          onClick={newChat}
+          aria-label="New chat"
+          className={`btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 ${compact ? '!py-1.5' : '!py-2'}`}
+        >
+          <MessageSquarePlus className="w-4 h-4" />
+          <span className="hidden sm:inline">New chat</span>
+        </button>
+      )}
+    </div>
+  );
+
   const header = (
-    <div className={`flex items-center gap-4 ${isNewChat ? 'justify-end' : 'justify-between'}`}>
+    <div ref={headerRef} className={`flex items-center gap-4 ${isNewChat ? 'justify-end' : 'justify-between'}`}>
       {/* On a new chat the greeting is the page's headline (a hero, like Home),
           so the usual page title is left out there. */}
       {!isNewChat && (
@@ -317,46 +379,7 @@ export default function ChatPage() {
           <h1 className="text-3xl font-serif font-bold text-cream">AI Chat</h1>
         </div>
       )}
-      {settings.enabled && (
-        <div className="flex items-center gap-2">
-          {chatPassages.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setDrawerOpen(true)}
-              aria-label={`Passages in this chat (${chatPassages.length})`}
-              className="btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 !py-2"
-            >
-              <BookOpen className="w-4 h-4" />
-              <span className="hidden sm:inline">Passages</span>
-              <span className="min-w-5 h-5 px-1.5 rounded-full bg-gold-500/20 text-gold-300 text-xs font-semibold inline-flex items-center justify-center">
-                {chatPassages.length}
-              </span>
-            </button>
-          )}
-          {settings.saveHistory && (
-            <button
-              type="button"
-              onClick={() => setHistoryOpen(true)}
-              aria-label="Chat history"
-              className="btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 !py-2"
-            >
-              <History className="w-4 h-4" />
-              <span className="hidden sm:inline">History</span>
-            </button>
-          )}
-          {turns.length > 0 && (
-            <button
-              type="button"
-              onClick={newChat}
-              aria-label="New chat"
-              className="btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 !py-2"
-            >
-              <MessageSquarePlus className="w-4 h-4" />
-              <span className="hidden sm:inline">New chat</span>
-            </button>
-          )}
-        </div>
-      )}
+      {settings.enabled && actions(false)}
     </div>
   );
 
@@ -503,8 +526,8 @@ export default function ChatPage() {
             {lastUserIndex >= 0 && (
               <div
                 ref={latestRef}
-                className="space-y-6 scroll-mt-20"
-                style={{ minHeight: `calc(100dvh - 5rem - ${composerHeight}px - 5.5rem)` }}
+                className="space-y-6 scroll-mt-32"
+                style={{ minHeight: `calc(100dvh - 8rem - ${composerHeight}px - 5.5rem)` }}
               >
                 {turns.slice(lastUserIndex).map((turn, i) => renderTurn(turn, lastUserIndex + i))}
                 {footer}
@@ -534,6 +557,21 @@ export default function ChatPage() {
           )}
         </>
       )}
+
+      {/* Compact header: stays under the navbar while you scroll a long chat */}
+      {showBar &&
+        createPortal(
+          <div className="chat-bar fixed inset-x-0 top-16 z-40 bg-navy-900/95 backdrop-blur border-b border-gold-500/10">
+            <div className="max-w-5xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
+              <p className="flex items-center gap-2 text-cream font-serif font-semibold">
+                <Sparkles className="w-4 h-4 text-gold-500" aria-hidden="true" />
+                AI Chat
+              </p>
+              {actions(true)}
+            </div>
+          </div>,
+          document.body,
+        )}
 
       <ChatHistoryDrawer
         open={historyOpen}

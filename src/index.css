@@ -339,6 +339,16 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
+/* AI Chat compact header: drops down from under the navbar */
+.chat-bar {
+  animation: chatBarDrop 180ms ease-out;
+}
+
+@keyframes chatBarDrop {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 @keyframes drawerFade {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -356,7 +366,8 @@ input[type="range"]::-moz-range-thumb {
 
 @media (prefers-reduced-motion: reduce) {
   .drawer-backdrop,
-  .drawer-panel {
+  .drawer-panel,
+  .chat-bar {
     animation: none;
   }
 }
