@@ -14,6 +14,7 @@ import { collectChatPassages, suggestCollectionName } from '../lib/ai/chat-passa
 import { MAX_CARD_VERSES } from '../lib/ai/scripture-guard';
 import { useResolvedPassages } from '../hooks/useResolvedPassages';
 import { buildMentorMessages } from '../lib/ai/prompts';
+import { timeOfDayGreeting } from '../lib/ai/greeting';
 import AiSetupNotice from '../components/ai/AiSetupNotice';
 import AiDisclaimer from '../components/ai/AiDisclaimer';
 import ThinkingIndicator from '../components/ai/ThinkingIndicator';
@@ -341,6 +342,9 @@ export default function ChatPage() {
           {turns.length === 0 && (
             <section className="card space-y-4">
               <p className="text-cream/70 text-sm leading-relaxed">
+                <strong className="font-bold text-cream">{timeOfDayGreeting()}</strong>
+                <br />
+                <br />
                 Share what’s on your heart. Your mentor will listen, encourage you, and point you to
                 passages of Scripture you can save and memorise.
               </p>
