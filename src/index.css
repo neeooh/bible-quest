@@ -85,6 +85,13 @@
            hover:bg-gold-500/10 transition-all duration-200 active:scale-95;
   }
 
+  /* Secondary actions: quiet until hovered, so the gold buttons stand out */
+  .btn-quiet {
+    @apply border border-cream/15 text-cream/60 px-6 py-3 rounded-lg
+           hover:text-gold-300 hover:border-gold-500/30 hover:bg-gold-500/10
+           transition-all duration-200 active:scale-95;
+  }
+
   .card {
     @apply bg-navy-800 border border-gold-500/10 rounded-xl p-4 sm:p-6;
   }

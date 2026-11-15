@@ -349,7 +349,7 @@ export default function ChatPage() {
           type="button"
           onClick={() => setHistoryOpen(true)}
           aria-label="Chat history"
-          className={`btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 ${compact ? '!py-1.5' : '!py-2'}`}
+          className={`btn-quiet text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 ${compact ? '!py-1.5' : '!py-2'}`}
         >
           <History className="w-4 h-4" />
           <span className="hidden sm:inline">History</span>
@@ -360,7 +360,7 @@ export default function ChatPage() {
           type="button"
           onClick={newChat}
           aria-label="New chat"
-          className={`btn-outline text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 ${compact ? '!py-1.5' : '!py-2'}`}
+          className={`btn-quiet text-sm inline-flex items-center gap-2 !px-3 sm:!px-4 ${compact ? '!py-1.5' : '!py-2'}`}
         >
           <MessageSquarePlus className="w-4 h-4" />
           <span className="hidden sm:inline">New chat</span>
