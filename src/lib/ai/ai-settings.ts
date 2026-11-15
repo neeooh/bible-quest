@@ -14,6 +14,8 @@ export interface AiSettings {
   /** Selected model name, e.g. "gemma3:latest". Empty until the user (or auto-pick) chooses one. */
   model: string;
   temperature: number;
+  /** Keep past AI Chat conversations on this device. */
+  saveHistory: boolean;
 }
 
 export function getDefaultAiSettings(): AiSettings {
@@ -22,6 +24,7 @@ export function getDefaultAiSettings(): AiSettings {
     baseUrl: DEFAULT_OLLAMA_URL,
     model: '',
     temperature: 0.7,
+    saveHistory: true,
   };
 }
 
@@ -37,6 +40,7 @@ function sanitize(raw: unknown): AiSettings {
       typeof r.temperature === 'number' && r.temperature >= 0 && r.temperature <= 2
         ? r.temperature
         : defaults.temperature,
+    saveHistory: typeof r.saveHistory === 'boolean' ? r.saveHistory : defaults.saveHistory,
   };
 }
 

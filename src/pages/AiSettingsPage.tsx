@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CheckCircle, Info, Loader2, RefreshCw, Sparkles } from 'lucide-react';
+import { AlertTriangle, CheckCircle, History, Info, Loader2, RefreshCw, Sparkles, Trash2 } from 'lucide-react';
 import { useAiSettings } from '../hooks/useAiSettings';
 import { useOllamaStatus } from '../hooks/useOllamaStatus';
+import { useSavedChats } from '../hooks/useSavedChats';
+import { MAX_SAVED_CHATS, clearSavedChats } from '../lib/ai/chat-history';
 import { formatModelSize, isModelInstalled, pickModel } from '../lib/ai/ai-settings';
 import { describeAiError } from '../lib/ai/errors';
 import { DEFAULT_OLLAMA_URL, normalizeBaseUrl } from '../lib/ai/ollama-client';
@@ -13,6 +15,9 @@ const inputClass =
 export default function AiSettingsPage() {
   const { settings, update } = useAiSettings();
   const [urlDraft, setUrlDraft] = useState(settings.baseUrl);
+  const savedChats = useSavedChats();
+  /** Confirmation step shown before deleting saved chats. */
+  const [confirmHistory, setConfirmHistory] = useState<'off' | 'clear' | null>(null);
   const { status, refresh } = useOllamaStatus(settings.baseUrl);
 
   const models = status.state === 'connected' ? status.models : [];
@@ -56,22 +61,11 @@ export default function AiSettingsPage() {
               Shows the AI search box on the Home page. Turn off to hide all AI features.
             </p>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={settings.enabled}
-            aria-label="Enable AI assistant"
-            onClick={() => update({ enabled: !settings.enabled })}
-            className={`relative w-12 h-7 rounded-full shrink-0 transition-colors duration-200 ${
-              settings.enabled ? 'bg-gold-500' : 'bg-navy-600'
-            }`}
-          >
-            <span
-              className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-cream transition-transform duration-200 ${
-                settings.enabled ? 'translate-x-5' : ''
-              }`}
-            />
-          </button>
+          <Toggle
+            checked={settings.enabled}
+            label="Enable AI assistant"
+            onChange={(enabled) => update({ enabled })}
+          />
         </div>
       </section>
 
@@ -200,6 +194,70 @@ export default function AiSettingsPage() {
         </div>
       </section>
 
+      {/* Chat history */}
+      <section className="card space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-lg font-serif font-semibold text-cream">Save chat history</h2>
+            <p className="text-cream/50 text-sm">
+              Keep your last {MAX_SAVED_CHATS} AI Chat conversations on this device so you can reopen them.
+              They are stored unencrypted in this browser and never leave your computer.
+            </p>
+          </div>
+          <Toggle
+            checked={settings.saveHistory}
+            label="Save chat history"
+            onChange={(saveHistory) => {
+              if (!saveHistory && savedChats.length > 0) setConfirmHistory('off');
+              else update({ saveHistory });
+            }}
+          />
+        </div>
+
+        {settings.saveHistory && savedChats.length > 0 && confirmHistory === null && (
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+            <span className="flex items-center gap-2 text-cream/60">
+              <History className="w-4 h-4 text-gold-500" />
+              {savedChats.length} saved chat{savedChats.length === 1 ? '' : 's'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setConfirmHistory('clear')}
+              className="btn-outline text-sm inline-flex items-center gap-2 !px-4 !py-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete saved chats
+            </button>
+          </div>
+        )}
+
+        {confirmHistory && (
+          <div role="alert" className="rounded-xl border border-red-400/40 bg-red-500/10 p-4 space-y-3">
+            <p className="text-cream text-sm">
+              {confirmHistory === 'off'
+                ? `Turning this off deletes your ${savedChats.length} saved chat${savedChats.length === 1 ? '' : 's'} from this device. This can’t be undone.`
+                : `Delete all ${savedChats.length} saved chat${savedChats.length === 1 ? '' : 's'} from this device? This can’t be undone.`}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  clearSavedChats();
+                  if (confirmHistory === 'off') update({ saveHistory: false });
+                  setConfirmHistory(null);
+                }}
+                className="text-sm px-4 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white font-medium transition-colors"
+              >
+                {confirmHistory === 'off' ? 'Delete chats and turn off' : 'Delete chats'}
+              </button>
+              <button type="button" onClick={() => setConfirmHistory(null)} className="btn-outline text-sm !px-4 !py-2">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+
       {/* Help */}
       <section className="card space-y-3">
         <div className="flex items-center gap-3">
@@ -242,5 +300,34 @@ function ConnectionError({ error }: { error: unknown }) {
         ))}
       </ul>
     </div>
+  );
+}
+
+function Toggle({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  label: string;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      onClick={() => onChange(!checked)}
+      className={`relative w-12 h-7 rounded-full shrink-0 transition-colors duration-200 ${
+        checked ? 'bg-gold-500' : 'bg-navy-600'
+      }`}
+    >
+      <span
+        className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-cream transition-transform duration-200 ${
+          checked ? 'translate-x-5' : ''
+        }`}
+      />
+    </button>
   );
 }
