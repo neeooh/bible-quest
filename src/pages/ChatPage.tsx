@@ -366,7 +366,7 @@ export default function ChatPage() {
 
           {/* Recent chats: a quieter, separate way back into past conversations */}
           {turns.length === 0 && settings.saveHistory && savedChats.length > 0 && (
-            <section aria-labelledby="recent-chats-heading" className="space-y-2">
+            <section aria-labelledby="recent-chats-heading" className="space-y-2 w-full max-w-[667px] mx-auto">
               <div className="flex items-center justify-between gap-3">
                 <h2
                   id="recent-chats-heading"
