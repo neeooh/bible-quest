@@ -25,6 +25,8 @@ export interface UseAiChatOptions {
   buildMessages: (history: ChatMessage[]) => ChatMessage[];
   /** When set, the conversation is kept in sessionStorage under this key. */
   sessionKey?: string;
+  /** Conversation to start with (e.g. a saved chat opened by its address). Read once. */
+  initialTurns?: () => ChatTurn[] | undefined;
 }
 
 let idCounter = 0;
@@ -68,8 +70,8 @@ async function resolveModel(baseUrl: string, saved: string, signal: AbortSignal)
 }
 
 /** A streaming chat with the local Ollama model. */
-export function useAiChat({ buildMessages, sessionKey }: UseAiChatOptions) {
-  const [turns, setTurns] = useState<ChatTurn[]>(() => loadTurns(sessionKey));
+export function useAiChat({ buildMessages, sessionKey, initialTurns }: UseAiChatOptions) {
+  const [turns, setTurns] = useState<ChatTurn[]>(() => initialTurns?.() ?? loadTurns(sessionKey));
   const [phase, setPhase] = useState<ChatPhase>('idle');
   const controllerRef = useRef<AbortController | null>(null);
   const turnsRef = useRef(turns);

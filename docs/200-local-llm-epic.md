@@ -223,6 +223,8 @@ A "Save these passages as a collection" button on the chat. It creates a collect
 #### ✅ AI-12.7 · Saved chat history (M)
 
 > **Built 2026-11-15** as specified below, plus: a History button in the chat header opening a panel (shared slide-over with the passages panel), a "Recent chats" list on the empty chat screen, inline confirmations for deleting, and "AI Chat" added to the top navigation between Home and Library. A chat is saved when a reply finishes; reopening a chat doesn't move it up the list. Storage: `biblequest-ai-chats-v1`.
+>
+> **Addresses (2026-11-15):** `/chat` is always a new chat (nav link, typed URL); after the first reply the address is replaced with `/chat/<id>`, so refresh and Read → Back return to the same conversation. Unknown/deleted ids fall back to `/chat`. With history off there are no ids: the tab remembers the current conversation (sessionStorage) instead.
 
 Original description:
 Save recent chats on the device so the user can return to a helpful conversation.

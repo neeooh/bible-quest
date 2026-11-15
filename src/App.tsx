@@ -32,6 +32,7 @@ export default function App() {
           <Route path="/topics/:slug" element={<TopicPage />} />
           <Route path="/settings/ai" element={<AiSettingsPage />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/chat/:chatId" element={<ChatPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>

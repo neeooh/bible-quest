@@ -81,7 +81,7 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 - An empathetic, faith-based AI mentor replies on the **AI Chat** page and points you to Bible passages.
 - Every passage it cites becomes a card with the exact World English Bible text, plus **Favourite**, **Add to My Verses** and **Read** buttons. References that don't exist are never shown as Scripture.
 - Ask follow-up questions, stop a reply, or start a new chat.
-- **Chat history:** your last 20 conversations are saved on this device. Open **History** on the AI Chat page to reopen or delete them; recent chats also appear on the empty chat screen. You can turn history off (which deletes saved chats) in AI settings.
+- **Chat history:** your last 20 conversations are saved on this device, each at its own address (`/chat/<id>`), so refreshing or coming back from the Read page keeps you in the conversation. `/chat` (and the **AI Chat** nav link) always starts a new chat. Open **History** on the AI Chat page to reopen or delete them; recent chats also appear on the empty chat screen. You can turn history off (which deletes saved chats) in AI settings.
 - **Passages panel:** see every passage from a conversation in one list and save the ones you tick to a collection.
 - **AI Chat** is also in the top navigation, between Home and Library.
 - If a message suggests someone may be in crisis, a fixed notice with emergency and crisis-line contacts appears.

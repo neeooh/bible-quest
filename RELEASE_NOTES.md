@@ -11,6 +11,7 @@ BibleQuest can now talk to an AI model running on your own Mac with Ollama. Noth
 - **Home page search box** with a soft gold glow, shown only when the assistant is on. The question opens AI Chat without being stored in the URL.
 - **AI Chat** (`/chat`): an empathetic, faith-based mentor with streaming replies, follow-up questions, Stop, Retry, New chat and starter suggestions. The conversation survives a visit to the Read page.
 - **Chat history:** the last 20 conversations are saved on this device (text only; verse cards are rebuilt when reopened). A History panel lets you reopen, delete one, or clear all, with confirmation; the empty chat screen lists recent chats. A "Save chat history" switch in AI settings turns it off and deletes saved chats after confirmation.
+- **Chat addresses:** `/chat` always starts a new conversation; once the first reply arrives the address becomes `/chat/<id>`, so refresh and Back from the Read page return to the same chat. With history turned off, the current conversation is remembered for the browser tab instead.
 - **AI Chat in the top navigation**, between Home and Library.
 - **Passages panel:** every passage in a conversation in one list, with checkboxes to save a selection to a new or existing collection.
 - **Verse cards:** every passage the mentor cites shows the exact World English Bible text, with Favourite, Add to My Verses and Read buttons. Invented references get no card or link, and text the model presents as a quote is never styled as Scripture.

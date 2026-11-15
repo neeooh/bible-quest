@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useElementHeight } from '../hooks/useElementHeight';
 import { BookOpen, History, MessageSquarePlus, Send, Sparkles, Square } from 'lucide-react';
 import { useAiChat, type ChatTurn } from '../hooks/useAiChat';
@@ -26,22 +26,14 @@ import {
   clearSavedChats,
   deleteSavedChat,
   formatChatDate,
+  getSavedChat,
   newChatId,
   saveChat,
   type SavedChat,
 } from '../lib/ai/chat-history';
 
+/** Per-tab memory of the conversation, used only when chat history is off. */
 const SESSION_KEY = 'biblequest-ai-chat';
-/** Id of the conversation on screen, so it keeps updating the same saved chat. */
-const CHAT_ID_KEY = 'biblequest-ai-chat-id';
-
-function initialChatId(): string {
-  try {
-    return sessionStorage.getItem(CHAT_ID_KEY) || newChatId();
-  } catch {
-    return newChatId();
-  }
-}
 
 const SUGGESTIONS = [
   'I’m feeling lonely',
@@ -50,13 +42,24 @@ const SUGGESTIONS = [
   'I feel far from God',
 ];
 
-/** Location keys whose Home-page query has already been sent. */
-const consumedQueries = new Set<string>();
-
 export default function ChatPage() {
   const { settings, update: updateSettings } = useAiSettings();
   const { status, refresh, recheck } = useOllamaStatus(settings.baseUrl, settings.enabled);
-  const chat = useAiChat({ buildMessages: buildMentorMessages, sessionKey: SESSION_KEY });
+  const location = useLocation();
+  const navigate = useNavigate();
+  // /chat is always a new conversation; /chat/<id> is a saved one.
+  const { chatId: routeChatId } = useParams<{ chatId: string }>();
+
+  const chat = useAiChat({
+    buildMessages: buildMentorMessages,
+    // With history on, conversations live at their own address; with it off,
+    // the tab remembers the current one so refresh and Read → Back still work.
+    sessionKey: settings.saveHistory ? undefined : SESSION_KEY,
+    initialTurns: () =>
+      settings.saveHistory && routeChatId
+        ? getSavedChat(routeChatId)?.turns.map((t) => ({ ...t }))
+        : undefined,
+  });
   const { turns, phase, busy, send, retry, stop, reset, load } = chat;
   const saved = useSavedVerses();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -64,18 +67,18 @@ export default function ChatPage() {
   // --- Chat history -------------------------------------------------------
   const savedChats = useSavedChats();
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [chatId, setChatId] = useState(initialChatId);
+  // Only adopt the address's id if that chat actually exists (it may have been deleted).
+  const [chatId, setChatId] = useState(() =>
+    routeChatId && settings.saveHistory && getSavedChat(routeChatId) ? routeChatId : newChatId(),
+  );
+  const chatIdRef = useRef(chatId);
   useEffect(() => {
-    try {
-      sessionStorage.setItem(CHAT_ID_KEY, chatId);
-    } catch {
-      // ignore
-    }
+    chatIdRef.current = chatId;
   }, [chatId]);
 
-  // Save the conversation whenever a reply has finished. The snapshot check
-  // stops a chat being re-saved (and jumping to the top of the list) just
-  // because it was reopened or the page was reloaded.
+  // Save the conversation whenever a reply has finished, then give it its own
+  // address. The snapshot check stops a chat being re-saved (and jumping to
+  // the top of the list) just because it was opened or the page reloaded.
   const lastSaved = useRef(JSON.stringify(turns.map((t) => [t.id, t.content])));
   useEffect(() => {
     if (!settings.saveHistory || busy || turns.length === 0) return;
@@ -83,7 +86,8 @@ export default function ChatPage() {
     if (snapshot === lastSaved.current) return;
     lastSaved.current = snapshot;
     saveChat(chatId, turns);
-  }, [turns, busy, chatId, settings.saveHistory]);
+    if (routeChatId !== chatId) navigate(`/chat/${chatId}`, { replace: true });
+  }, [turns, busy, chatId, settings.saveHistory, routeChatId, navigate]);
 
   const startNewChat = useCallback(() => {
     reset();
@@ -91,21 +95,66 @@ export default function ChatPage() {
     lastSaved.current = '[]';
   }, [reset]);
 
+  const showSavedChat = useCallback(
+    (savedChat: SavedChat) => {
+      load(savedChat.turns.map((t) => ({ ...t })));
+      setChatId(savedChat.id);
+      lastSaved.current = JSON.stringify(savedChat.turns.map((t) => [t.id, t.content]));
+    },
+    [load],
+  );
+
+  // Respond to the address: /chat starts fresh, /chat/<id> opens that chat,
+  // and a question from the Home page starts a new chat with it. Each
+  // navigation is handled once (StrictMode runs effects twice in development).
+  const incoming = (location.state as ChatLocationState | null)?.query?.trim();
+  const handledKeys = useRef(new Set<string>());
+  const skipNextReset = useRef(false);
+  useEffect(() => {
+    if (!settings.enabled || handledKeys.current.has(location.key)) return;
+    handledKeys.current.add(location.key);
+
+    if (incoming) {
+      // Starting a conversation from a navigation event, not derivable during render.
+      // oxlint-disable-next-line react/set-state-in-effect
+      startNewChat();
+      send(incoming);
+      // Drop the query from history so a refresh doesn't ask it again.
+      skipNextReset.current = true;
+      navigate('/chat', { replace: true, state: null });
+      return;
+    }
+    if (routeChatId) {
+      if (!settings.saveHistory) {
+        navigate('/chat', { replace: true });
+        return;
+      }
+      if (routeChatId === chatIdRef.current) return; // already on screen
+      const savedChat = getSavedChat(routeChatId);
+      if (savedChat) showSavedChat(savedChat);
+      else navigate('/chat', { replace: true }); // deleted or unknown chat
+      return;
+    }
+    if (skipNextReset.current) {
+      skipNextReset.current = false;
+      return;
+    }
+    if (settings.saveHistory) startNewChat();
+  }, [location.key, incoming, routeChatId, settings.enabled, settings.saveHistory, navigate, send, startNewChat, showSavedChat]);
+
   const openSavedChat = (savedChat: SavedChat) => {
-    load(savedChat.turns.map((t) => ({ ...t })));
-    setChatId(savedChat.id);
-    lastSaved.current = JSON.stringify(savedChat.turns.map((t) => [t.id, t.content]));
     setHistoryOpen(false);
+    if (savedChat.id !== chatId) navigate(`/chat/${savedChat.id}`);
   };
 
   const deleteChat = (id: string) => {
     deleteSavedChat(id);
-    if (id === chatId) startNewChat();
+    if (id === chatId) navigate('/chat');
   };
 
   const clearHistory = () => {
     clearSavedChats();
-    startNewChat();
+    navigate('/chat');
   };
   const closeHistory = useCallback(() => setHistoryOpen(false), []);
 
@@ -145,24 +194,9 @@ export default function ChatPage() {
     pendingJump.current = { turnId, key };
     setDrawerOpen(false);
   };
-  const location = useLocation();
-  const navigate = useNavigate();
   const [draft, setDraft] = useState('');
   const composerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  // A question typed on the Home page starts a new conversation.
-  const incoming = (location.state as ChatLocationState | null)?.query?.trim();
-  useEffect(() => {
-    if (!incoming || !settings.enabled || consumedQueries.has(location.key)) return;
-    consumedQueries.add(location.key);
-    // Starting the conversation from a navigation event, not derivable during render.
-    // oxlint-disable-next-line react/set-state-in-effect
-    startNewChat();
-    send(incoming);
-    // Drop the query from history so a refresh doesn't ask it again.
-    navigate(location.pathname, { replace: true, state: null });
-  }, [incoming, settings.enabled, location.key, location.pathname, navigate, startNewChat, send]);
 
   // "New page" behaviour: when a question is sent, scroll it to the top of the
   // screen once. The reply then streams into the empty space below it; nothing
@@ -199,7 +233,8 @@ export default function ChatPage() {
   };
 
   const newChat = () => {
-    startNewChat();
+    if (settings.saveHistory) navigate('/chat');
+    else startNewChat();
     setDraft('');
     inputRef.current?.focus();
   };
