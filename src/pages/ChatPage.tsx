@@ -39,7 +39,7 @@ const SESSION_KEY = 'biblequest-ai-chat';
 const SUGGESTIONS = [
   'I’m feeling lonely',
   'I’m anxious about the future',
-  'How can I forgive someone who hurt me?',
+  'How do I forgive someone?',
   'I feel far from God',
 ];
 
@@ -250,7 +250,7 @@ export default function ChatPage() {
           : 'flex items-end gap-2'
       }
     >
-      {hero && <Sparkles className="w-5 h-5 text-gold-500 shrink-0 mb-3.5" aria-hidden="true" />}
+      {hero && <Sparkles className="hidden sm:block w-5 h-5 text-gold-500 shrink-0 mb-3.5" aria-hidden="true" />}
       <div
         className={
           hero
@@ -270,7 +270,7 @@ export default function ChatPage() {
           onKeyDown={onKeyDown}
           placeholder={turns.length ? 'Ask a follow-up question…' : 'What’s on your heart today?'}
           className={`flex-1 min-w-0 resize-none field-sizing-content bg-transparent text-cream placeholder:text-cream/40 focus:outline-none ${
-            hero ? 'max-h-60 py-2.5 text-lg' : 'max-h-40 py-1.5 text-base'
+            hero ? 'max-h-60 py-2.5 text-base sm:text-lg' : 'max-h-40 py-1.5 text-base'
           }`}
         />
       </div>
@@ -298,11 +298,29 @@ export default function ChatPage() {
     </form>
   );
 
+  const isNewChat = settings.enabled && turns.length === 0 && status.state !== 'error';
+
+  // On a desktop, put the cursor straight into the new-chat box (not on phones,
+  // where it would pop the keyboard up over the page).
+  useEffect(() => {
+    if (!isNewChat || !window.matchMedia('(min-width: 768px) and (pointer: fine)').matches) return;
+    inputRef.current?.focus({ preventScroll: true });
+  }, [isNewChat]);
+
   const header = (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-3">
-        <Sparkles className="w-6 h-6 text-gold-500" />
-        <h1 className="text-3xl font-serif font-bold text-cream">AI Chat</h1>
+        {/* On a new chat the greeting is the headline, so the page title steps back */}
+        <Sparkles className={isNewChat ? 'w-4 h-4 text-gold-500' : 'w-6 h-6 text-gold-500'} />
+        <h1
+          className={
+            isNewChat
+              ? 'font-sans text-gold-500 text-xs font-medium uppercase tracking-[0.2em]'
+              : 'text-3xl font-serif font-bold text-cream'
+          }
+        >
+          AI Chat
+        </h1>
       </div>
       {settings.enabled && (
         <div className="flex items-center gap-2">
@@ -416,18 +434,19 @@ export default function ChatPage() {
               </div>
               <div className="w-full max-w-2xl mt-6 space-y-3">
                 {chatForm(true)}
-                <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 px-1 text-left">
+                <div className="flex flex-wrap items-center justify-center sm:justify-between gap-x-6 gap-y-1 px-1">
                   {footerContent}
                 </div>
               </div>
-              <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
+              {/* One swipeable row on phones; wrapped and centred on larger screens */}
+              <div className="no-scrollbar w-[calc(100%+2rem)] -mx-4 px-4 flex gap-2 overflow-x-auto sm:w-auto sm:max-w-3xl sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center sm:overflow-visible">
                 {SUGGESTIONS.map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => send(s)}
                     disabled={busy}
-                    className="text-sm px-3 py-1.5 rounded-full border border-gold-500/30 text-gold-300 hover:bg-gold-500/10 transition-colors disabled:opacity-40"
+                    className="shrink-0 whitespace-nowrap text-sm px-3 py-1.5 rounded-full border border-gold-500/30 text-gold-300 hover:bg-gold-500/10 transition-colors disabled:opacity-40"
                   >
                     {s}
                   </button>

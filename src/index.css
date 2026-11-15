@@ -295,6 +295,14 @@ input[type="range"]::-moz-range-thumb {
   background: var(--gold-500);
 }
 
+/* Horizontal scroller without a visible scrollbar (still scrolls by touch, wheel or keyboard) */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* AI search box on the Home page — soft, breathing gold glow */
 .ai-glow {
   box-shadow: 0 0 18px 2px color-mix(in srgb, var(--gold-500) 30%, transparent);
