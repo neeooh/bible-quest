@@ -240,6 +240,64 @@ export default function ChatPage() {
     inputRef.current?.focus();
   };
 
+  // The question box: large and glowing on a new chat, compact in the bottom bar.
+  const chatForm = (hero: boolean) => (
+    <form
+      onSubmit={submit}
+      className={
+        hero
+          ? 'ai-glow w-full max-w-2xl mx-auto flex items-end gap-2 bg-navy-800 border border-gold-500/40 rounded-2xl pl-4 pr-2 py-2'
+          : 'flex items-end gap-2'
+      }
+    >
+      {hero && <Sparkles className="w-5 h-5 text-gold-500 shrink-0 mb-3.5" aria-hidden="true" />}
+      <div
+        className={
+          hero
+            ? 'flex-1 min-w-0 flex items-end'
+            : 'flex-1 min-w-0 flex items-end bg-navy-800 border border-gold-500/30 rounded-xl px-4 py-1.5 focus-within:border-gold-500/60 transition-colors'
+        }
+      >
+        <label htmlFor="chat-input" className="sr-only">
+          Message
+        </label>
+        <textarea
+          id="chat-input"
+          ref={inputRef}
+          rows={1}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={onKeyDown}
+          placeholder={turns.length ? 'Ask a follow-up question…' : 'What’s on your heart today?'}
+          className={`flex-1 min-w-0 resize-none field-sizing-content bg-transparent text-cream placeholder:text-cream/40 focus:outline-none ${
+            hero ? 'max-h-60 py-2.5 text-lg' : 'max-h-40 py-1.5 text-base'
+          }`}
+        />
+      </div>
+      {busy ? (
+        <button
+          type="button"
+          onClick={stop}
+          aria-label="Stop reply"
+          title="Stop"
+          className="btn-outline !p-0 w-12 h-12 inline-flex items-center justify-center shrink-0"
+        >
+          <Square className="w-4 h-4" fill="currentColor" />
+        </button>
+      ) : (
+        <button
+          type="submit"
+          aria-label="Send"
+          title="Send"
+          disabled={!draft.trim()}
+          className="btn-gold !p-0 w-12 h-12 inline-flex items-center justify-center shrink-0 disabled:opacity-40"
+        >
+          <Send className="w-5 h-5" />
+        </button>
+      )}
+    </form>
+  );
+
   const header = (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-3">
@@ -289,7 +347,9 @@ export default function ChatPage() {
     </div>
   );
 
-  const showComposer = settings.enabled && !(status.state === 'error' && turns.length === 0);
+  // The fixed composer only appears once a conversation has started; a new
+  // chat asks its first question in the large input in the middle of the page.
+  const showComposer = settings.enabled && turns.length > 0;
   const composerHeight = useElementHeight(composerRef, showComposer);
 
   if (!settings.enabled) {
@@ -340,15 +400,16 @@ export default function ChatPage() {
       ) : (
         <>
           {turns.length === 0 && (
-            <section className="card space-y-4">
-              <p className="text-cream/70 text-sm leading-relaxed">
-                <strong className="font-bold text-cream">{timeOfDayGreeting()}</strong>
-                <br />
-                <br />
-                Share what’s on your heart. Your mentor will listen, encourage you, and point you to
-                passages of Scripture you can save and memorise.
-              </p>
-              <div className="flex flex-wrap gap-2">
+            <section className="min-h-[45vh] flex flex-col justify-center items-center text-center gap-6 pt-4">
+              <div className="space-y-3 max-w-xl">
+                <p className="text-3xl sm:text-4xl font-serif font-bold text-cream">{timeOfDayGreeting()}</p>
+                <p className="text-cream/60 text-base leading-relaxed">
+                  Share what’s on your heart. Your mentor will listen, encourage you, and point you to
+                  passages of Scripture you can save and memorise.
+                </p>
+              </div>
+              {chatForm(true)}
+              <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
                 {SUGGESTIONS.map((s) => (
                   <button
                     key={s}
@@ -428,7 +489,7 @@ export default function ChatPage() {
       )}
 
       {/* Composer: fixed to the bottom of the screen; the spacer keeps the last message clear of it */}
-      {!unreachable && (
+      {showComposer && (
         <>
           <div aria-hidden="true" style={{ height: composerHeight }} />
           {/* Rendered at the document root: the page's fade-in transform would otherwise
@@ -439,44 +500,7 @@ export default function ChatPage() {
             className="fixed inset-x-0 bottom-0 z-40 bg-navy-900/95 backdrop-blur border-t border-gold-500/10"
           >
             <div className="max-w-5xl mx-auto px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-              <form onSubmit={submit} className="flex items-end gap-2">
-                <div className="flex-1 min-w-0 flex items-end bg-navy-800 border border-gold-500/30 rounded-xl px-4 py-1.5 focus-within:border-gold-500/60 transition-colors">
-                  <label htmlFor="chat-input" className="sr-only">
-                    Message
-                  </label>
-                  <textarea
-                    id="chat-input"
-                    ref={inputRef}
-                    rows={1}
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    onKeyDown={onKeyDown}
-                    placeholder={turns.length ? 'Ask a follow-up question…' : 'What’s on your heart today?'}
-                    className="flex-1 min-w-0 resize-none max-h-40 field-sizing-content bg-transparent py-1.5 text-cream placeholder:text-cream/40 text-base focus:outline-none"
-                  />
-                </div>
-                {busy ? (
-                  <button
-                    type="button"
-                    onClick={stop}
-                    aria-label="Stop reply"
-                    title="Stop"
-                    className="btn-outline !p-0 w-12 h-12 inline-flex items-center justify-center shrink-0"
-                  >
-                    <Square className="w-4 h-4" fill="currentColor" />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    aria-label="Send"
-                    title="Send"
-                    disabled={!draft.trim()}
-                    className="btn-gold !p-0 w-12 h-12 inline-flex items-center justify-center shrink-0 disabled:opacity-40"
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
-                )}
-              </form>
+              {chatForm(false)}
             </div>
           </div>,
           document.body,
