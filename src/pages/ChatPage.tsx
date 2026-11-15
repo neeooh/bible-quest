@@ -215,8 +215,22 @@ export default function ChatPage() {
                 registerShowCard={registerShowCard(turn.id)}
               />
             ))}
-            <div ref={endRef} />
           </div>
+
+          {/* End of the thread: the AI note and the model in use */}
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-2 border-t border-gold-500/10">
+            <AiDisclaimer />
+            <div className="flex items-center gap-1.5 text-xs text-cream/40">
+              <span>Current model:</span>
+              <ModelPicker
+                model={settings.model}
+                status={status}
+                onChange={(model) => updateSettings({ model })}
+                onRefresh={recheck}
+              />
+            </div>
+          </div>
+          <div ref={endRef} />
         </>
       )}
 
@@ -231,7 +245,7 @@ export default function ChatPage() {
             ref={composerRef}
             className="fixed inset-x-0 bottom-0 z-40 bg-navy-900/95 backdrop-blur border-t border-gold-500/10"
           >
-            <div className="max-w-5xl mx-auto px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-2">
+            <div className="max-w-5xl mx-auto px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <form onSubmit={submit} className="flex items-end gap-2">
                 <div className="flex-1 min-w-0 flex items-end bg-navy-800 border border-gold-500/30 rounded-xl px-4 py-1.5 focus-within:border-gold-500/60 transition-colors">
                   <label htmlFor="chat-input" className="sr-only">
@@ -270,16 +284,6 @@ export default function ChatPage() {
                   </button>
                 )}
               </form>
-              {/* Note on the left, model choice on the right */}
-              <div className="flex items-center justify-between gap-3">
-                <AiDisclaimer />
-                <ModelPicker
-                  model={settings.model}
-                  status={status}
-                  onChange={(model) => updateSettings({ model })}
-                  onRefresh={recheck}
-                />
-              </div>
             </div>
           </div>,
           document.body,

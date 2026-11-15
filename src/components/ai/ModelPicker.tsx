@@ -85,7 +85,7 @@ export default function ModelPicker({ model, status, onChange, onRefresh }: Mode
         aria-controls={open ? menuId : undefined}
         aria-label={`Model: ${label}. Change model`}
         title="Change model"
-        className="inline-flex items-center gap-1 max-w-[9rem] sm:max-w-[14rem] text-xs text-cream/50 hover:text-gold-400 transition-colors"
+        className="inline-flex items-center gap-1 max-w-[9rem] sm:max-w-[14rem] text-xs text-cream/70 hover:text-gold-400 transition-colors"
       >
         <span className="truncate">{label}</span>
         <ChevronDown

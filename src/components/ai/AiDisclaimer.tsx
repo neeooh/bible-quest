@@ -2,8 +2,8 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Info } from 'lucide-react';
 
 /**
- * One-line note under the chat input. The full wording opens in a small
- * popup above it, so the note stays visible without taking up much space.
+ * One-line note at the end of the chat. The full wording opens in a small
+ * popup above it.
  */
 export default function AiDisclaimer() {
   const [open, setOpen] = useState(false);
@@ -27,8 +27,7 @@ export default function AiDisclaimer() {
   return (
     <div ref={rootRef} className="relative min-w-0">
       <p className="flex items-center gap-1.5 text-cream/40 text-xs leading-snug">
-        <span className="sm:hidden">AI can make mistakes.</span>
-        <span className="hidden sm:inline">AI-generated guidance — it can make mistakes.</span>
+        AI-generated guidance — it can make mistakes.
         <button
           type="button"
           onClick={() => setOpen(!open)}
