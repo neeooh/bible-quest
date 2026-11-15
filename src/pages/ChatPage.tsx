@@ -233,7 +233,7 @@ export default function ChatPage() {
           >
             <div className="max-w-5xl mx-auto px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-2">
               <form onSubmit={submit} className="flex items-end gap-2">
-                <div className="flex-1 min-w-0 flex items-end gap-2 bg-navy-800 border border-gold-500/30 rounded-xl pl-4 pr-2 py-1.5 focus-within:border-gold-500/60 transition-colors">
+                <div className="flex-1 min-w-0 flex items-end bg-navy-800 border border-gold-500/30 rounded-xl px-4 py-1.5 focus-within:border-gold-500/60 transition-colors">
                   <label htmlFor="chat-input" className="sr-only">
                     Message
                   </label>
@@ -247,14 +247,6 @@ export default function ChatPage() {
                     placeholder={turns.length ? 'Ask a follow-up question…' : 'What’s on your heart today?'}
                     className="flex-1 min-w-0 resize-none max-h-40 field-sizing-content bg-transparent py-1.5 text-cream placeholder:text-cream/40 text-base focus:outline-none"
                   />
-                  <div className="pb-0.5">
-                    <ModelPicker
-                      model={settings.model}
-                      status={status}
-                      onChange={(model) => updateSettings({ model })}
-                      onRefresh={recheck}
-                    />
-                  </div>
                 </div>
                 {busy ? (
                   <button
@@ -278,7 +270,16 @@ export default function ChatPage() {
                   </button>
                 )}
               </form>
-              <AiDisclaimer />
+              {/* Note on the left, model choice on the right */}
+              <div className="flex items-center justify-between gap-3">
+                <AiDisclaimer />
+                <ModelPicker
+                  model={settings.model}
+                  status={status}
+                  onChange={(model) => updateSettings({ model })}
+                  onRefresh={recheck}
+                />
+              </div>
             </div>
           </div>,
           document.body,

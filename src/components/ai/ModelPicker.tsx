@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, ChevronUp, Cpu, Loader2, Settings } from 'lucide-react';
+import { Check, ChevronDown, Loader2, Settings } from 'lucide-react';
 import { formatModelSize, pickModel, shortModelName } from '../../lib/ai/ai-settings';
 import type { OllamaStatus } from '../../hooks/useOllamaStatus';
 
@@ -14,7 +14,7 @@ interface ModelPickerProps {
 }
 
 /**
- * Pill showing the model in use. Opens a menu upwards (it sits at the bottom
+ * The model in use, shown as plain text with a chevron. Opens a menu upwards (it sits at the bottom
  * of the screen) to switch between the models installed in Ollama.
  */
 export default function ModelPicker({ model, status, onChange, onRefresh }: ModelPickerProps) {
@@ -85,12 +85,11 @@ export default function ModelPicker({ model, status, onChange, onRefresh }: Mode
         aria-controls={open ? menuId : undefined}
         aria-label={`Model: ${label}. Change model`}
         title="Change model"
-        className="inline-flex items-center gap-1.5 max-w-[9rem] sm:max-w-[12rem] rounded-full border border-gold-500/30 bg-gold-500/10 px-3 py-1.5 text-xs font-medium text-gold-300 hover:bg-gold-500/20 hover:border-gold-500/50 transition-colors"
+        className="inline-flex items-center gap-1 max-w-[9rem] sm:max-w-[14rem] text-xs text-cream/50 hover:text-gold-400 transition-colors"
       >
-        <Cpu className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
         <span className="truncate">{label}</span>
-        <ChevronUp
-          className={`w-3.5 h-3.5 shrink-0 transition-transform ${open ? '' : 'rotate-180'}`}
+        <ChevronDown
+          className={`w-3.5 h-3.5 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
           aria-hidden="true"
         />
       </button>
