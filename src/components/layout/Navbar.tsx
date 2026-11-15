@@ -4,6 +4,7 @@ import { BookOpen, Menu, X, Sun, Moon } from 'lucide-react';
 
 const links = [
   { to: '/', label: 'Home' },
+  { to: '/chat', label: 'AI Chat' },
   { to: '/library', label: 'Library' },
   { to: '/memorize', label: 'Memorise' },
   { to: '/my-verses', label: 'My Verses' },
@@ -30,14 +31,14 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
         </NavLink>
 
         {/* Desktop links + theme toggle */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-5 lg:gap-8 ml-6">
           {links.map(link => (
             <NavLink
               key={link.to}
               to={link.to}
               end={link.to === '/'}
               className={({ isActive }) =>
-                `relative ${isActive ? 'nav-link nav-link-active' : 'nav-link'}`
+                `relative whitespace-nowrap ${isActive ? 'nav-link nav-link-active' : 'nav-link'}`
               }
             >
               {link.label}
