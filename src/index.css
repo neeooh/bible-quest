@@ -63,6 +63,15 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
   }
+
+  /* Tailwind resets buttons to the default arrow cursor; show a pointer on
+     everything clickable. Disabled buttons keep the arrow. */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  select:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
 }
 
 @layer components {
