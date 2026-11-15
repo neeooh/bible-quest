@@ -375,9 +375,10 @@ export default function ChatPage() {
     />
   );
 
-  // End of the thread: the AI note and the model in use.
-  const footer = (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-2 border-t border-gold-500/10">
+  // The AI note and the model in use: at the end of the thread, or right under
+  // the question box on a new chat.
+  const footerContent = (
+    <>
       <AiDisclaimer />
       <div className="flex items-center gap-1.5 text-xs text-cream/40">
         <span>Current model:</span>
@@ -388,6 +389,11 @@ export default function ChatPage() {
           onRefresh={recheck}
         />
       </div>
+    </>
+  );
+  const footer = (
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-2 border-t border-gold-500/10">
+      {footerContent}
     </div>
   );
 
@@ -401,14 +407,19 @@ export default function ChatPage() {
         <>
           {turns.length === 0 && (
             <section className="min-h-[45vh] flex flex-col justify-center items-center text-center gap-6 pt-4">
-              <div className="space-y-3 max-w-xl">
+              <div className="space-y-4 max-w-xl">
                 <p className="text-3xl sm:text-4xl font-serif font-bold text-cream">{timeOfDayGreeting()}</p>
                 <p className="text-cream/60 text-base leading-relaxed">
                   Share what’s on your heart. Your mentor will listen, encourage you, and point you to
                   passages of Scripture you can save and memorise.
                 </p>
               </div>
-              {chatForm(true)}
+              <div className="w-full max-w-2xl mt-6 space-y-3">
+                {chatForm(true)}
+                <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 px-1 text-left">
+                  {footerContent}
+                </div>
+              </div>
               <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
                 {SUGGESTIONS.map((s) => (
                   <button
@@ -484,7 +495,6 @@ export default function ChatPage() {
             )}
           </div>
 
-          {lastUserIndex < 0 && footer}
         </>
       )}
 
