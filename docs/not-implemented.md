@@ -49,3 +49,13 @@ Section 11 (Stage 2 priority list). Not implemented.
 - User-created memorisation challenges.
 - Community features.
 - Cloud synchronisation.
+
+## Backlog (ideas to tackle later)
+
+### Verse cards as flashcards
+*Added 2026-11-15.* The verse cards in AI Chat (and potentially the passage cards in My Verses and Collections) could double as flashcards, another way to memorise a passage alongside the five exercises.
+
+- Front: the reference (e.g. "Psalm 34:18"), optionally with a hint such as the first few words. Back: the full WEB text.
+- Tap or click to flip; the user marks themselves "Got it" / "Not yet", which could feed the existing learning stages and spaced-repetition reviews.
+- Could also run as a deck: flip through every card in a chat, a collection or the passages due for review.
+- Open questions: where the deck lives (a new exercise type on the Memorise page, or a mode on the card itself), and whether self-rating counts towards XP and stages like the other exercises.
