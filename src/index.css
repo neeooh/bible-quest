@@ -63,6 +63,15 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
   }
+
+  /* Tailwind resets buttons to the default arrow cursor; show a pointer on
+     everything clickable. Disabled buttons keep the arrow. */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  select:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
 }
 
 @layer components {
@@ -74,6 +83,13 @@
   .btn-outline {
     @apply border border-gold-500/30 text-gold-300 px-6 py-3 rounded-lg
            hover:bg-gold-500/10 transition-all duration-200 active:scale-95;
+  }
+
+  /* Secondary actions: quiet until hovered, so the gold buttons stand out */
+  .btn-quiet {
+    @apply border border-cream/15 text-cream/60 px-6 py-3 rounded-lg
+           hover:text-gold-300 hover:border-gold-500/30 hover:bg-gold-500/10
+           transition-all duration-200 active:scale-95;
   }
 
   .card {
@@ -127,7 +143,8 @@
 
 .toast-container {
   position: fixed;
-  bottom: 1.5rem;
+  /* Sits above a fixed bottom bar (e.g. the AI Chat composer) when there is one */
+  bottom: calc(1.5rem + var(--bottom-bar-height, 0px));
   right: 1.5rem;
   z-index: 9999;
   display: flex;
@@ -283,4 +300,81 @@ input[type="range"]::-moz-range-thumb {
 
 *::-webkit-scrollbar-thumb:hover {
   background: var(--gold-500);
+}
+
+/* Horizontal scroller without a visible scrollbar (still scrolls by touch, wheel or keyboard) */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* AI search box on the Home page — soft, breathing gold glow */
+.ai-glow {
+  box-shadow: 0 0 18px 2px color-mix(in srgb, var(--gold-500) 30%, transparent);
+  animation: aiGlow 3.2s ease-in-out infinite;
+}
+
+.ai-glow:focus-within {
+  box-shadow: 0 0 26px 5px color-mix(in srgb, var(--gold-500) 45%, transparent);
+}
+
+@keyframes aiGlow {
+  0%, 100% { box-shadow: 0 0 14px 1px color-mix(in srgb, var(--gold-500) 22%, transparent); }
+  50% { box-shadow: 0 0 28px 6px color-mix(in srgb, var(--gold-500) 42%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-glow {
+    animation: none;
+  }
+}
+
+/* Passages drawer: slides up from the bottom on phones, in from the right on larger screens */
+.drawer-backdrop {
+  animation: drawerFade 200ms ease-out;
+}
+
+.drawer-panel {
+  animation: sheetUp 240ms ease-out;
+}
+
+@media (min-width: 640px) {
+  .drawer-panel {
+    animation: drawerInRight 240ms ease-out;
+  }
+}
+
+/* AI Chat compact header: drops down from under the navbar */
+.chat-bar {
+  animation: chatBarDrop 180ms ease-out;
+}
+
+@keyframes chatBarDrop {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes drawerFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes drawerInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer-backdrop,
+  .drawer-panel,
+  .chat-bar {
+    animation: none;
+  }
 }

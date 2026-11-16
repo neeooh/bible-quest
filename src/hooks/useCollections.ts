@@ -10,6 +10,7 @@ export interface UseCollectionsReturn {
   addPassageToCollections: (passageKey: string, collectionIds: string[]) => void;
   removePassageFromCollection: (collectionId: string, passageKey: string) => void;
   removePassageFromAllCollections: (passageKey: string) => void;
+  addPassagesToCollection: (collectionId: string, passageKeys: string[]) => void;
 }
 
 export function useCollections(): UseCollectionsReturn {
@@ -57,6 +58,10 @@ export function useCollections(): UseCollectionsReturn {
     setCollections(updated);
   }, []);
 
+  const addPassagesToCollection = useCallback((collectionId: string, passageKeys: string[]) => {
+    setCollections(collectionsLib.addPassagesToCollection(collectionId, passageKeys));
+  }, []);
+
   return {
     collections,
     createCollection,
@@ -65,5 +70,6 @@ export function useCollections(): UseCollectionsReturn {
     addPassageToCollections,
     removePassageFromCollection,
     removePassageFromAllCollections,
+    addPassagesToCollection,
   };
 }

@@ -43,6 +43,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // AI requests to the local Ollama server (e.g. http://localhost:11434/api/chat)
+        // are deliberately NOT routed through the service worker: no rule below
+        // matches them, so the browser sends them straight to the network. That
+        // keeps replies streaming, lets Stop cancel them, and nothing is cached.
+        // Do not add a catch-all runtimeCaching rule without excluding /api/.
         runtimeCaching: [
           {
             // Cache Google Fonts

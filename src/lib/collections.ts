@@ -142,3 +142,26 @@ export function removePassageFromAllCollections(passageKey: string): Collection[
     ),
   );
 }
+
+/** Adds passages to one collection, keeping its other passages and skipping duplicates. */
+export function addPassagesToCollection(collectionId: string, passageKeys: string[]): Collection[] {
+  const current = getCollections();
+  return persist(
+    current.map((c) => {
+      if (c.id !== collectionId) return c;
+      const toAdd = passageKeys.filter((k, i) => !c.passageKeys.includes(k) && passageKeys.indexOf(k) === i);
+      if (toAdd.length === 0) return c;
+      return { ...c, passageKeys: [...c.passageKeys, ...toAdd], updatedAt: Date.now() };
+    }),
+  );
+}
+
+/** A collection name that isn't taken yet (names double as URL slugs). */
+export function uniqueCollectionName(name: string, collections: Collection[] = getCollections()): string {
+  const taken = new Set(collections.map((c) => toCollectionSlug(c.name)));
+  if (!taken.has(toCollectionSlug(name))) return name;
+  for (let n = 2; ; n++) {
+    const candidate = `${name} (${n})`;
+    if (!taken.has(toCollectionSlug(candidate))) return candidate;
+  }
+}

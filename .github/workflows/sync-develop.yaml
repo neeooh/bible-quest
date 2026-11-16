@@ -1,0 +1,43 @@
+name: Sync develop with main
+
+# After anything lands on main (a release, or a hotfix made straight on main),
+# merge main back into develop so the two never drift apart.
+# If the merge conflicts, this run fails (GitHub emails you) and nothing is
+# pushed: merge main into develop by hand once.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-develop
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Merge main into develop
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          if git merge-base --is-ancestor origin/main HEAD; then
+            echo "develop already contains main; nothing to do."
+            exit 0
+          fi
+          if ! git merge --no-edit origin/main -m "Merge main into develop (automatic sync)"; then
+            git merge --abort
+            echo "::error::main and develop conflict. Merge main into develop by hand: git checkout develop && git merge main && git push"
+            exit 1
+          fi
+          git push origin develop

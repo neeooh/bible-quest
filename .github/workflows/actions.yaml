@@ -1,9 +1,16 @@
-name: FTP Deploy
+name: Build and deploy
 
+# Lint, test and build every push to main/develop and every PR into them.
+# Only main is deployed (on push, or a manual run on main).
 on:
   push:
     branches:
       - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
   workflow_dispatch:
 
 jobs:
@@ -18,8 +25,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm test
       - run: npm run build
       - name: Upload static site to FTP
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}

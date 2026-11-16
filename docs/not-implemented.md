@@ -49,3 +49,23 @@ Section 11 (Stage 2 priority list). Not implemented.
 - User-created memorisation challenges.
 - Community features.
 - Cloud synchronisation.
+
+## Backlog (ideas to tackle later)
+
+### Verse cards as flashcards
+*Added 2026-11-15.* The verse cards in AI Chat (and potentially the passage cards in My Verses and Collections) could double as flashcards, another way to memorise a passage alongside the five exercises.
+
+- Front: the reference (e.g. "Psalm 34:18"), optionally with a hint such as the first few words. Back: the full WEB text.
+- Tap or click to flip; the user marks themselves "Got it" / "Not yet", which could feed the existing learning stages and spaced-repetition reviews.
+- Could also run as a deck: flip through every card in a chat, a collection or the passages due for review.
+- Open questions: where the deck lives (a new exercise type on the Memorise page, or a mode on the card itself), and whether self-rating counts towards XP and stages like the other exercises.
+
+### Export a chat conversation to Markdown (.md)
+*Added 2026-11-15.* Let the user download an AI Chat conversation as a `.md` file, to keep, print or share outside the app.
+
+- Entry points: an "Export" action in the chat header (next to Passages / History) and on each chat in the History panel.
+- Content: chat title and date, then each question and reply in order (questions as quotes or headings, replies as written). Cited passages are appended as a "Passages" section with the exact WEB text and references, so the file stands on its own.
+- Filename from the chat title and date, e.g. `2026-11-15-im-feeling-lonely.md`.
+- Include the AI note ("AI-generated guidance, may contain mistakes; verse text from the World English Bible") at the end.
+- Works offline and entirely in the browser (no server); a fixed (non-AI) crisis notice shown in the chat should not be exported as part of the conversation.
+- Open questions: also offer plain text / PDF? Export several chats at once from History?

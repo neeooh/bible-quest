@@ -75,6 +75,18 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 - Level system with XP thresholds.
 - Progress tiles on the home page show your pipeline at a glance.
 
+### AI Mentor Chat (optional, local)
+
+- Type what's on your heart into the glowing search box on the Home page (for example, "I'm feeling lonely").
+- An empathetic, faith-based AI mentor replies on the **AI Chat** page and points you to Bible passages.
+- Every passage it cites becomes a card with the exact World English Bible text, plus **Favourite**, **Add to My Verses** and **Read** buttons. References that don't exist are never shown as Scripture.
+- Ask follow-up questions, stop a reply, or start a new chat.
+- **Chat history:** your last 20 conversations are saved on this device, each at its own address (`/chat/<id>`), so refreshing or coming back from the Read page keeps you in the conversation. `/chat` (and the **AI Chat** nav link) always starts a new chat. Open **History** on the AI Chat page to reopen or delete them; recent chats also appear on the empty chat screen. You can turn history off (which deletes saved chats) in AI settings.
+- **Passages panel:** see every passage from a conversation in one list and save the ones you tick to a collection.
+- **AI Chat** is also in the top navigation, between Home and Library.
+- If a message suggests someone may be in crisis, a fixed notice with emergency and crisis-line contacts appears.
+- Runs entirely on your own Mac with [Ollama](https://ollama.com); nothing is sent to the cloud. Off by default: turn it on in **About → AI settings** (`/settings/ai`), where you can also pick the model.
+
 ### Other
 
 - **Light and dark theme** — Toggle from the navigation bar. Scrollbars and all UI elements match the active theme.
@@ -86,13 +98,19 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 
 ## Tech Stack
 
-React 18, TypeScript, Vite, Tailwind CSS, Lucide icons, vite-plugin-pwa. No backend. No external APIs. All data stored in LocalStorage.
+React 18, TypeScript, Vite, Tailwind CSS, Lucide icons, vite-plugin-pwa. No backend. No external APIs. All data stored in LocalStorage. Optional AI features use a locally hosted Ollama server (see below).
 
 ## Getting Started
 
 ```bash
 npm install
 npm run dev
+```
+
+Run the unit tests (Vitest):
+
+```bash
+npm test
 ```
 
 Production build:
@@ -102,6 +120,75 @@ npm run build
 ```
 
 Output goes to `dist/`. Deploy as a static site.
+
+## Branches and CI
+
+- Work on a `feature/*` branch and open a pull request into **`develop`**.
+- When `develop` is ready to release, merge it into **`main`**.
+- **Build and deploy** (`.github/workflows/actions.yaml`): lint, tests and build run on every PR into `main` or `develop`, and on every push to them. Only `main` is uploaded to the hosted site, over FTP.
+- **Sync develop with main** (`.github/workflows/sync-develop.yaml`): after every push to `main` (a release or a hotfix), `main` is merged back into `develop` automatically. If they conflict, the run fails and pushes nothing. Then merge by hand:
+
+  ```bash
+  git checkout develop && git merge main && git push
+  ```
+
+## AI Assistant (Ollama) Setup
+
+BibleQuest can connect to an LLM running on your own Mac with [Ollama](https://ollama.com). Nothing goes to the cloud: the browser talks directly to Ollama at `http://localhost:11434`. Design and decisions: [docs/200-local-llm-epic.md](docs/200-local-llm-epic.md).
+
+Once Ollama is set up, open **About → AI settings**, press **Test connection**, choose a model and turn the assistant on.
+
+Recommended model: `gemma3` (`ollama pull gemma3`).
+
+### Local development (`npm run dev` / `npm run preview`)
+
+No setup needed. Ollama accepts requests from `localhost` and `127.0.0.1` pages by default.
+
+### Hosted site (https://biblequest.causewaysoft.com)
+
+By default, Ollama refuses requests from any non-local website with **403 Forbidden**. To allow the hosted app, tell Ollama to trust its address, then restart Ollama:
+
+```bash
+launchctl setenv OLLAMA_ORIGINS "https://biblequest.causewaysoft.com"
+```
+
+Then quit Ollama from the menu bar and open it again.
+
+Notes:
+
+- The origin must match exactly: `https://`, no trailing slash, no path.
+- Local origins (`localhost`, `127.0.0.1`) stay allowed in addition to the one you add. To allow several sites, separate them with commas.
+- `launchctl setenv` is **cleared when the Mac restarts**. To make it permanent, create a Launch Agent that sets it at every login:
+
+  ```bash
+  cat > ~/Library/LaunchAgents/com.biblequest.ollama-origins.plist <<'PLIST'
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+  <plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.biblequest.ollama-origins</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/bin/launchctl</string>
+      <string>setenv</string>
+      <string>OLLAMA_ORIGINS</string>
+      <string>https://biblequest.causewaysoft.com</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+  </dict>
+  </plist>
+  PLIST
+  ```
+
+- To check it worked (should print `204`, not `403`):
+
+  ```bash
+  curl -s -o /dev/null -w "%{http_code}\n" -X OPTIONS -H "Origin: https://biblequest.causewaysoft.com" -H "Access-Control-Request-Method: POST" http://localhost:11434/api/chat
+  ```
+
+- Some browsers ask for permission when a website tries to reach a service on your own computer ("local network access"). Allow it for BibleQuest.
 
 ## Bible Text
 
