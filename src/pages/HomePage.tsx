@@ -1,13 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  BookOpen,
   Flame,
-  Star,
   Copy,
   ArrowRight,
-  Check,
-  Heart,
   Loader2,
   BookMarked,
   Share2,
@@ -22,11 +18,12 @@ import { showToast } from '../components/Toast';
 import AiOnly from '../components/ai/AiOnly';
 import AiSearchBox from '../components/ai/AiSearchBox';
 import type { DailyVerse } from '../lib/types';
+import VerseCard from '../components/verse/VerseCard';
+import { copyVerse, memorisePath, readVersePath, shareVerse } from '../lib/verse-actions';
 
 export default function HomePage() {
   const { progress } = useProgress();
   const { addVerse, isSaved, isFavourite, setFavourite, savedVerses } = useSavedVerses();
-  const [copied, setCopied] = useState(false);
   const [daily, setDaily] = useState<DailyVerse | null>(null);
   const lastRead = getLastRead();
 
@@ -74,16 +71,6 @@ export default function HomePage() {
     return { learning, memorising, retention, notPractised, dueForReview };
   }, [progress.exerciseHistory, savedVerses]);
 
-  function handleCopy() {
-    if (!daily) return;
-    const text = `"${daily.text}" — ${daily.reference} (WEB)`;
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      showToast('Verse copied to clipboard', 'success');
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
-
   function handleToggleFavourite() {
     if (!daily) return;
     if (dailyFavourited) {
@@ -114,81 +101,26 @@ export default function HomePage() {
       </AiOnly>
 
       {/* Daily Verse */}
-      <section className="card max-w-2xl mx-auto space-y-5">
-        <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
-          <Star className="w-3.5 h-3.5 text-gold-500" />
-          <span className="text-cream/40">Verse of the Day</span>
-        </div>
-
-        {daily === null ? (
-          <div className="flex justify-center py-6">
-            <Loader2 className="w-6 h-6 text-gold-500 animate-spin" />
-          </div>
-        ) : (
-          <>
-            <blockquote className="text-cream/90 text-xl md:text-2xl leading-relaxed font-serif">
-              &ldquo;{daily.text}&rdquo;
-            </blockquote>
-            <Link
-              to={`/read/${daily.book}/${daily.chapter}?verse=${daily.verse}`}
-              className="text-gold-400 text-sm font-medium hover:text-gold-300 hover:underline transition-colors -mt-3 block"
-            >
-              {daily.reference}
-            </Link>
-            <div className="flex gap-2 pt-2">
-              <Link
-                to={`/memorize?book=${daily.book}&chapter=${daily.chapter}&start=${daily.verse}&end=${daily.verse}`}
-                className="btn-gold inline-flex items-center justify-center gap-2 text-sm px-3 sm:px-6 flex-1 max-w-xs"
-              >
-                <BookOpen className="w-4 h-4" />
-                Memorise This
-              </Link>
-              <button
-                type="button"
-                onClick={handleToggleFavourite}
-                className="btn-outline inline-flex items-center justify-center gap-2 text-sm w-11 h-11 !p-0 sm:w-auto sm:h-auto sm:!px-6 sm:!py-3 shrink-0"
-              >
-                {dailyFavourited ? (
-                  <Heart className="w-4 h-4 text-red-400" fill="currentColor" />
-                ) : (
-                  <Heart className="w-4 h-4" />
-                )}
-                <span className="hidden sm:inline">{dailyFavourited ? 'Favourited' : 'Favourite'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="btn-outline inline-flex items-center justify-center gap-2 text-sm w-11 h-11 !p-0 sm:w-auto sm:h-auto sm:!px-6 sm:!py-3 shrink-0"
-              >
-                {copied ? (
-                  <Check className="w-4 h-4" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-                <span className="hidden sm:inline">{copied ? 'Copied' : 'Copy'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!daily) return;
-                  const shareText = `"${daily.text}" — ${daily.reference} (WEB)`;
-                  if (navigator.share) {
-                    navigator.share({ text: shareText }).catch(() => {});
-                  } else {
-                    navigator.clipboard.writeText(shareText).then(() => {
-                      showToast('Copied to clipboard', 'success');
-                    });
-                  }
-                }}
-                className="btn-outline inline-flex items-center justify-center gap-2 text-sm w-11 h-11 !p-0 sm:w-auto sm:h-auto sm:!px-6 sm:!py-3 shrink-0"
-              >
-                <Share2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Share</span>
-              </button>
-            </div>
-          </>
-        )}
-      </section>
+      {daily === null ? (
+        <section className="card max-w-2xl w-full mx-auto flex justify-center py-12" aria-label="Verse of the Day">
+          <Loader2 className="w-6 h-6 text-gold-500 animate-spin" />
+        </section>
+      ) : (
+        <VerseCard
+          variant="hero"
+          className="max-w-2xl w-full mx-auto"
+          eyebrow="Verse of the Day"
+          reference={daily.reference}
+          readHref={readVersePath(daily.book, daily.chapter, daily.verse)}
+          text={daily.text}
+          favourite={{ active: dailyFavourited, onToggle: handleToggleFavourite }}
+          menu={[
+            { label: 'Copy verse', icon: Copy, onSelect: () => copyVerse(daily.text, daily.reference) },
+            { label: 'Share', icon: Share2, onSelect: () => shareVerse(daily.text, daily.reference) },
+          ]}
+          primary={{ label: 'Memorise', to: memorisePath(daily.book, daily.chapter, daily.verse) }}
+        />
+      )}
 
       {/* CTA */}
       <section className="flex flex-wrap justify-center gap-4 items-center">

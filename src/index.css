@@ -52,6 +52,7 @@
 
   --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-scripture: "Literata", Georgia, "Times New Roman", serif;
 }
 
 @layer base {
