@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Info } from 'lucide-react';
+import { useAiSettings } from '../../hooks/useAiSettings';
 
 /**
  * One-line note at the end of the chat. The full wording opens in a small
@@ -9,6 +10,7 @@ export default function AiDisclaimer() {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const popupId = useId();
+  const { settings } = useAiSettings();
 
   useEffect(() => {
     if (!open) return;
@@ -47,7 +49,10 @@ export default function AiDisclaimer() {
           role="note"
           className="absolute left-0 bottom-full mb-2 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-gold-500/20 bg-navy-800 shadow-2xl shadow-black/40 p-4 text-cream/70 text-xs leading-relaxed page-enter z-50"
         >
-          Replies come from an AI model running on your own Mac. They may contain mistakes and are
+          {settings.provider === 'hosted'
+            ? 'Replies come from an AI model run by BibleQuest’s AI provider. Your messages are sent to it to get a reply and are not stored by BibleQuest.'
+            : 'Replies come from an AI model running on your own Mac.'}{' '}
+          They may contain mistakes and are
           not a substitute for a pastor, counsellor or doctor. Verse text is always shown from the
           World English Bible.
         </div>

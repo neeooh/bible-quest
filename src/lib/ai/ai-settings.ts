@@ -1,3 +1,4 @@
+import { isHostedAiConfigured } from './hosted-client';
 import { DEFAULT_OLLAMA_URL } from './ollama-client';
 import type { OllamaModel } from './types';
 
@@ -8,19 +9,31 @@ export const AI_SETTINGS_EVENT = 'biblequest-ai-settings-change';
 /** Preferred model family; preselected when installed. */
 export const PREFERRED_MODEL_PREFIX = 'gemma3';
 
+/**
+ * hosted – BibleQuest's own AI service (free, with daily limits)
+ * ollama  – a model on the user's own computer (advanced)
+ */
+export type AiProviderKind = 'hosted' | 'ollama';
+
 export interface AiSettings {
   enabled: boolean;
+  provider: AiProviderKind;
+  /** Ollama address. */
   baseUrl: string;
-  /** Selected model name, e.g. "gemma3:latest". Empty until the user (or auto-pick) chooses one. */
+  /** Selected Ollama model, e.g. "gemma3:latest". Empty until the user (or auto-pick) chooses one. */
   model: string;
+  /** Ollama only; the hosted service sets its own. */
   temperature: number;
   /** Keep past AI Chat conversations on this device. */
   saveHistory: boolean;
 }
 
 export function getDefaultAiSettings(): AiSettings {
+  const hosted = isHostedAiConfigured();
   return {
-    enabled: false,
+    // With the hosted service, AI works out of the box for everyone.
+    enabled: hosted,
+    provider: hosted ? 'hosted' : 'ollama',
     baseUrl: DEFAULT_OLLAMA_URL,
     model: '',
     temperature: 0.7,
@@ -32,8 +45,25 @@ function sanitize(raw: unknown): AiSettings {
   const defaults = getDefaultAiSettings();
   if (!raw || typeof raw !== 'object') return defaults;
   const r = raw as Partial<Record<keyof AiSettings, unknown>>;
+  // Settings saved before the hosted service existed have no provider: keep
+  // anyone who had Ollama switched on with Ollama, and move everyone else to
+  // the hosted service with AI on.
+  const legacy = r.provider === undefined;
+  let provider: AiProviderKind =
+    r.provider === 'hosted' || r.provider === 'ollama'
+      ? r.provider
+      : legacy && r.enabled === true
+        ? 'ollama'
+        : defaults.provider;
+  if (provider === 'hosted' && !isHostedAiConfigured()) provider = 'ollama';
   return {
-    enabled: typeof r.enabled === 'boolean' ? r.enabled : defaults.enabled,
+    enabled:
+      legacy && provider === 'hosted'
+        ? defaults.enabled
+        : typeof r.enabled === 'boolean'
+          ? r.enabled
+          : defaults.enabled,
+    provider,
     baseUrl: typeof r.baseUrl === 'string' && r.baseUrl.trim() ? r.baseUrl : defaults.baseUrl,
     model: typeof r.model === 'string' ? r.model : defaults.model,
     temperature:

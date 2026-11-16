@@ -25,12 +25,22 @@ export interface ChatStats {
 }
 
 export type AiErrorCode =
-  /** Ollama not running, wrong URL, or blocked by CORS (the browser can't tell these apart). */
+  /** Server not reachable: Ollama not running, wrong URL, offline, or blocked by CORS (the browser can't tell these apart). */
   | 'unreachable'
   | 'model_not_found'
   | 'timeout'
   | 'bad_response'
-  | 'aborted';
+  | 'aborted'
+  /** Hosted AI: sending too quickly; try again in a moment. */
+  | 'rate_limited'
+  /** Hosted AI: this device or network has used today's free messages. */
+  | 'daily_limit'
+  /** Hosted AI: the service's daily budget is spent, it is switched off, or the provider is busy. */
+  | 'unavailable'
+  /** Hosted AI: the bot check failed. */
+  | 'bot_check'
+  /** The model declined to answer this message. */
+  | 'refused';
 
 export class AiError extends Error {
   readonly code: AiErrorCode;

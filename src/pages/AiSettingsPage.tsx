@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CheckCircle, History, Info, Loader2, RefreshCw, Sparkles, Trash2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Cloud, History, Info, Laptop, Loader2, RefreshCw, Sparkles, Trash2 } from 'lucide-react';
 import { useAiSettings } from '../hooks/useAiSettings';
 import { useOllamaStatus } from '../hooks/useOllamaStatus';
 import { useSavedChats } from '../hooks/useSavedChats';
 import { MAX_SAVED_CHATS, clearSavedChats } from '../lib/ai/chat-history';
-import { formatModelSize, isModelInstalled, pickModel } from '../lib/ai/ai-settings';
+import { formatModelSize, isModelInstalled, pickModel, type AiProviderKind } from '../lib/ai/ai-settings';
+import { isHostedAiConfigured } from '../lib/ai/hosted-client';
 import { describeAiError } from '../lib/ai/errors';
 import { DEFAULT_OLLAMA_URL, normalizeBaseUrl } from '../lib/ai/ollama-client';
 
@@ -18,7 +19,9 @@ export default function AiSettingsPage() {
   const savedChats = useSavedChats();
   /** Confirmation step shown before deleting saved chats. */
   const [confirmHistory, setConfirmHistory] = useState<'off' | 'clear' | null>(null);
-  const { status, refresh } = useOllamaStatus(settings.baseUrl);
+  const usesOllama = settings.provider === 'ollama';
+  const hostedAvailable = isHostedAiConfigured();
+  const { status, refresh } = useOllamaStatus(settings.baseUrl, usesOllama);
 
   const models = status.state === 'connected' ? status.models : [];
   const savedMissing =
@@ -26,10 +29,10 @@ export default function AiSettingsPage() {
 
   // First connection with no model chosen yet: preselect gemma3 (or the first model).
   useEffect(() => {
-    if (status.state !== 'connected' || settings.model) return;
+    if (!usesOllama || status.state !== 'connected' || settings.model) return;
     const picked = pickModel(status.models, '');
     if (picked) update({ model: picked });
-  }, [status, settings.model, update]);
+  }, [usesOllama, status, settings.model, update]);
 
   const saveUrl = () => {
     const next = normalizeBaseUrl(urlDraft) || DEFAULT_OLLAMA_URL;
@@ -47,8 +50,9 @@ export default function AiSettingsPage() {
           <h1 className="text-3xl font-serif font-bold text-cream">AI Assistant</h1>
         </div>
         <p className="text-cream/50 text-sm">
-          Chat with an AI mentor that runs on your own Mac with Ollama. Your messages never leave
-          your computer.
+          {usesOllama
+            ? 'Chat with an AI mentor that runs on your own Mac with Ollama. Your messages never leave your computer.'
+            : 'Chat with the BibleQuest AI mentor. It’s free to use, with no account, up to a daily limit.'}
         </p>
       </div>
 
@@ -69,6 +73,40 @@ export default function AiSettingsPage() {
         </div>
       </section>
 
+      {/* Provider */}
+      {hostedAvailable && (
+        <section className="card space-y-4">
+          <h2 className="text-lg font-serif font-semibold text-cream">Who answers</h2>
+          <div role="radiogroup" aria-label="Who answers" className="grid gap-3 sm:grid-cols-2">
+            <ProviderOption
+              value="hosted"
+              current={settings.provider}
+              onChange={(provider) => update({ provider })}
+              icon={<Cloud className="w-5 h-5 text-gold-500" />}
+              title="BibleQuest AI"
+              description="Works straight away. Free, with a daily message limit."
+            />
+            <ProviderOption
+              value="ollama"
+              current={settings.provider}
+              onChange={(provider) => update({ provider })}
+              icon={<Laptop className="w-5 h-5 text-gold-500" />}
+              title="My own Ollama"
+              description="Advanced: a model on your own Mac. No limits, fully private."
+            />
+          </div>
+          {!usesOllama && (
+            <p className="text-cream/50 text-xs leading-relaxed">
+              Your messages are sent to BibleQuest’s AI provider to get a reply. BibleQuest doesn’t
+              store them or use them for anything else; only a count of messages per day is kept to
+              apply the free limit. Please don’t share details that identify you or others.
+            </p>
+          )}
+        </section>
+      )}
+
+      {usesOllama && (
+      <>
       {/* Connection */}
       <section className="card space-y-4">
         <h2 className="text-lg font-serif font-semibold text-cream">Connection</h2>
@@ -194,6 +232,9 @@ export default function AiSettingsPage() {
         </div>
       </section>
 
+      </>
+      )}
+
       {/* Chat history */}
       <section className="card space-y-4">
         <div className="flex items-center justify-between gap-4">
@@ -201,7 +242,7 @@ export default function AiSettingsPage() {
             <h2 className="text-lg font-serif font-semibold text-cream">Save chat history</h2>
             <p className="text-cream/50 text-sm">
               Keep your last {MAX_SAVED_CHATS} AI Chat conversations on this device so you can reopen them.
-              They are stored unencrypted in this browser and never leave your computer.
+              They are stored unencrypted in this browser only.
             </p>
           </div>
           <Toggle
@@ -259,6 +300,7 @@ export default function AiSettingsPage() {
       </section>
 
       {/* Help */}
+      {usesOllama && (
       <section className="card space-y-3">
         <div className="flex items-center gap-3">
           <Info className="w-5 h-5 text-gold-500 shrink-0" />
@@ -282,7 +324,43 @@ export default function AiSettingsPage() {
           .
         </p>
       </section>
+      )}
     </div>
+  );
+}
+
+function ProviderOption({
+  value,
+  current,
+  onChange,
+  icon,
+  title,
+  description,
+}: {
+  value: AiProviderKind;
+  current: AiProviderKind;
+  onChange: (value: AiProviderKind) => void;
+  icon: ReactNode;
+  title: string;
+  description: string;
+}) {
+  const checked = value === current;
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
+      onClick={() => onChange(value)}
+      className={`text-left rounded-xl border p-4 space-y-1.5 transition-colors ${
+        checked ? 'border-gold-500/70 bg-gold-500/10' : 'border-gold-500/20 hover:border-gold-500/40'
+      }`}
+    >
+      <span className="flex items-center gap-2 text-cream font-medium text-sm">
+        {icon}
+        {title}
+      </span>
+      <span className="block text-cream/50 text-sm">{description}</span>
+    </button>
   );
 }
 

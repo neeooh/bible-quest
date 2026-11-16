@@ -19,6 +19,7 @@ import AiSetupNotice from '../components/ai/AiSetupNotice';
 import AiDisclaimer from '../components/ai/AiDisclaimer';
 import ThinkingIndicator from '../components/ai/ThinkingIndicator';
 import ModelPicker from '../components/ai/ModelPicker';
+import HostedQuotaNote from '../components/ai/HostedQuotaNote';
 import AssistantMessage from '../components/ai/AssistantMessage';
 import type { ChatLocationState } from '../components/ai/AiSearchBox';
 import ChatHistoryDrawer from '../components/ai/ChatHistoryDrawer';
@@ -48,7 +49,9 @@ const SUGGESTIONS = [
 
 export default function ChatPage() {
   const { settings, update: updateSettings } = useAiSettings();
-  const { status, refresh, recheck } = useOllamaStatus(settings.baseUrl, settings.enabled);
+  const usesOllama = settings.provider === 'ollama';
+  // Only Ollama needs a connection check; the hosted service reports problems per message.
+  const { status, refresh, recheck } = useOllamaStatus(settings.baseUrl, settings.enabled && usesOllama);
   const location = useLocation();
   const navigate = useNavigate();
   // /chat is always a new conversation; /chat/<id> is a saved one.
@@ -416,15 +419,19 @@ export default function ChatPage() {
   const footerContent = (
     <>
       <AiDisclaimer />
-      <div className="flex items-center gap-1.5 text-xs text-cream/40">
-        <span>Current model:</span>
-        <ModelPicker
-          model={settings.model}
-          status={status}
-          onChange={(model) => updateSettings({ model })}
-          onRefresh={recheck}
-        />
-      </div>
+      {usesOllama ? (
+        <div className="flex items-center gap-1.5 text-xs text-cream/40">
+          <span>Current model:</span>
+          <ModelPicker
+            model={settings.model}
+            status={status}
+            onChange={(model) => updateSettings({ model })}
+            onRefresh={recheck}
+          />
+        </div>
+      ) : (
+        <HostedQuotaNote />
+      )}
     </>
   );
   const footer = (

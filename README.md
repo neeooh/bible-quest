@@ -75,7 +75,7 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 - Level system with XP thresholds.
 - Progress tiles on the home page show your pipeline at a glance.
 
-### AI Mentor Chat (optional, local)
+### AI Mentor Chat
 
 - Type what's on your heart into the glowing search box on the Home page (for example, "I'm feeling lonely").
 - An empathetic, faith-based AI mentor replies on the **AI Chat** page and points you to Bible passages.
@@ -85,7 +85,8 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 - **Passages panel:** see every passage from a conversation in one list and save the ones you tick to a collection.
 - **AI Chat** is also in the top navigation, between Home and Library.
 - If a message suggests someone may be in crisis, a fixed notice with emergency and crisis-line contacts appears.
-- Runs entirely on your own Mac with [Ollama](https://ollama.com); nothing is sent to the cloud. Off by default: turn it on in **About → AI settings** (`/settings/ai`), where you can also pick the model.
+- **Free for everyone, no account:** by default the mentor is BibleQuest AI, served by the API in [`server/`](server/README.md) with daily message limits. Messages are sent to the AI provider to get a reply and are not stored.
+- **Advanced:** switch to a model on your own Mac with [Ollama](https://ollama.com) in **About → AI settings** (`/settings/ai`); then nothing leaves your computer.
 
 ### Other
 
@@ -98,7 +99,7 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 
 ## Tech Stack
 
-React 18, TypeScript, Vite, Tailwind CSS, Lucide icons, vite-plugin-pwa. No backend. No external APIs. All data stored in LocalStorage. Optional AI features use a locally hosted Ollama server (see below).
+React 18, TypeScript, Vite, Tailwind CSS, Lucide icons, vite-plugin-pwa. All data stored in LocalStorage. The AI mentor uses a small Laravel API ([`server/`](server/README.md)) that calls Anthropic's Claude, or optionally a local Ollama server (see below).
 
 ## Getting Started
 
@@ -132,9 +133,13 @@ Output goes to `dist/`. Deploy as a static site.
   git checkout develop && git merge main && git push
   ```
 
+## Hosted AI (BibleQuest AI)
+
+The API lives in [`server/`](server/README.md): setup, limits, privacy and deployment to shared hosting are described there. The app finds it through `VITE_AI_API_URL` (see [`.env.example`](.env.example)); builds without it offer only local Ollama. Design notes: [docs/300-hosted-ai.md](docs/300-hosted-ai.md).
+
 ## AI Assistant (Ollama) Setup
 
-BibleQuest can connect to an LLM running on your own Mac with [Ollama](https://ollama.com). Nothing goes to the cloud: the browser talks directly to Ollama at `http://localhost:11434`. Design and decisions: [docs/200-local-llm-epic.md](docs/200-local-llm-epic.md).
+BibleQuest can also connect to an LLM running on your own Mac with [Ollama](https://ollama.com). Nothing goes to the cloud: the browser talks directly to Ollama at `http://localhost:11434`. Design and decisions: [docs/200-local-llm-epic.md](docs/200-local-llm-epic.md).
 
 Once Ollama is set up, open **About → AI settings**, press **Test connection**, choose a model and turn the assistant on.
 
