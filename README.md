@@ -121,6 +121,17 @@ npm run build
 
 Output goes to `dist/`. Deploy as a static site.
 
+## Branches and CI
+
+- Work on a `feature/*` branch and open a pull request into **`develop`**.
+- When `develop` is ready to release, merge it into **`main`**.
+- **Build and deploy** (`.github/workflows/actions.yaml`): lint, tests and build run on every PR into `main` or `develop`, and on every push to them. Only `main` is uploaded to the hosted site, over FTP.
+- **Sync develop with main** (`.github/workflows/sync-develop.yaml`): after every push to `main` (a release or a hotfix), `main` is merged back into `develop` automatically. If they conflict, the run fails and pushes nothing. Then merge by hand:
+
+  ```bash
+  git checkout develop && git merge main && git push
+  ```
+
 ## AI Assistant (Ollama) Setup
 
 BibleQuest can connect to an LLM running on your own Mac with [Ollama](https://ollama.com). Nothing goes to the cloud: the browser talks directly to Ollama at `http://localhost:11434`. Design and decisions: [docs/200-local-llm-epic.md](docs/200-local-llm-epic.md).
