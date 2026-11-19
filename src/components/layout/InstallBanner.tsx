@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { Download, X } from 'lucide-react';
 import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 
 export default function InstallBanner() {
@@ -26,8 +26,9 @@ export default function InstallBanner() {
         <button
           type="button"
           onClick={promptInstall}
-          className="btn-gold text-sm px-4 py-2 shrink-0"
+          className="btn-outline text-sm px-4 py-2 shrink-0 inline-flex items-center gap-2"
         >
+          <Download className="w-4 h-4" aria-hidden="true" />
           Install
         </button>
         <button
