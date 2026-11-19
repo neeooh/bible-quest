@@ -83,7 +83,7 @@ Named for what happens next: **Start** (not started) → **Practise** (learning 
 
 ### Known gaps / next steps
 
-- **Topic previews are truncated text.** `src/lib/topics.ts` stores a hand-shortened `preview` ending in `…`, and favouriting from a Topic page saves that preview into My Verses. Cards should load the full WEB text for the range instead.
+- ~~**Topic previews are truncated text.**~~ Fixed: cards on Topic, My Verses and Collection pages load the full WEB text for the passage range (`src/hooks/usePassageVerses.ts`) and never show stored copies, so verses saved earlier as shortened previews (or cut at 200 characters by the practice history) now show in full too. Favouriting from a Topic page saves the full text, and My Verses reads the end verse from the stored reference so a range like Philippians 4:6–7 shows both verses.
 - The chat card has not been checked in a browser with a live Ollama chat yet (unit-tested only).
 - `PassagesDrawer` (chat side panel) still has its own passage rows; decide whether it should use `VerseCard` too.
 - The old `.verse-number` CSS class may now be unused outside the reader — check before removing.

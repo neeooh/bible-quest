@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
 import { useCollections } from '../hooks/useCollections';
+import { joinVerses, usePassageVerses } from '../hooks/usePassageVerses';
 import { toCollectionSlug } from '../lib/collections';
 import { getBookBySlug } from '../lib/book-metadata';
 import { getPassageStage, type LearningStage } from '../lib/learning-stage';
@@ -36,6 +37,14 @@ function timeAgo(timestamp: number): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
+}
+
+/** End verse of a stored reference like "Psalm 34:17–18"; `start` if it is a single verse. */
+function rangeEnd(reference: string, start: number): number {
+  const m = reference.match(/:(\d+)\s*[–-]\s*(\d+)\s*$/);
+  if (!m || Number(m[1]) !== start) return start;
+  const end = Number(m[2]);
+  return end > start ? end : start;
 }
 
 type StageFilter = 'all' | 'not-started' | 'learning' | 'memorising' | 'retention' | 'due-for-review';
@@ -140,7 +149,10 @@ export default function MyVersesPage() {
 
     // Add favourites (merge or create new entries)
     for (const sv of savedVerses) {
-      const key = `${sv.book}:${sv.chapter}:${sv.verse}-${sv.verse}`;
+      // A passage favourited from a Topic page is stored on its first verse,
+      // with the whole range in its reference ("Philippians 4:6–7").
+      const endVerse = rangeEnd(sv.reference, sv.verse);
+      const key = `${sv.book}:${sv.chapter}:${sv.verse}-${endVerse}`;
       const isFav = sv.favourite !== false;
       const existing = map.get(key);
       if (existing) {
@@ -153,7 +165,7 @@ export default function MyVersesPage() {
           bookName: getBookBySlug(sv.book)?.name ?? sv.book,
           chapterNumber: sv.chapter,
           startVerse: sv.verse,
-          endVerse: sv.verse,
+          endVerse,
           reference: sv.reference,
           text: sv.text,
           isFavourite: isFav,
@@ -219,6 +231,22 @@ export default function MyVersesPage() {
     );
   }, [progress.exerciseHistory, savedVerses, isSaved]);
 
+  // Show the full passage from the bundled Bible: stored text may be a short
+  // topic preview or cut at 200 characters by the practice history.
+  const ranges = useMemo(
+    () =>
+      entries.map((e) => ({
+        key: e.key,
+        book: e.book,
+        chapter: e.chapterNumber,
+        start: e.startVerse,
+        end: e.endVerse,
+      })),
+    [entries],
+  );
+  const fullVerses = usePassageVerses(ranges);
+  const fullText = (e: UnifiedEntry) => joinVerses(fullVerses.get(e.key)) ?? e.text;
+
   const filtered = useMemo(() => {
     let list = [...entries];
 
@@ -228,7 +256,7 @@ export default function MyVersesPage() {
       list = list.filter(
         (e) =>
           e.reference.toLowerCase().includes(needle) ||
-          e.text.toLowerCase().includes(needle),
+          (joinVerses(fullVerses.get(e.key)) ?? e.text).toLowerCase().includes(needle),
       );
     }
 
@@ -257,7 +285,7 @@ export default function MyVersesPage() {
     }
 
     return list.sort((a, b) => b.lastPractised - a.lastPractised);
-  }, [entries, stageFilter, favouritesOnly, searchQuery]);
+  }, [entries, fullVerses, stageFilter, favouritesOnly, searchQuery]);
 
   function toggleFavourite(entry: UnifiedEntry) {
     if (entry.isFavourite) {
@@ -276,7 +304,7 @@ export default function MyVersesPage() {
           book: entry.book,
           chapter: entry.chapterNumber,
           verse: entry.startVerse,
-          text: entry.text,
+          text: fullText(entry),
           reference: entry.reference,
         });
       }
@@ -476,6 +504,7 @@ export default function MyVersesPage() {
               key={entry.key}
               reference={entry.reference}
               readHref={readVersePath(entry.book, entry.chapterNumber, entry.startVerse, entry.endVerse)}
+              verses={fullVerses.get(entry.key)}
               text={entry.text}
               clamp
               aside={<ReviewStatus nextReview={entry.nextReview} due={entry.dueForReview} />}
@@ -492,8 +521,8 @@ export default function MyVersesPage() {
               favourite={{ active: entry.isFavourite, onToggle: () => toggleFavourite(entry) }}
               menu={[
                 { label: 'Add to collection', icon: FolderPlus, onSelect: () => setAddToCollectionKey(entry.key) },
-                { label: 'Copy verse', icon: Copy, onSelect: () => copyVerse(entry.text, entry.reference) },
-                { label: 'Share', icon: Share2, onSelect: () => shareVerse(entry.text, entry.reference) },
+                { label: 'Copy verse', icon: Copy, onSelect: () => copyVerse(fullText(entry), entry.reference) },
+                { label: 'Share', icon: Share2, onSelect: () => shareVerse(fullText(entry), entry.reference) },
                 { label: 'Remove from My Verses', icon: Trash2, danger: true, onSelect: () => removeEntry(entry) },
               ]}
               primary={{

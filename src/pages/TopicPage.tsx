@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ChevronLeft, Copy, FolderPlus, Share2 } from 'lucide-react';
-import { getTopicBySlug, TOPICS } from '../lib/topics';
+import { getTopicBySlug, type TopicPassage } from '../lib/topics';
 import { useSavedVerses } from '../hooks/useSavedVerses';
 import { useCollections } from '../hooks/useCollections';
+import { joinVerses, usePassageVerses } from '../hooks/usePassageVerses';
 import TopicIcon from '../components/TopicIcon';
 import AddToCollectionDialog from '../components/collections/AddToCollectionDialog';
 import { showToast } from '../components/Toast';
@@ -17,6 +18,21 @@ export default function TopicPage() {
   const { collections, createCollection, addPassageToCollections } = useCollections();
   const [collectionDialogKey, setCollectionDialogKey] = useState<string | null>(null);
 
+  // Cards show the full passage from the bundled Bible, never the short preview.
+  const ranges = useMemo(
+    () =>
+      (topic?.passages ?? []).map((p) => ({
+        key: passageKey(p),
+        book: p.book,
+        chapter: p.chapter,
+        start: p.startVerse,
+        end: p.endVerse,
+      })),
+    [topic],
+  );
+  const fullVerses = usePassageVerses(ranges);
+  const fullText = (p: TopicPassage) => joinVerses(fullVerses.get(passageKey(p))) ?? p.preview;
+
   if (!topic) {
     return (
       <div className="py-20 text-center space-y-4">
@@ -28,7 +44,7 @@ export default function TopicPage() {
     );
   }
 
-  function handleToggleFavourite(passage: (typeof TOPICS)[0]['passages'][0]) {
+  function handleToggleFavourite(passage: TopicPassage) {
     const isFav = isFavourite(passage.book, passage.chapter, passage.startVerse);
 
     if (isFav) {
@@ -42,7 +58,7 @@ export default function TopicPage() {
           book: passage.book,
           chapter: passage.chapter,
           verse: passage.startVerse,
-          text: passage.preview,
+          text: fullText(passage),
           reference: passage.reference,
         });
       }
@@ -78,13 +94,14 @@ export default function TopicPage() {
       <div className="space-y-3.5">
         {topic.passages.map((passage) => {
           const isFav = isFavourite(passage.book, passage.chapter, passage.startVerse);
-          const key = `${passage.book}:${passage.chapter}:${passage.startVerse}-${passage.endVerse}`;
+          const key = passageKey(passage);
 
           return (
             <VerseCard
               key={key}
               reference={passage.reference}
               readHref={readVersePath(passage.book, passage.chapter, passage.startVerse, passage.endVerse)}
+              verses={fullVerses.get(key)}
               text={passage.preview}
               clamp
               note={passage.explainer}
@@ -100,7 +117,7 @@ export default function TopicPage() {
                         book: passage.book,
                         chapter: passage.chapter,
                         verse: passage.startVerse,
-                        text: passage.preview,
+                        text: fullText(passage),
                         reference: passage.reference,
                         favourite: false,
                       });
@@ -108,8 +125,8 @@ export default function TopicPage() {
                     setCollectionDialogKey(key);
                   },
                 },
-                { label: 'Copy verse', icon: Copy, onSelect: () => copyVerse(passage.preview, passage.reference) },
-                { label: 'Share', icon: Share2, onSelect: () => shareVerse(passage.preview, passage.reference) },
+                { label: 'Copy verse', icon: Copy, onSelect: () => copyVerse(fullText(passage), passage.reference) },
+                { label: 'Share', icon: Share2, onSelect: () => shareVerse(fullText(passage), passage.reference) },
               ]}
               primary={{
                 label: 'Practise',
@@ -130,4 +147,8 @@ export default function TopicPage() {
       />
     </div>
   );
+}
+
+function passageKey(p: TopicPassage): string {
+  return `${p.book}:${p.chapter}:${p.startVerse}-${p.endVerse}`;
 }

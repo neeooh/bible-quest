@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
 import { useCollections } from '../hooks/useCollections';
+import { joinVerses, usePassageVerses } from '../hooks/usePassageVerses';
 import { toCollectionSlug } from '../lib/collections';
 import { getBookBySlug } from '../lib/book-metadata';
 import {
@@ -145,15 +146,31 @@ export default function CollectionDetailPage() {
     return result;
   }, [collection, progress.exerciseHistory, savedVerses, isFavourite]);
 
+  // Show the full passage from the bundled Bible: stored text may be a short
+  // topic preview or cut at 200 characters by the practice history.
+  const ranges = useMemo(
+    () =>
+      entries.map((e) => ({
+        key: e.key,
+        book: e.book,
+        chapter: e.chapterNumber,
+        start: e.startVerse,
+        end: e.endVerse,
+      })),
+    [entries],
+  );
+  const fullVerses = usePassageVerses(ranges);
+  const fullText = (e: UnifiedEntry) => joinVerses(fullVerses.get(e.key)) ?? e.text;
+
   const filtered = useMemo(() => {
     const needle = searchQuery.toLowerCase().trim();
     if (!needle) return entries;
     return entries.filter(
       (e) =>
         e.reference.toLowerCase().includes(needle) ||
-        e.text.toLowerCase().includes(needle),
+        (joinVerses(fullVerses.get(e.key)) ?? e.text).toLowerCase().includes(needle),
     );
-  }, [entries, searchQuery]);
+  }, [entries, fullVerses, searchQuery]);
 
   function toggleFavourite(entry: UnifiedEntry) {
     if (entry.isFavourite) {
@@ -170,7 +187,7 @@ export default function CollectionDetailPage() {
           book: entry.book,
           chapter: entry.chapterNumber,
           verse: entry.startVerse,
-          text: entry.text,
+          text: fullText(entry),
           reference: entry.reference,
         });
       }
@@ -285,6 +302,7 @@ export default function CollectionDetailPage() {
               key={entry.key}
               reference={entry.reference}
               readHref={readVersePath(entry.book, entry.chapterNumber, entry.startVerse, entry.endVerse)}
+              verses={fullVerses.get(entry.key)}
               text={entry.text}
               clamp
               note={
@@ -298,8 +316,8 @@ export default function CollectionDetailPage() {
               status={<StageProgress stage={entry.stage} started={entry.timesCompleted > 0} />}
               favourite={{ active: entry.isFavourite, onToggle: () => toggleFavourite(entry) }}
               menu={[
-                { label: 'Copy verse', icon: Copy, onSelect: () => copyVerse(entry.text, entry.reference) },
-                { label: 'Share', icon: Share2, onSelect: () => shareVerse(entry.text, entry.reference) },
+                { label: 'Copy verse', icon: Copy, onSelect: () => copyVerse(fullText(entry), entry.reference) },
+                { label: 'Share', icon: Share2, onSelect: () => shareVerse(fullText(entry), entry.reference) },
                 {
                   label: 'Remove from collection',
                   icon: FolderMinus,
