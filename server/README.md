@@ -45,7 +45,7 @@ In the repository root, create `.env.local` with `VITE_AI_API_URL=http://localho
 
 Tests: `php artisan test` (they use a fake model, so they never call Anthropic or need a key).
 
-## Deploying to shared hosting (LAMP, PHP 8.3+)
+## Deploying to shared hosting (LAMP, PHP 8.4+; the host runs 8.5)
 
 1. **Make a subdomain**, for example `api.your-domain`, and point its document root at `server/public` (not at `server`).
 2. **Upload the code.** Either `git clone` on the host, or build locally with `composer install --no-dev --optimize-autoloader` and upload the `server` folder including `vendor/`.

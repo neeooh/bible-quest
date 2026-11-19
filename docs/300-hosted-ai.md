@@ -13,7 +13,7 @@ Bring-your-own-key was considered and parked: it only helps power users, and the
 
 ## Decisions
 
-- **Backend:** Laravel 13 in `server/` in this repo, deployed to the existing shared LAMP hosting (PHP 8.3+). The PWA stays a static site on FTP.
+- **Backend:** Laravel 13 in `server/` in this repo, deployed to the existing shared LAMP hosting (PHP 8.5; the locked packages need 8.4 or newer). The PWA stays a static site on FTP.
 - **No streaming for now:** the API returns the whole reply in one response. It works on any shared host; the chat already shows a "thinking" state while waiting. Streaming can be added later if the host allows it.
 - **Vendor:** Anthropic, `claude-haiku-5-5`, effort `low`. Swappable on the server (`App\Ai\ChatModel`) without an app release.
 - **Ollama stays** as an advanced option in AI settings.
