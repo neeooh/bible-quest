@@ -27,9 +27,9 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
             src="/favicon.svg"
             alt=""
             aria-hidden="true"
-            width={32}
-            height={32}
-            className="w-8 h-8 transition-opacity group-hover:opacity-90"
+            width={44}
+            height={44}
+            className="w-11 h-11 shrink-0 transition-opacity group-hover:opacity-90"
           />
           <span className="font-serif text-lg text-cream font-semibold tracking-wide">
             BibleQuest
