@@ -28,7 +28,7 @@ export default function Layout({ children }: LayoutProps) {
         {children}
       </main>
       <ToastContainer />
-      <InstallBanner />
+      <InstallBanner visible={location.pathname === '/'} />
     </div>
   );
 }

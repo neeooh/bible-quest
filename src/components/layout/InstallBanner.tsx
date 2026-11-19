@@ -1,10 +1,15 @@
 import { Download, X } from 'lucide-react';
 import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 
-export default function InstallBanner() {
+interface InstallBannerProps {
+  /** Kept mounted everywhere so the one-off beforeinstallprompt event is captured on any page. */
+  visible: boolean;
+}
+
+export default function InstallBanner({ visible }: InstallBannerProps) {
   const { canShow, promptInstall, dismiss } = useInstallPrompt();
 
-  if (!canShow) return null;
+  if (!visible || !canShow) return null;
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 max-w-lg mx-auto">
@@ -18,9 +23,9 @@ export default function InstallBanner() {
           className="w-10 h-10 shrink-0"
         />
         <div className="min-w-0 flex-1">
-          <p className="text-cream text-sm font-medium">Install BibleQuest</p>
+          <p className="text-cream text-sm font-medium">Add BibleQuest to your home screen</p>
           <p className="text-cream/40 text-xs">
-            Works offline. Add to your home screen.
+            Opens like an app and works offline. Remove it anytime.
           </p>
         </div>
         <button
@@ -29,7 +34,7 @@ export default function InstallBanner() {
           className="btn-outline text-sm px-4 py-2 shrink-0 inline-flex items-center gap-2"
         >
           <Download className="w-4 h-4" aria-hidden="true" />
-          Install
+          Add
         </button>
         <button
           type="button"
