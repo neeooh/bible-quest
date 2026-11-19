@@ -1,10 +1,15 @@
 import { Download, X } from 'lucide-react';
 import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 
-export default function InstallBanner() {
+interface InstallBannerProps {
+  /** Kept mounted everywhere so the one-off beforeinstallprompt event is captured on any page. */
+  visible: boolean;
+}
+
+export default function InstallBanner({ visible }: InstallBannerProps) {
   const { canShow, promptInstall, dismiss } = useInstallPrompt();
 
-  if (!canShow) return null;
+  if (!visible || !canShow) return null;
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 max-w-lg mx-auto">
