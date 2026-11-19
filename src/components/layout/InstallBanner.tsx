@@ -1,4 +1,4 @@
-import { Download, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 
 export default function InstallBanner() {
@@ -9,9 +9,14 @@ export default function InstallBanner() {
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 max-w-lg mx-auto">
       <div className="bg-navy-800 border border-gold-500/20 rounded-xl px-4 py-3 flex items-center gap-3 shadow-lg shadow-navy-900/50">
-        <div className="w-10 h-10 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0">
-          <Download className="w-5 h-5 text-gold-500" />
-        </div>
+        <img
+          src="/favicon.svg"
+          alt=""
+          aria-hidden="true"
+          width={40}
+          height={40}
+          className="w-10 h-10 shrink-0"
+        />
         <div className="min-w-0 flex-1">
           <p className="text-cream text-sm font-medium">Install BibleQuest</p>
           <p className="text-cream/40 text-xs">
