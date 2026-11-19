@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { BookOpen, Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 
 const links = [
   { to: '/', label: 'Home' },
@@ -23,7 +23,14 @@ export default function Navbar({ theme, onToggleTheme }: NavbarProps) {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-navy-900 border-b border-gold-500/20">
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
         <NavLink to="/" className="flex items-center gap-2 group" onClick={() => setMenuOpen(false)}>
-          <BookOpen className="w-6 h-6 text-gold-500 group-hover:text-gold-400 transition-colors" />
+          <img
+            src="/favicon.svg"
+            alt=""
+            aria-hidden="true"
+            width={32}
+            height={32}
+            className="w-8 h-8 transition-opacity group-hover:opacity-90"
+          />
           <span className="font-serif text-lg text-cream font-semibold tracking-wide">
             BibleQuest
           </span>
