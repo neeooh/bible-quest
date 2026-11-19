@@ -17,6 +17,9 @@
   --toast-success-bg: rgb(20, 45, 30);
   --toast-info-bg: rgb(40, 35, 20);
   --range-track: #243044;
+  --verse-glow: rgba(214, 173, 96, 0.16);
+  --verse-glow-soft: rgba(214, 173, 96, 0.06);
+  --verse-glow-button: rgba(214, 173, 96, 0.7);
 }
 
 /* ----- Light theme ----- */
@@ -36,6 +39,10 @@
   --toast-success-bg: rgb(220, 245, 225);
   --toast-info-bg: rgb(250, 243, 225);
   --range-track: #ddd6c8;
+  /* Warmer and stronger on cream, so the glow reads as light, not as a stain */
+  --verse-glow: rgba(232, 184, 92, 0.30);
+  --verse-glow-soft: rgba(232, 184, 92, 0.12);
+  --verse-glow-button: rgba(176, 128, 40, 0.45);
 }
 
 @theme {
@@ -52,6 +59,7 @@
 
   --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-scripture: "Literata", Georgia, "Times New Roman", serif;
 }
 
 @layer base {
@@ -318,6 +326,26 @@ input[type="range"]::-moz-range-thumb {
 
 .ai-glow:focus-within {
   box-shadow: 0 0 26px 5px color-mix(in srgb, var(--gold-500) 45%, transparent);
+}
+
+/* Home: soft gold light behind the Verse of the Day */
+.verse-glow {
+  position: relative;
+  isolation: isolate;
+}
+.verse-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 55% at 50% 42%, var(--verse-glow) 0%, transparent 70%),
+    radial-gradient(44% 26% at 50% 70%, var(--verse-glow-soft) 0%, transparent 100%);
+}
+.verse-glow-button {
+  box-shadow: 0 10px 30px -12px var(--verse-glow-button);
 }
 
 @keyframes aiGlow {

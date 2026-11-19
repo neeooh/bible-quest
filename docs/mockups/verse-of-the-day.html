@@ -1,0 +1,341 @@
+<!--
+  Home page — three directions (mock-up)
+    A · Editorial hero      (boxless, centred)
+    B · Refined hero card   (boxed, left-aligned)
+    C · Daily ritual        (boxless, centred, date + streak + glow)
+  Each is a whole Home page: AI ask box, Verse of the Day, Your progress, links.
+  At the end: the progress block for a brand-new user (first run).
+
+  Paste-able fragment: replace the Home page content with it.
+  Uses the app's own CSS variables, so it follows dark and light themes.
+  Static HTML/CSS only — buttons don't do anything.
+-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500&display=swap">
+<style>
+  .hm {
+    --ink: var(--text-primary, #FFF8F0);
+    --ink-2: color-mix(in srgb, var(--ink) 62%, transparent);
+    --ink-3: color-mix(in srgb, var(--ink) 45%, transparent);
+    --line: color-mix(in srgb, var(--ink) 8%, transparent);
+    --gold: var(--gold-400, #e0be78);
+    --gold-5: var(--gold-500, #D6AD60);
+    --gold-solid: #D6AD60;
+    font-family: Inter, system-ui, sans-serif; color: var(--ink);
+    width: 100%; max-width: 42rem; margin: 0 auto; padding: 8px 0 24px;
+  }
+  .hm * { box-sizing: border-box; }
+  .hm p { margin: 0; }
+  .hm svg { flex: none; }
+  .hm :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+
+  /* Mock-up annotations — not part of the design */
+  .hm-tag {
+    display: block; width: fit-content; margin: 0 auto 28px; padding: 4px 12px; border: 1px dashed var(--ink-3);
+    border-radius: 6px; font: 600 11px/1.6 ui-monospace, Menlo, monospace; color: var(--ink-2); letter-spacing: .04em;
+  }
+  .hm-sep { height: 0; border: 0; border-top: 2px dashed color-mix(in srgb, var(--ink) 14%, transparent); margin: 72px 0 56px; }
+
+  /* ── Shared: AI ask box (quieter — an input, not a hero) ── */
+  .hm-ask { display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 8px 0 16px;
+    background: var(--bg-secondary, #1a2332); border: 1px solid color-mix(in srgb, var(--gold-5) 22%, transparent); border-radius: 14px; }
+  .hm-ask:focus-within { border-color: color-mix(in srgb, var(--gold-5) 55%, transparent); }
+  .hm-ask > svg { width: 19px; height: 19px; color: var(--gold-5); }
+  .hm-ask input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; outline: none;
+    font: 400 15.5px Inter, sans-serif; color: var(--ink); }
+  .hm-ask input::placeholder { color: var(--ink-3); }
+  .hm-ask button { width: 40px; height: 40px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--gold-5) 30%, transparent);
+    background: none; color: var(--gold); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  .hm-ask button svg { width: 18px; height: 18px; }
+  .hm-disc { margin-top: 8px !important; text-align: center; font-size: 11.5px; color: var(--ink-3); }
+
+  /* ── Shared: verse pieces ── */
+  .hm-eyebrow { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .2em; color: var(--gold-5); }
+  .hm-verse { margin: 0; font-family: Literata, Georgia, serif; font-optical-sizing: auto; font-weight: 400;
+    color: color-mix(in srgb, var(--ink) 92%, transparent); }
+  .hm-ref { font-family: "Playfair Display", Georgia, serif; font-weight: 600; color: var(--gold); text-decoration: none; }
+  .hm-ref:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+  .hm-tr { margin-left: 8px; font-size: 10px; font-weight: 600; letter-spacing: .16em; color: var(--ink-3); vertical-align: 2px; }
+  .hm-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 50px; padding: 0 30px;
+    border: 0; border-radius: 12px; background: var(--gold-solid); color: #14110b; font: 600 15px Inter, sans-serif;
+    cursor: pointer; text-decoration: none; white-space: nowrap; transition: background .15s, transform .1s; }
+  .hm-primary:hover { background: #e0be78; }
+  .hm-primary:active { transform: scale(.97); }
+  .hm-primary svg, .hm-link svg, .hm-btn svg { width: 17px; height: 17px; }
+  .hm-links { display: flex; justify-content: center; gap: 22px; }
+  .hm-link { display: inline-flex; align-items: center; gap: 7px; padding: 8px 4px; border: 0; background: none;
+    font: 500 13.5px Inter, sans-serif; color: var(--ink-2); cursor: pointer; text-decoration: none; transition: color .15s; }
+  .hm-link:hover { color: var(--ink); }
+  .hm-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 50px; padding: 0 18px;
+    border: 1px solid color-mix(in srgb, var(--gold-5) 28%, transparent); border-radius: 12px; background: transparent;
+    color: var(--ink); font: 500 14px Inter, sans-serif; cursor: pointer; transition: background .15s, border-color .15s; }
+  .hm-btn:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); border-color: color-mix(in srgb, var(--gold-5) 50%, transparent); }
+
+  /* ── Shared: progress (one hue, no tiles, one clear next step) ── */
+  .hm-prog-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .hm-streak { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .hm-streak b { color: var(--gold); font-weight: 600; }
+  .hm-streak svg { width: 14px; height: 14px; color: var(--gold-5); }
+  .hm-bar { display: flex; gap: 3px; height: 8px; margin-top: 18px; border-radius: 999px; overflow: hidden; }
+  .hm-bar i { display: block; height: 100%; }
+  .hm .s-ret { background: var(--gold-5); }
+  .hm .s-mem { background: color-mix(in srgb, var(--gold-5) 62%, transparent); }
+  .hm .s-lrn { background: color-mix(in srgb, var(--gold-5) 34%, transparent); }
+  .hm .s-new { background: color-mix(in srgb, var(--ink) 10%, transparent); }
+  .hm-legend { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 12px; }
+  .hm-legend a { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  .hm-legend a:hover { color: var(--ink); }
+  .hm-legend b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .hm-legend i { width: 8px; height: 8px; border-radius: 50%; }
+  .hm-next { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .hm-next p { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); }
+  .hm-next p svg { width: 16px; height: 16px; color: var(--gold-5); }
+  .hm-next a { display: inline-flex; align-items: center; gap: 6px; font: 600 14px Inter, sans-serif; color: var(--gold); text-decoration: none; }
+  .hm-next a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .hm-next a svg { width: 16px; height: 16px; }
+
+  /* ── Shared: way-finding row at the bottom ── */
+  .hm-foot { display: flex; justify-content: center; align-items: center; gap: 10px 28px; flex-wrap: wrap; margin-top: 40px; }
+  .hm-foot a { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--ink-2); text-decoration: none; }
+  .hm-foot a:hover { color: var(--ink); }
+  .hm-foot a svg { width: 15px; height: 15px; color: var(--gold-5); }
+  .hm-about { margin-top: 28px !important; text-align: center; font-size: 12px; }
+  .hm-about a { color: var(--ink-3); text-decoration: none; }
+
+  /* ═════════ A · Editorial hero ═════════ */
+  .hm-a .hero { text-align: center; margin-top: 64px; }
+  .hm-a .hm-verse { margin: 22px auto 0; max-width: 30ch; font-size: clamp(1.45rem, 1.05rem + 1.6vw, 2rem); line-height: 1.5; text-wrap: balance; }
+  .hm-a .rule { width: 36px; height: 1px; margin: 26px auto 14px; background: var(--gold-5); opacity: .6; }
+  .hm-a .attr { font-size: 17px; }
+  .hm-a .hm-primary { margin-top: 32px; }
+  .hm-a .hm-links { margin-top: 14px; }
+  .hm-a .prog { margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--line); }
+
+  /* ═════════ B · Refined hero card ═════════ */
+  .hm-b .card-b { background: var(--bg-secondary, #1a2332); border: 1px solid var(--border-alpha, rgba(214,173,96,.1)); border-radius: 20px; }
+  .hm-b .hero { margin-top: 40px; padding: 34px 36px 30px; }
+  .hm-b .hm-verse { margin-top: 20px; max-width: 34ch; font-size: clamp(1.35rem, 1.05rem + 1.1vw, 1.7rem); line-height: 1.52; }
+  .hm-b .attr { margin-top: 16px !important; font-size: 16px; }
+  .hm-b .attr::before { content: "— "; color: var(--ink-3); font-family: Literata, Georgia, serif; }
+  .hm-b .actions { display: flex; align-items: center; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+  .hm-b .hm-primary { min-width: 15rem; }
+  .hm-b .prog { margin-top: 20px; padding: 26px 36px 24px; }
+
+  /* ═════════ C · Daily ritual ═════════ */
+  .hm-c .hero { position: relative; isolation: isolate; text-align: center; margin-top: 40px; padding: 44px 20px 40px; border-radius: 28px; overflow: hidden; }
+  .hm-c .hero::before { content: ""; position: absolute; inset: 0; z-index: -1;
+    background: radial-gradient(60% 55% at 50% 42%, color-mix(in srgb, var(--gold-5) 16%, transparent) 0%, transparent 70%),
+                radial-gradient(90% 80% at 50% 100%, color-mix(in srgb, var(--gold-5) 6%, transparent) 0%, transparent 70%); }
+  .hm-c .top { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .hm-c .date { font: 500 13px Inter, sans-serif; color: var(--ink-2); letter-spacing: .02em; }
+  .hm-c .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-3); }
+  .hm-c .chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 8px; border-radius: 999px;
+    background: color-mix(in srgb, var(--gold-5) 14%, transparent); color: var(--gold); font: 600 12px Inter, sans-serif; }
+  .hm-c .chip svg { width: 13px; height: 13px; }
+  .hm-c .hm-verse { margin: 26px auto 0; max-width: 28ch; font-size: clamp(1.5rem, 1.05rem + 1.8vw, 2.1rem); line-height: 1.48; text-wrap: balance; }
+  .hm-c .attr { margin-top: 18px !important; font-size: 17px; }
+  .hm-c .hm-primary { margin-top: 32px; box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--gold-5) 70%, transparent); }
+  .hm-c .hint { margin-top: 12px !important; font-size: 12.5px; color: var(--ink-3); }
+  .hm-c .hm-links { margin-top: 16px; }
+  .hm-c .prog { margin-top: 48px; padding-top: 28px; border-top: 1px solid var(--line); }
+  .hm-c .prog .hm-streak { display: none; } /* streak already sits by the date */
+
+  /* ═════════ First run ═════════ */
+  .hm-first { margin-top: 0; padding-top: 28px; border-top: 1px solid var(--line); }
+  .hm-first .msg { margin-top: 14px !important; font-family: Literata, Georgia, serif; font-size: 19px; line-height: 1.5; color: var(--ink); }
+  .hm-first .sub { margin-top: 6px !important; font-size: 14px; color: var(--ink-2); }
+  .hm-first .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+  .hm-first .hm-primary { height: 46px; padding: 0 22px; font-size: 14.5px; }
+  .hm-first .hm-btn { height: 46px; }
+
+  [data-theme="light"] .hm-ask { background: var(--bg-secondary); }
+
+  @media (max-width: 640px) {
+    .hm-a .hero { margin-top: 48px; }
+    .hm-a .hm-primary, .hm-c .hm-primary { width: 100%; max-width: 20rem; }
+    .hm-b .hero { padding: 24px 20px 20px; }
+    .hm-b .prog { padding: 22px 20px 20px; }
+    .hm-b .hm-primary { flex: 1; min-width: 0; padding: 0 14px; gap: 8px; }
+    .hm-b .hm-btn { width: 50px; padding: 0; }
+    .hm-b .hm-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .hm-sep { margin: 56px 0 44px; }
+  }
+</style>
+
+<!-- Icons, reused below -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></symbol>
+    <symbol id="i-library" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></symbol>
+  </defs>
+</svg>
+
+<!-- ═══════════════════════ A · Editorial hero ═══════════════════════ -->
+<div class="hm hm-a">
+  <span class="hm-tag">A · Editorial hero — whole page</span>
+
+  <form class="hm-ask" onsubmit="return false"><svg><use href="#i-spark"/></svg><input placeholder="What’s on your heart today?" aria-label="Ask the AI mentor"><button type="submit" aria-label="Ask"><svg><use href="#i-arrow"/></svg></button></form>
+  <p class="hm-disc">AI-generated guidance — it can make mistakes.</p>
+
+  <section class="hero" aria-labelledby="a-vod">
+    <p class="hm-eyebrow" id="a-vod">Verse of the Day</p>
+    <blockquote class="hm-verse">Jesus, looking at them, said, “With men it is impossible, but not with God, for all things are possible with God.”</blockquote>
+    <div class="rule" aria-hidden="true"></div>
+    <p class="attr"><a class="hm-ref" href="/read/mark/10?verse=27">Mark 10:27</a><span class="hm-tr">WEB</span></p>
+    <a class="hm-primary" href="/memorize?book=mark&chapter=10&start=27&end=27"><svg><use href="#i-book"/></svg>Memorise this verse</a>
+    <div class="hm-links">
+      <button type="button" class="hm-link"><svg><use href="#i-heart"/></svg>Favourite</button>
+      <button type="button" class="hm-link"><svg><use href="#i-copy"/></svg>Copy</button>
+      <button type="button" class="hm-link"><svg><use href="#i-share"/></svg>Share</button>
+    </div>
+  </section>
+
+  <section class="prog" aria-labelledby="a-prog">
+    <div class="hm-prog-head">
+      <p class="hm-eyebrow" id="a-prog">Your progress</p>
+      <a class="hm-streak" href="/progress"><svg><use href="#i-flame"/></svg><span><b>5</b>-day streak</span></a>
+    </div>
+    <div class="hm-bar" role="img" aria-label="4 in retention, 1 memorising, 2 learning, 3 not started">
+      <i class="s-ret" style="flex:4"></i><i class="s-mem" style="flex:1"></i><i class="s-lrn" style="flex:2"></i><i class="s-new" style="flex:3"></i>
+    </div>
+    <div class="hm-legend">
+      <a href="/my-verses?stage=retention"><i class="s-ret"></i><b>4</b> Retention</a>
+      <a href="/my-verses?stage=memorising"><i class="s-mem"></i><b>1</b> Memorising</a>
+      <a href="/my-verses?stage=learning"><i class="s-lrn"></i><b>2</b> Learning</a>
+      <a href="/my-verses?stage=not-started"><i class="s-new"></i><b>3</b> Not started</a>
+    </div>
+    <div class="hm-next">
+      <p><svg><use href="#i-clock"/></svg>2 verses are due for review today</p>
+      <a href="/my-verses?stage=due-for-review">Review now<svg><use href="#i-arrow"/></svg></a>
+    </div>
+  </section>
+
+  <nav class="hm-foot" aria-label="More">
+    <a href="/read/mark/10"><svg><use href="#i-bookmark"/></svg>Continue reading Mark 10</a>
+    <a href="/library"><svg><use href="#i-library"/></svg>Explore the Bible</a>
+  </nav>
+  <p class="hm-about"><a href="/about">About BibleQuest</a></p>
+</div>
+
+<hr class="hm-sep">
+
+<!-- ═══════════════════════ B · Refined hero card ═══════════════════════ -->
+<div class="hm hm-b">
+  <span class="hm-tag">B · Refined hero card — whole page</span>
+
+  <form class="hm-ask" onsubmit="return false"><svg><use href="#i-spark"/></svg><input placeholder="What’s on your heart today?" aria-label="Ask the AI mentor"><button type="submit" aria-label="Ask"><svg><use href="#i-arrow"/></svg></button></form>
+  <p class="hm-disc">AI-generated guidance — it can make mistakes.</p>
+
+  <section class="hero card-b" aria-labelledby="b-vod">
+    <p class="hm-eyebrow" id="b-vod">Verse of the Day</p>
+    <blockquote class="hm-verse">Jesus, looking at them, said, “With men it is impossible, but not with God, for all things are possible with God.”</blockquote>
+    <p class="attr"><a class="hm-ref" href="/read/mark/10?verse=27">Mark 10:27</a><span class="hm-tr">WEB</span></p>
+    <div class="actions">
+      <a class="hm-primary" href="/memorize?book=mark&chapter=10&start=27&end=27"><svg><use href="#i-book"/></svg>Memorise this verse</a>
+      <button type="button" class="hm-btn" aria-label="Favourite"><svg><use href="#i-heart"/></svg><span>Favourite</span></button>
+      <button type="button" class="hm-btn" aria-label="Share"><svg><use href="#i-share"/></svg><span>Share</span></button>
+    </div>
+  </section>
+
+  <section class="prog card-b" aria-labelledby="b-prog">
+    <div class="hm-prog-head">
+      <p class="hm-eyebrow" id="b-prog">Your progress</p>
+      <a class="hm-streak" href="/progress"><svg><use href="#i-flame"/></svg><span><b>5</b>-day streak</span></a>
+    </div>
+    <div class="hm-bar" role="img" aria-label="4 in retention, 1 memorising, 2 learning, 3 not started">
+      <i class="s-ret" style="flex:4"></i><i class="s-mem" style="flex:1"></i><i class="s-lrn" style="flex:2"></i><i class="s-new" style="flex:3"></i>
+    </div>
+    <div class="hm-legend">
+      <a href="/my-verses?stage=retention"><i class="s-ret"></i><b>4</b> Retention</a>
+      <a href="/my-verses?stage=memorising"><i class="s-mem"></i><b>1</b> Memorising</a>
+      <a href="/my-verses?stage=learning"><i class="s-lrn"></i><b>2</b> Learning</a>
+      <a href="/my-verses?stage=not-started"><i class="s-new"></i><b>3</b> Not started</a>
+    </div>
+    <div class="hm-next">
+      <p><svg><use href="#i-clock"/></svg>2 verses are due for review today</p>
+      <a href="/my-verses?stage=due-for-review">Review now<svg><use href="#i-arrow"/></svg></a>
+    </div>
+  </section>
+
+  <nav class="hm-foot" aria-label="More">
+    <a href="/read/mark/10"><svg><use href="#i-bookmark"/></svg>Continue reading Mark 10</a>
+    <a href="/library"><svg><use href="#i-library"/></svg>Explore the Bible</a>
+  </nav>
+  <p class="hm-about"><a href="/about">About BibleQuest</a></p>
+</div>
+
+<hr class="hm-sep">
+
+<!-- ═══════════════════════ C · Daily ritual ═══════════════════════ -->
+<div class="hm hm-c">
+  <span class="hm-tag">C · Daily ritual — whole page</span>
+
+  <form class="hm-ask" onsubmit="return false"><svg><use href="#i-spark"/></svg><input placeholder="What’s on your heart today?" aria-label="Ask the AI mentor"><button type="submit" aria-label="Ask"><svg><use href="#i-arrow"/></svg></button></form>
+  <p class="hm-disc">AI-generated guidance — it can make mistakes.</p>
+
+  <section class="hero" aria-labelledby="c-vod">
+    <div class="top">
+      <p class="date" id="c-vod">Thursday, 19 November</p>
+      <span class="dot" aria-hidden="true"></span>
+      <a class="chip" href="/progress" style="text-decoration:none"><svg><use href="#i-flame"/></svg>Day 5</a>
+    </div>
+    <blockquote class="hm-verse">Jesus, looking at them, said, “With men it is impossible, but not with God, for all things are possible with God.”</blockquote>
+    <p class="attr"><a class="hm-ref" href="/read/mark/10?verse=27">Mark 10:27</a><span class="hm-tr">WEB</span></p>
+    <a class="hm-primary" href="/memorize?book=mark&chapter=10&start=27&end=27">Memorise today’s verse<svg><use href="#i-arrow"/></svg></a>
+    <p class="hint">About 3 minutes · 1 verse</p>
+    <div class="hm-links">
+      <button type="button" class="hm-link"><svg><use href="#i-heart"/></svg>Favourite</button>
+      <button type="button" class="hm-link"><svg><use href="#i-share"/></svg>Share</button>
+    </div>
+  </section>
+
+  <section class="prog" aria-labelledby="c-prog">
+    <div class="hm-prog-head">
+      <p class="hm-eyebrow" id="c-prog">Your progress</p>
+      <a class="hm-streak" href="/progress"><svg><use href="#i-flame"/></svg><span><b>5</b>-day streak</span></a>
+    </div>
+    <div class="hm-bar" role="img" aria-label="4 in retention, 1 memorising, 2 learning, 3 not started">
+      <i class="s-ret" style="flex:4"></i><i class="s-mem" style="flex:1"></i><i class="s-lrn" style="flex:2"></i><i class="s-new" style="flex:3"></i>
+    </div>
+    <div class="hm-legend">
+      <a href="/my-verses?stage=retention"><i class="s-ret"></i><b>4</b> Retention</a>
+      <a href="/my-verses?stage=memorising"><i class="s-mem"></i><b>1</b> Memorising</a>
+      <a href="/my-verses?stage=learning"><i class="s-lrn"></i><b>2</b> Learning</a>
+      <a href="/my-verses?stage=not-started"><i class="s-new"></i><b>3</b> Not started</a>
+    </div>
+    <div class="hm-next">
+      <p><svg><use href="#i-clock"/></svg>2 verses are due for review today</p>
+      <a href="/my-verses?stage=due-for-review">Review now<svg><use href="#i-arrow"/></svg></a>
+    </div>
+  </section>
+
+  <nav class="hm-foot" aria-label="More">
+    <a href="/read/mark/10"><svg><use href="#i-bookmark"/></svg>Continue reading Mark 10</a>
+    <a href="/library"><svg><use href="#i-library"/></svg>Explore the Bible</a>
+  </nav>
+  <p class="hm-about"><a href="/about">About BibleQuest</a></p>
+</div>
+
+<hr class="hm-sep">
+
+<!-- ═══════════════════════ Progress — first run (all options) ═══════════════════════ -->
+<div class="hm">
+  <span class="hm-tag">Progress block — brand-new user (replaces the row of zeros)</span>
+  <section class="hm-first" aria-labelledby="f-prog">
+    <p class="hm-eyebrow" id="f-prog">Your progress</p>
+    <p class="msg">Hide God’s word in your heart, one verse at a time.</p>
+    <p class="sub">Start with today’s verse, or save a few you love and we’ll track how well you know them.</p>
+    <div class="row">
+      <a class="hm-primary" href="/memorize?book=mark&chapter=10&start=27&end=27">Start with Mark 10:27<svg><use href="#i-arrow"/></svg></a>
+      <a class="hm-btn" href="/library" style="text-decoration:none">Find verses by topic</a>
+    </div>
+  </section>
+</div>

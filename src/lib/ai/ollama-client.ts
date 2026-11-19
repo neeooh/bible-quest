@@ -1,3 +1,4 @@
+import { createAbortScope, type AbortScope } from './abort';
 import { createNdjsonParser } from './ndjson';
 import { AiError, type ChatMessage, type ChatStats, type OllamaModel } from './types';
 
@@ -30,39 +31,6 @@ export function normalizeBaseUrl(url: string): string {
   return url.trim().replace(/\/+$/, '');
 }
 
-/**
- * Links an optional caller signal with an internal timeout. `timedOut()`
- * tells the two kinds of abort apart.
- */
-function createAbortScope(outer: AbortSignal | undefined) {
-  const controller = new AbortController();
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  let didTimeOut = false;
-
-  const onOuterAbort = () => controller.abort();
-  if (outer) {
-    if (outer.aborted) controller.abort();
-    else outer.addEventListener('abort', onOuterAbort, { once: true });
-  }
-
-  return {
-    signal: controller.signal,
-    timedOut: () => didTimeOut,
-    startTimer(ms: number) {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        didTimeOut = true;
-        controller.abort();
-      }, ms);
-    },
-    dispose() {
-      clearTimeout(timer);
-      outer?.removeEventListener('abort', onOuterAbort);
-    },
-  };
-}
-
-type AbortScope = ReturnType<typeof createAbortScope>;
 
 function toAiError(err: unknown, scope: AbortScope): AiError {
   if (err instanceof AiError) return err;

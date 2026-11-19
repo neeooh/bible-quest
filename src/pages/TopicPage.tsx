@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronLeft, BookOpen, Heart, Brain, FolderPlus } from 'lucide-react';
-import { getTopicBySlug, TOPICS } from '../lib/topics';
+import { ChevronLeft, Copy, FolderPlus, Share2 } from 'lucide-react';
+import { getTopicBySlug, type TopicPassage } from '../lib/topics';
 import { useSavedVerses } from '../hooks/useSavedVerses';
 import { useCollections } from '../hooks/useCollections';
+import { joinVerses, usePassageVerses } from '../hooks/usePassageVerses';
 import TopicIcon from '../components/TopicIcon';
 import AddToCollectionDialog from '../components/collections/AddToCollectionDialog';
 import { showToast } from '../components/Toast';
+import VerseCard from '../components/verse/VerseCard';
+import { copyVerse, memorisePath, readVersePath, shareVerse } from '../lib/verse-actions';
 
 export default function TopicPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -14,6 +17,21 @@ export default function TopicPage() {
   const { addVerse, isSaved, isFavourite, setFavourite } = useSavedVerses();
   const { collections, createCollection, addPassageToCollections } = useCollections();
   const [collectionDialogKey, setCollectionDialogKey] = useState<string | null>(null);
+
+  // Cards show the full passage from the bundled Bible, never the short preview.
+  const ranges = useMemo(
+    () =>
+      (topic?.passages ?? []).map((p) => ({
+        key: passageKey(p),
+        book: p.book,
+        chapter: p.chapter,
+        start: p.startVerse,
+        end: p.endVerse,
+      })),
+    [topic],
+  );
+  const fullVerses = usePassageVerses(ranges);
+  const fullText = (p: TopicPassage) => joinVerses(fullVerses.get(passageKey(p))) ?? p.preview;
 
   if (!topic) {
     return (
@@ -26,7 +44,7 @@ export default function TopicPage() {
     );
   }
 
-  function handleToggleFavourite(passage: (typeof TOPICS)[0]['passages'][0]) {
+  function handleToggleFavourite(passage: TopicPassage) {
     const isFav = isFavourite(passage.book, passage.chapter, passage.startVerse);
 
     if (isFav) {
@@ -40,7 +58,7 @@ export default function TopicPage() {
           book: passage.book,
           chapter: passage.chapter,
           verse: passage.startVerse,
-          text: passage.preview,
+          text: fullText(passage),
           reference: passage.reference,
         });
       }
@@ -73,89 +91,48 @@ export default function TopicPage() {
       </div>
 
       {/* Passage cards */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         {topic.passages.map((passage) => {
           const isFav = isFavourite(passage.book, passage.chapter, passage.startVerse);
+          const key = passageKey(passage);
 
           return (
-            <div
-              key={`${passage.book}:${passage.chapter}:${passage.startVerse}`}
-              className="card flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
-            >
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-gold-400 font-serif font-semibold text-base">
-                    {passage.reference}
-                  </p>
-                </div>
-                <p className="text-cream/80 text-base mt-3 italic leading-relaxed line-clamp-2">
-                  &ldquo;{passage.preview}&rdquo;
-                </p>
-                <p className="text-cream/40 text-xs mt-2 leading-relaxed">
-                  {passage.explainer}
-                </p>
-              </div>
-
-              <div className="flex flex-row flex-wrap sm:flex-col gap-2 shrink-0 w-full sm:w-auto items-center sm:items-stretch">
-                <Link
-                  to={`/memorize?book=${passage.book}&chapter=${passage.chapter}&start=${passage.startVerse}&end=${passage.endVerse}`}
-                  className="btn-gold text-sm inline-flex items-center justify-center gap-1.5 w-auto sm:w-full"
-                >
-                  <Brain className="w-3.5 h-3.5" />
-                  Practise
-                </Link>
-                <div className="flex items-center gap-2">
-                  <Link
-                    to={`/read/${passage.book}/${passage.chapter}?verse=${passage.startVerse}&end=${passage.endVerse}`}
-                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
-                    aria-label={`Read ${passage.reference}`}
-                    title="Read"
-                  >
-                    <BookOpen className="w-4 h-4" />
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleFavourite(passage)}
-                    className={`w-9 h-9 rounded-lg border transition-colors flex items-center justify-center ${
-                      isFav
-                        ? 'border-gold-500/30 text-red-400 hover:text-red-300'
-                        : 'border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40'
-                    }`}
-                    aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                    title={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                  >
-                    <Heart
-                    className="w-4 h-4"
-                    fill={isFav ? 'currentColor' : 'none'}
-                  />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      // Ensure the passage is saved before adding to a collection
-                      if (!isSaved(passage.book, passage.chapter, passage.startVerse)) {
-                        addVerse({
-                          book: passage.book,
-                          chapter: passage.chapter,
-                          verse: passage.startVerse,
-                          text: passage.preview,
-                          reference: passage.reference,
-                          favourite: false,
-                        });
-                      }
-                      setCollectionDialogKey(
-                        `${passage.book}:${passage.chapter}:${passage.startVerse}-${passage.endVerse}`,
-                      );
-                    }}
-                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/30 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
-                    aria-label={`Add ${passage.reference} to collection`}
-                    title="Add to collection"
-                  >
-                    <FolderPlus className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <VerseCard
+              key={key}
+              reference={passage.reference}
+              readHref={readVersePath(passage.book, passage.chapter, passage.startVerse, passage.endVerse)}
+              verses={fullVerses.get(key)}
+              text={passage.preview}
+              clamp
+              note={passage.explainer}
+              favourite={{ active: isFav, onToggle: () => handleToggleFavourite(passage) }}
+              menu={[
+                {
+                  label: 'Add to collection',
+                  icon: FolderPlus,
+                  onSelect: () => {
+                    // Ensure the passage is saved before adding to a collection
+                    if (!isSaved(passage.book, passage.chapter, passage.startVerse)) {
+                      addVerse({
+                        book: passage.book,
+                        chapter: passage.chapter,
+                        verse: passage.startVerse,
+                        text: fullText(passage),
+                        reference: passage.reference,
+                        favourite: false,
+                      });
+                    }
+                    setCollectionDialogKey(key);
+                  },
+                },
+                { label: 'Copy verse', icon: Copy, onSelect: () => copyVerse(fullText(passage), passage.reference) },
+                { label: 'Share', icon: Share2, onSelect: () => shareVerse(fullText(passage), passage.reference) },
+              ]}
+              primary={{
+                label: 'Practise',
+                to: memorisePath(passage.book, passage.chapter, passage.startVerse, passage.endVerse),
+              }}
+            />
           );
         })}
       </div>
@@ -170,4 +147,8 @@ export default function TopicPage() {
       />
     </div>
   );
+}
+
+function passageKey(p: TopicPassage): string {
+  return `${p.book}:${p.chapter}:${p.startVerse}-${p.endVerse}`;
 }

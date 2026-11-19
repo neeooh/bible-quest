@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Trophy,
@@ -9,6 +9,11 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useProgress } from '../hooks/useProgress';
+import { useSavedVerses } from '../hooks/useSavedVerses';
+import { getDailyVerse } from '../lib/bible';
+import { countStages, getPracticeItems } from '../lib/practice-queue';
+import type { DailyVerse } from '../lib/types';
+import ProgressSummary from '../components/progress/ProgressSummary';
 import { getBookBySlug } from '../lib/book-metadata';
 
 const exerciseLabels: Record<string, string> = {
@@ -44,6 +49,17 @@ function getBadgeTier(level: number): { ring: string; glow: string } {
 
 export default function ProgressPage() {
   const { progress, level } = useProgress();
+  const { savedVerses } = useSavedVerses();
+  const [daily, setDaily] = useState<DailyVerse | null>(null);
+
+  useEffect(() => {
+    getDailyVerse().then(setDaily);
+  }, []);
+
+  const stageCounts = useMemo(
+    () => countStages(getPracticeItems(progress.exerciseHistory, savedVerses, progress.hiddenPassages)),
+    [progress.exerciseHistory, progress.hiddenPassages, savedVerses],
+  );
 
   const recentHistory = [...progress.exerciseHistory].reverse();
   const [showAllHistory, setShowAllHistory] = useState(false);
@@ -64,6 +80,9 @@ export default function ProgressPage() {
           My Progress
         </h1>
       </div>
+
+      {/* Where each saved or practised passage is */}
+      <ProgressSummary counts={stageCounts} daily={daily} />
 
       {/* Level display */}
       <section className="card space-y-4">

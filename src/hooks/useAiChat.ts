@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getAiSettings, pickModel, saveAiSettings } from '../lib/ai/ai-settings';
-import { chatStream, listModels } from '../lib/ai/ollama-client';
+import { getChatProvider } from '../lib/ai/chat-provider';
 import { AiError, isAiError, type ChatMessage } from '../lib/ai/types';
 
 export interface ChatTurn {
@@ -21,7 +20,7 @@ export interface ChatTurn {
 export type ChatPhase = 'idle' | 'waiting' | 'streaming';
 
 export interface UseAiChatOptions {
-  /** Turns the visible conversation into the messages sent to Ollama (e.g. adds a system prompt). */
+  /** Turns the visible conversation into the messages sent to Ollama (e.g. adds a system prompt for Ollama). */
   buildMessages: (history: ChatMessage[]) => ChatMessage[];
   /** When set, the conversation is kept in sessionStorage under this key. */
   sessionKey?: string;
@@ -58,18 +57,7 @@ function saveTurns(key: string | undefined, turns: ChatTurn[]) {
   }
 }
 
-/** Uses the saved model, or picks one (gemma3 first) and saves it. */
-async function resolveModel(baseUrl: string, saved: string, signal: AbortSignal): Promise<string> {
-  if (saved) return saved;
-  const model = pickModel(await listModels(baseUrl, signal), saved);
-  if (!model) {
-    throw new AiError('model_not_found', 'No models are installed in Ollama yet.');
-  }
-  saveAiSettings({ model });
-  return model;
-}
-
-/** A streaming chat with the local Ollama model. */
+/** A chat with the AI mentor, through whichever provider is chosen in AI settings. */
 export function useAiChat({ buildMessages, sessionKey, initialTurns }: UseAiChatOptions) {
   const [turns, setTurns] = useState<ChatTurn[]>(() => initialTurns?.() ?? loadTurns(sessionKey));
   const [phase, setPhase] = useState<ChatPhase>('idle');
@@ -115,14 +103,8 @@ export function useAiChat({ buildMessages, sessionKey, initialTurns }: UseAiChat
 
     let text = '';
     try {
-      const settings = getAiSettings();
-      const model = await resolveModel(settings.baseUrl, settings.model, controller.signal);
       const messages = buildRef.current(history.map(({ role, content }) => ({ role, content })));
-      const stream = chatStream(settings.baseUrl, messages, {
-        model,
-        signal: controller.signal,
-        options: { temperature: settings.temperature },
-      });
+      const stream = getChatProvider().reply(messages, controller.signal);
       for await (const delta of stream) {
         if (!text) setPhase('streaming');
         text += delta;

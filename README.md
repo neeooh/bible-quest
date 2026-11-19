@@ -75,7 +75,7 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 - Level system with XP thresholds.
 - Progress tiles on the home page show your pipeline at a glance.
 
-### AI Mentor Chat (optional, local)
+### AI Mentor Chat
 
 - Type what's on your heart into the glowing search box on the Home page (for example, "I'm feeling lonely").
 - An empathetic, faith-based AI mentor replies on the **AI Chat** page and points you to Bible passages.
@@ -85,7 +85,8 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 - **Passages panel:** see every passage from a conversation in one list and save the ones you tick to a collection.
 - **AI Chat** is also in the top navigation, between Home and Library.
 - If a message suggests someone may be in crisis, a fixed notice with emergency and crisis-line contacts appears.
-- Runs entirely on your own Mac with [Ollama](https://ollama.com); nothing is sent to the cloud. Off by default: turn it on in **About → AI settings** (`/settings/ai`), where you can also pick the model.
+- **Free for everyone, no account:** by default the mentor is BibleQuest AI, served by the API in [`server/`](server/README.md) with daily message limits. Messages are sent to the AI provider to get a reply and are not stored.
+- **Advanced:** switch to a model on your own Mac with [Ollama](https://ollama.com) in **About → AI settings** (`/settings/ai`); then nothing leaves your computer.
 
 ### Other
 
@@ -98,7 +99,7 @@ Every saved passage moves through four stages: Not Started, Learning, Memorising
 
 ## Tech Stack
 
-React 18, TypeScript, Vite, Tailwind CSS, Lucide icons, vite-plugin-pwa. No backend. No external APIs. All data stored in LocalStorage. Optional AI features use a locally hosted Ollama server (see below).
+React 18, TypeScript, Vite, Tailwind CSS, Lucide icons, vite-plugin-pwa. All data stored in LocalStorage. The AI mentor uses a small Laravel API ([`server/`](server/README.md)) that calls Anthropic's Claude, or optionally a local Ollama server (see below).
 
 ## Getting Started
 
@@ -132,9 +133,67 @@ Output goes to `dist/`. Deploy as a static site.
   git checkout develop && git merge main && git push
   ```
 
+## Hosted AI (BibleQuest AI)
+
+The API lives in [`server/`](server/README.md): setup, limits, privacy and deployment to shared hosting are described there. The app finds it through `VITE_AI_API_URL` (see [`.env.example`](.env.example)); builds without it offer only local Ollama. Design notes: [docs/300-hosted-ai.md](docs/300-hosted-ai.md).
+
+### Hosting the AI server (Laravel on shared LAMP hosting)
+
+The app itself is a static site (uploaded over FTP by CI). The AI mentor needs one small server-side part: a Laravel app in `server/` that keeps the Anthropic API key secret and enforces the spending limits. It runs on ordinary shared PHP hosting, with no Node, Redis or background workers.
+
+**You need:**
+
+- PHP **8.4 or newer** (the host runs 8.5) with the usual extensions (`pdo_mysql`, `mbstring`, `openssl`, `curl`, `json`).
+- A MySQL database.
+- SSH or a terminal in the hosting panel, to run three `php artisan` commands once.
+- An **Anthropic** API key from the Anthropic Console (Claude; an OpenAI key won't work).
+- Optional but strongly recommended: a free Cloudflare Turnstile widget for the bot check.
+
+**Steps** (details in [`server/README.md`](server/README.md#deploying-to-shared-hosting-lamp-php-84-the-host-runs-85)):
+
+1. **Subdomain:** create `api.your-domain` and point its document root at **`server/public`** (never at `server/`, which holds `.env` and the code).
+2. **Upload the code:** `git clone` on the host and run `composer install --no-dev --optimize-autoloader` in `server/`. Or run that locally and upload `server/` including `vendor/`.
+3. **Database:** create a MySQL database and user in the hosting panel.
+4. **Configure:** copy `server/.env.example` to `server/.env` and set at least:
+
+   ```ini
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_URL=https://api.your-domain
+   DB_CONNECTION=mysql
+   DB_HOST=…
+   DB_DATABASE=…
+   DB_USERNAME=…
+   DB_PASSWORD=…
+   CACHE_STORE=database
+   ANTHROPIC_API_KEY=…
+   AI_ALLOWED_ORIGINS=https://biblequest.causewaysoft.com
+   TURNSTILE_SECRET_KEY=…
+   AI_TIMEOUT_SECONDS=25   # keep below the host's PHP max_execution_time
+   ```
+
+5. **Run once** in `server/`:
+
+   ```bash
+   php artisan key:generate
+   php artisan migrate --force
+   php artisan config:cache
+   ```
+
+   Run `php artisan config:cache` again after every change to `.env`.
+
+6. **Point the app at it:** in GitHub → Settings → Secrets and variables → Actions → **Variables**, set `VITE_AI_API_URL=https://api.your-domain` (and `VITE_TURNSTILE_SITE_KEY` if you use Turnstile). The next deploy from `main` picks them up.
+7. **Check it:** `https://api.your-domain/up` returns 200, and the AI Chat page in the app answers.
+
+**Keep the bill predictable:** the server stops for the day once its estimated spend reaches `AI_DAILY_BUDGET_USD` (default $1.25 ≈ £30/month). Also set a **monthly spend limit in the Anthropic Console** as the hard backstop.
+
+**Before going live**, work through the checklist in [`backlog.md`](backlog.md) ("Hosted AI: go-live checklist and server hardening"). The most important item is turning on Turnstile: without it the per-device limits can be bypassed by a script.
+
+**Updating:** pull or upload the new code, then in `server/` run `composer install --no-dev --optimize-autoloader`, `php artisan migrate --force` and `php artisan config:cache`. CI runs the server's tests on PHP 8.5 but does not deploy the server.
+
 ## AI Assistant (Ollama) Setup
 
-BibleQuest can connect to an LLM running on your own Mac with [Ollama](https://ollama.com). Nothing goes to the cloud: the browser talks directly to Ollama at `http://localhost:11434`. Design and decisions: [docs/200-local-llm-epic.md](docs/200-local-llm-epic.md).
+BibleQuest can also connect to an LLM running on your own Mac with [Ollama](https://ollama.com). Nothing goes to the cloud: the browser talks directly to Ollama at `http://localhost:11434`. Design and decisions: [docs/200-local-llm-epic.md](docs/200-local-llm-epic.md).
 
 Once Ollama is set up, open **About → AI settings**, press **Test connection**, choose a model and turn the assistant on.
 

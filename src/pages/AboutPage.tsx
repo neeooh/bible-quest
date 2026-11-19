@@ -186,11 +186,21 @@ export default function AboutPage() {
         </section>
       )}
 
+      {/* AI mentor */}
+      <section className="card space-y-4">
+        <h2 className="text-lg font-serif font-semibold text-cream">AI Mentor</h2>
+        <p className="text-cream/70 text-sm leading-relaxed">
+          The AI mentor is free for everyone, with no account, up to a daily number of messages.
+          Your messages are sent to BibleQuest’s AI provider to get a reply; BibleQuest doesn’t
+          store them, and only keeps a count of messages per day to apply the limit.
+        </p>
+      </section>
+
       {/* Local AI Assistant setup */}
       <section className="card space-y-4">
-        <h2 className="text-lg font-serif font-semibold text-cream">Local AI Assistant (Ollama)</h2>
+        <h2 className="text-lg font-serif font-semibold text-cream">Advanced: your own AI with Ollama</h2>
         <p className="text-cream/70 text-sm leading-relaxed">
-          BibleQuest can use an AI model running on your own Mac with{' '}
+          Instead of BibleQuest AI, you can use an AI model running on your own Mac with{' '}
           <a
             href="https://ollama.com"
             target="_blank"
@@ -219,7 +229,7 @@ export default function AboutPage() {
             If your browser asks to allow access to devices on your local network, allow it for BibleQuest.
           </p>
           <p>
-            <span className="text-cream font-medium">4. Turn it on</span> — Open AI settings, test the connection, choose a model, and enable the assistant.
+            <span className="text-cream font-medium">4. Switch to it</span> — In AI settings, choose “My own Ollama”, test the connection and choose a model.
           </p>
         </div>
         <Link to="/settings/ai" className="btn-outline text-sm inline-flex items-center gap-2">

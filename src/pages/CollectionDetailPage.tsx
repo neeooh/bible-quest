@@ -3,24 +3,19 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useProgress } from '../hooks/useProgress';
 import { useSavedVerses } from '../hooks/useSavedVerses';
 import { useCollections } from '../hooks/useCollections';
+import { joinVerses, usePassageVerses } from '../hooks/usePassageVerses';
 import { toCollectionSlug } from '../lib/collections';
 import { getBookBySlug } from '../lib/book-metadata';
 import {
   getPassageStage,
   type LearningStage,
 } from '../lib/learning-stage';
-import {
-  ArrowLeft,
-  Edit,
-  Search,
-  Brain,
-  BookOpen,
-  Heart,
-  X,
-  FolderOpen,
-} from 'lucide-react';
+import { ArrowLeft, Copy, Edit, FolderMinus, FolderOpen, Search, Share2, X } from 'lucide-react';
 import CreateCollectionDialog from '../components/collections/CreateCollectionDialog';
 import CollectionIcon from '../components/collections/CollectionIcon';
+import VerseCard from '../components/verse/VerseCard';
+import { StageProgress } from '../components/verse/VerseStatus';
+import { copyVerse, memorisePath, practiseLabel, readVersePath, shareVerse } from '../lib/verse-actions';
 
 interface UnifiedEntry {
   key: string;
@@ -54,7 +49,6 @@ export default function CollectionDetailPage() {
   const collection = collections.find((c) => toCollectionSlug(c.name) === slug);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const entries: UnifiedEntry[] = useMemo(() => {
@@ -152,15 +146,31 @@ export default function CollectionDetailPage() {
     return result;
   }, [collection, progress.exerciseHistory, savedVerses, isFavourite]);
 
+  // Show the full passage from the bundled Bible: stored text may be a short
+  // topic preview or cut at 200 characters by the practice history.
+  const ranges = useMemo(
+    () =>
+      entries.map((e) => ({
+        key: e.key,
+        book: e.book,
+        chapter: e.chapterNumber,
+        start: e.startVerse,
+        end: e.endVerse,
+      })),
+    [entries],
+  );
+  const fullVerses = usePassageVerses(ranges);
+  const fullText = (e: UnifiedEntry) => joinVerses(fullVerses.get(e.key)) ?? e.text;
+
   const filtered = useMemo(() => {
     const needle = searchQuery.toLowerCase().trim();
     if (!needle) return entries;
     return entries.filter(
       (e) =>
         e.reference.toLowerCase().includes(needle) ||
-        e.text.toLowerCase().includes(needle),
+        (joinVerses(fullVerses.get(e.key)) ?? e.text).toLowerCase().includes(needle),
     );
-  }, [entries, searchQuery]);
+  }, [entries, fullVerses, searchQuery]);
 
   function toggleFavourite(entry: UnifiedEntry) {
     if (entry.isFavourite) {
@@ -177,7 +187,7 @@ export default function CollectionDetailPage() {
           book: entry.book,
           chapter: entry.chapterNumber,
           verse: entry.startVerse,
-          text: entry.text,
+          text: fullText(entry),
           reference: entry.reference,
         });
       }
@@ -286,109 +296,40 @@ export default function CollectionDetailPage() {
           <p className="text-cream/40 text-sm">No passages match your search.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {filtered.map((entry) => (
-            <div
+            <VerseCard
               key={entry.key}
-              className={`card flex items-start justify-between gap-4 border-l-4 ${
-                entry.isFavourite ? 'border-l-gold-500' : 'border-l-navy-600'
-              }`}
-            >
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-base text-gold-400 font-serif font-semibold">
-                    {entry.reference}
-                  </p>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
-                      entry.stage === 'learning'
-                        ? 'bg-blue-500/15 text-blue-400'
-                        : entry.stage === 'memorising'
-                          ? 'bg-amber-500/15 text-amber-400'
-                          : 'bg-green-500/15 text-green-400'
-                    }`}
-                  >
-                    {entry.stageLabel}
+              reference={entry.reference}
+              readHref={readVersePath(entry.book, entry.chapterNumber, entry.startVerse, entry.endVerse)}
+              verses={fullVerses.get(entry.key)}
+              text={entry.text}
+              clamp
+              note={
+                entry.timesCompleted > 0 ? (
+                  <span className="text-[0.78rem] text-cream/45">
+                    Best {Math.round(entry.bestAccuracy * 100)}% · {entry.timesCompleted} session
+                    {entry.timesCompleted > 1 ? 's' : ''}
                   </span>
-                </div>
-
-                {entry.text && (
-                  <p
-                    className={`text-cream/80 text-base mt-3 italic leading-relaxed cursor-pointer hover:text-cream transition-colors ${
-                      expandedCards.has(entry.key) ? '' : 'line-clamp-2'
-                    }`}
-                    onClick={() =>
-                      setExpandedCards((prev) => {
-                        const next = new Set(prev);
-                        if (next.has(entry.key)) next.delete(entry.key);
-                        else next.add(entry.key);
-                        return next;
-                      })
-                    }
-                    title={expandedCards.has(entry.key) ? 'Click to collapse' : 'Click to expand'}
-                  >
-                    &ldquo;{entry.text}&rdquo;
-                  </p>
-                )}
-
-                {entry.timesCompleted > 0 && (
-                  <p className="text-cream/40 text-xs mt-3">
-                    Best: {Math.round(entry.bestAccuracy * 100)}% &middot; {entry.timesCompleted} session{entry.timesCompleted > 1 ? 's' : ''}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-2 shrink-0">
-                <Link
-                  to={`/memorize?book=${entry.book}&chapter=${entry.chapterNumber}&start=${entry.startVerse}&end=${entry.endVerse}`}
-                  className="btn-gold text-sm inline-flex items-center justify-center gap-1.5 w-full"
-                >
-                  <Brain className="w-3.5 h-3.5" />
-                  Practise
-                </Link>
-                <div className="flex items-center gap-2">
-                  <Link
-                    to={`/read/${entry.book}/${entry.chapterNumber}?verse=${entry.startVerse}`}
-                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/40 hover:text-gold-400 hover:border-gold-500/40 transition-colors flex items-center justify-center"
-                    aria-label={`Read ${entry.reference}`}
-                    title="Read"
-                  >
-                    <BookOpen className="w-4 h-4" />
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => toggleFavourite(entry)}
-                    className={`w-9 h-9 rounded-lg border transition-colors flex items-center justify-center ${
-                      entry.isFavourite
-                        ? 'border-gold-500/30 text-red-400 hover:text-red-300'
-                        : 'border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40'
-                    }`}
-                    aria-label={
-                      entry.isFavourite
-                        ? `Remove ${entry.reference} from favourites`
-                        : `Add ${entry.reference} to favourites`
-                    }
-                    title={entry.isFavourite ? 'Remove from favourites' : 'Add to favourites'}
-                  >
-                    <Heart
-                      className="w-4 h-4"
-                      fill={entry.isFavourite ? 'currentColor' : 'none'}
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      removePassageFromCollection(collection.id, entry.key);
-                    }}
-                    className="w-9 h-9 rounded-lg border border-gold-500/20 text-cream/30 hover:text-red-400 hover:border-red-400/40 transition-colors flex items-center justify-center"
-                    aria-label={`Remove ${entry.reference} from collection`}
-                    title="Remove from collection"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+                ) : undefined
+              }
+              status={<StageProgress stage={entry.stage} started={entry.timesCompleted > 0} />}
+              favourite={{ active: entry.isFavourite, onToggle: () => toggleFavourite(entry) }}
+              menu={[
+                { label: 'Copy verse', icon: Copy, onSelect: () => copyVerse(fullText(entry), entry.reference) },
+                { label: 'Share', icon: Share2, onSelect: () => shareVerse(fullText(entry), entry.reference) },
+                {
+                  label: 'Remove from collection',
+                  icon: FolderMinus,
+                  danger: true,
+                  onSelect: () => removePassageFromCollection(collection.id, entry.key),
+                },
+              ]}
+              primary={{
+                label: practiseLabel(entry.timesCompleted, false),
+                to: memorisePath(entry.book, entry.chapterNumber, entry.startVerse, entry.endVerse),
+              }}
+            />
           ))}
         </div>
       )}

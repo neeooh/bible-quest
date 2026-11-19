@@ -1,21 +1,23 @@
 import { Link } from 'react-router-dom';
 import { Settings, Sparkles } from 'lucide-react';
 import { describeAiError } from '../../lib/ai/errors';
+import { useAiSettings } from '../../hooks/useAiSettings';
 
 interface AiSetupNoticeProps {
-  /** An error from the Ollama client; when absent, explains that AI is turned off. */
+  /** An error from the chat provider; when absent, explains that AI is turned off. */
   error?: unknown;
   /** Shown as a secondary action, e.g. "Try again". */
   onRetry?: () => void;
 }
 
-/** Friendly "connect your local assistant" message with a link to AI settings. */
+/** Friendly "AI isn't working" message with a link to AI settings. */
 export default function AiSetupNotice({ error, onRetry }: AiSetupNoticeProps) {
+  const { settings } = useAiSettings();
   const description = error
-    ? describeAiError(error)
+    ? describeAiError(error, undefined, settings.provider)
     : {
         title: 'The AI assistant is turned off',
-        hints: ['Turn it on in AI settings to chat with a model running on your own Mac with Ollama.'],
+        hints: ['Turn it on in AI settings to chat with the BibleQuest AI mentor.'],
       };
 
   return (
