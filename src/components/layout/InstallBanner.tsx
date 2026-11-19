@@ -23,9 +23,9 @@ export default function InstallBanner({ visible }: InstallBannerProps) {
           className="w-10 h-10 shrink-0"
         />
         <div className="min-w-0 flex-1">
-          <p className="text-cream text-sm font-medium">Install BibleQuest</p>
+          <p className="text-cream text-sm font-medium">Add BibleQuest to your home screen</p>
           <p className="text-cream/40 text-xs">
-            Works offline. Add to your home screen.
+            Opens like an app and works offline. Remove it anytime.
           </p>
         </div>
         <button
@@ -34,7 +34,7 @@ export default function InstallBanner({ visible }: InstallBannerProps) {
           className="btn-outline text-sm px-4 py-2 shrink-0 inline-flex items-center gap-2"
         >
           <Download className="w-4 h-4" aria-hidden="true" />
-          Install
+          Add
         </button>
         <button
           type="button"
