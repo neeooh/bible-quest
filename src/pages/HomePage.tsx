@@ -1,14 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Flame,
-  Copy,
-  ArrowRight,
-  Loader2,
-  BookMarked,
-  Share2,
-  Trophy,
-} from 'lucide-react';
+import { BookMarked, Library } from 'lucide-react';
 import { getDailyVerse } from '../lib/bible';
 import { getLastRead } from '../lib/last-read';
 import { useProgress } from '../hooks/useProgress';
@@ -17,9 +9,9 @@ import { getPassageStage } from '../lib/learning-stage';
 import { showToast } from '../components/Toast';
 import AiOnly from '../components/ai/AiOnly';
 import AiSearchBox from '../components/ai/AiSearchBox';
-import type { DailyVerse } from '../lib/types';
-import VerseCard from '../components/verse/VerseCard';
-import { copyVerse, memorisePath, readVersePath, shareVerse } from '../lib/verse-actions';
+import type { DailyVerse, UserProgress } from '../lib/types';
+import VerseOfTheDay from '../components/home/VerseOfTheDay';
+import ProgressSummary from '../components/home/ProgressSummary';
 
 export default function HomePage() {
   const { progress } = useProgress();
@@ -93,117 +85,64 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-7rem)] flex flex-col justify-center space-y-12 py-8">
-
+    <div className="mx-auto w-full max-w-2xl py-8">
       {/* AI mentor search (only when the AI assistant is enabled) */}
       <AiOnly>
-        <AiSearchBox />
+        <div className="mb-10">
+          <AiSearchBox />
+        </div>
       </AiOnly>
 
-      {/* Daily Verse */}
-      {daily === null ? (
-        <section className="card max-w-2xl w-full mx-auto flex justify-center py-12" aria-label="Verse of the Day">
-          <Loader2 className="w-6 h-6 text-gold-500 animate-spin" />
-        </section>
-      ) : (
-        <VerseCard
-          variant="hero"
-          className="max-w-2xl w-full mx-auto"
-          eyebrow="Verse of the Day"
-          reference={daily.reference}
-          readHref={readVersePath(daily.book, daily.chapter, daily.verse)}
-          text={daily.text}
-          favourite={{ active: dailyFavourited, onToggle: handleToggleFavourite }}
-          menu={[
-            { label: 'Copy verse', icon: Copy, onSelect: () => copyVerse(daily.text, daily.reference) },
-            { label: 'Share', icon: Share2, onSelect: () => shareVerse(daily.text, daily.reference) },
-          ]}
-          primary={{ label: 'Memorise', to: memorisePath(daily.book, daily.chapter, daily.verse) }}
-        />
-      )}
+      <VerseOfTheDay
+        daily={daily}
+        favourite={dailyFavourited}
+        onToggleFavourite={handleToggleFavourite}
+        streak={activeStreak(progress)}
+      />
 
-      {/* CTA */}
-      <section className="flex flex-wrap justify-center gap-4 items-center">
+      <div className="mt-12">
+        <ProgressSummary counts={stageCounts} daily={daily} />
+      </div>
+
+      {/* Way-finding */}
+      <nav aria-label="Keep going" className="mt-10 flex flex-wrap items-center justify-center gap-x-7 gap-y-2.5">
         {lastRead && (
           <Link
             to={`/read/${lastRead.book}/${lastRead.chapter}`}
-            className="btn-outline inline-flex items-center gap-2 text-base px-8 py-3.5"
+            className="inline-flex items-center gap-1.5 text-sm text-cream/60 transition-colors hover:text-cream"
           >
-            <BookMarked className="w-5 h-5" />
-            Continue: {lastRead.bookName} {lastRead.chapter}
+            <BookMarked className="h-[15px] w-[15px] text-gold-500" aria-hidden="true" />
+            Continue reading {lastRead.bookName} {lastRead.chapter}
           </Link>
         )}
         <Link
           to="/library"
-          className="text-gold-400 hover:text-gold-300 hover:underline transition-colors inline-flex items-center gap-1.5 text-sm"
+          className="inline-flex items-center gap-1.5 text-sm text-cream/60 transition-colors hover:text-cream"
         >
+          <Library className="h-[15px] w-[15px] text-gold-500" aria-hidden="true" />
           Explore the Bible
-          <ArrowRight className="w-4 h-4" />
         </Link>
-      </section>
+      </nav>
 
-      {/* Your Progress — persistent summary card */}
-      {(
-        <section className="card max-w-2xl w-full mx-auto space-y-4">
-            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
-              <Trophy className="w-3.5 h-3.5 text-gold-500" />
-              <span className="text-cream/40">Your Progress</span>
-            </div>
-            <div className="grid grid-cols-6 sm:grid-cols-5 gap-3">
-              <Link
-                to="/my-verses?stage=not-started"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group text-center col-span-2 sm:col-span-1 aspect-square flex flex-col items-center justify-center"
-              >
-                <p className={`text-3xl font-bold ${stageCounts.notPractised > 0 ? 'text-cream/50' : 'text-cream/20'}`}>
-                  {stageCounts.notPractised}
-                </p>
-                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Not Started</p>
-              </Link>
-              <Link
-                to="/my-verses?stage=learning"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group text-center col-span-2 sm:col-span-1 aspect-square flex flex-col items-center justify-center"
-              >
-                <p className="text-3xl font-bold text-blue-400">{stageCounts.learning}</p>
-                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Learning</p>
-              </Link>
-              <Link
-                to="/my-verses?stage=memorising"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group text-center col-span-2 sm:col-span-1 aspect-square flex flex-col items-center justify-center"
-              >
-                <p className="text-3xl font-bold text-amber-400">{stageCounts.memorising}</p>
-                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Memorising</p>
-              </Link>
-              <Link
-                to="/my-verses?stage=retention"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group text-center col-span-3 sm:col-span-1 aspect-auto sm:aspect-square flex flex-col items-center justify-center"
-              >
-                <p className="text-3xl font-bold text-green-400">{stageCounts.retention}</p>
-                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Retention</p>
-              </Link>
-              <Link
-                to="/my-verses?stage=due-for-review"
-                className="rounded-lg bg-navy-700 hover:bg-navy-600 transition-colors p-3 group text-center col-span-3 sm:col-span-1 aspect-auto sm:aspect-square flex flex-col items-center justify-center"
-              >
-                <p className={`text-3xl font-bold ${stageCounts.dueForReview > 0 ? 'text-red-400' : 'text-cream/20'}`}>
-                  {stageCounts.dueForReview}
-                </p>
-                <p className="text-cream/40 text-xs mt-1 group-hover:text-cream/60 transition-colors">Review</p>
-              </Link>
-            </div>
-            <Link to="/progress" className="flex items-center justify-center gap-1.5 pt-1 group">
-              <Flame className="w-3.5 h-3.5 text-gold-500" />
-              <span className="text-sm font-semibold text-gold-400">{progress.dailyStreak}</span>
-              <span className="text-sm text-cream/40">day streak</span>
-            </Link>
-          </section>
-      )}
-
-      {/* About */}
-      <section className="text-center">
-        <Link to="/about" className="text-cream/40 text-xs hover:text-cream/60 transition-colors">
+      <p className="mt-7 text-center">
+        <Link to="/about" className="text-xs text-cream/45 transition-colors hover:text-cream/70">
           About BibleQuest
         </Link>
-      </section>
+      </p>
     </div>
   );
+}
+
+/**
+ * The stored streak only changes when you next practise, so after a missed
+ * day it is stale. Count it only while it is still alive (practised today or
+ * yesterday) — same UTC dates as updateStreak().
+ */
+function activeStreak(progress: UserProgress): number {
+  if (!progress.lastPracticeDate || progress.dailyStreak <= 0) return 0;
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const alive = [today, yesterday].map((d) => d.toISOString().slice(0, 10));
+  return alive.includes(progress.lastPracticeDate) ? progress.dailyStreak : 0;
 }

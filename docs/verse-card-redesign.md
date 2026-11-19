@@ -114,3 +114,17 @@ Follow-ups beyond the card (not in scope of this branch):
 - One content width for list pages (Topic, My Verses, Library).
 - Reduce nested surfaces (progress tiles, AI panels).
 - Contrast pass on all `cream/30`–`cream/40` text.
+
+## Home page redesign (option C, "Daily ritual")
+
+Mock-ups of the three directions: [`docs/mockups/verse-of-the-day.html`](mockups/verse-of-the-day.html). Chosen: **C** with these adjustments — keep a "Verse of the Day" label next to the date, show the streak badge only while the streak is alive, work out the "About N minutes" hint from the verse length, tune the glow separately for the light theme.
+
+What changed and why:
+
+- **Verse of the Day** (`src/components/home/VerseOfTheDay.tsx`) — no box; centred Literata verse with a soft gold glow behind it (`.verse-glow` in `src/index.css`, with its own light-theme colours); date · label · "Day N" streak badge; reference under the verse; one large "Memorise today's verse" button with an "About N minutes · 1 verse" hint (`memoriseMinutes()`); Favourite and Share as quiet text buttons. The `hero` size and `eyebrow` slot were removed from `VerseCard`, which is now list/cited only.
+- **Streak** — the stored streak only changes on the next practice, so it can be stale; Home counts it only if the last practice was today or yesterday (`activeStreak()` in `HomePage.tsx`).
+- **Your progress** (`src/components/home/ProgressSummary.tsx`) — replaces five traffic-light tiles inside a card with one segmented bar in shades of gold (most mature first), counts that link to My Verses filters, and one next step: review what's due, else start saved verses, else "all caught up". A brand-new user gets an invitation ("Start with <today's verse>", "Find verses by topic") instead of a row of zeros.
+- **AI ask box** — no pulsing glow on Home (still on the new-chat screen, where it is the main focus); quieter border, left-aligned placeholder, outline arrow button.
+- **Way-finding** — "Continue reading …" and "Explore the Bible" as one quiet row under progress; "About BibleQuest" last. The page is no longer vertically centred, so nothing jumps when "Continue reading" appears.
+
+Follow-up spotted: `updateStreak()` in `src/lib/progress.ts` leaves the streak at 0 on the first day of practice and resets a broken streak to 0 instead of 1, so "Day N" reads one day short.

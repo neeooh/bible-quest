@@ -36,3 +36,9 @@ export function practiseLabel(timesCompleted: number, due: boolean): string {
   if (due) return 'Review';
   return timesCompleted > 0 ? 'Practise' : 'Start';
 }
+
+/** Rough time to memorise a passage: about 8 words a minute, at least 2 minutes. */
+export function memoriseMinutes(text: string): number {
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(2, Math.round(words / 8));
+}

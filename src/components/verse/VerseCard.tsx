@@ -11,7 +11,7 @@ import { ArrowRight, BookOpen, Heart, MoreHorizontal, type LucideIcon } from 'lu
  * added around it.
  */
 
-export type VerseCardVariant = 'hero' | 'list' | 'cited';
+export type VerseCardVariant = 'list' | 'cited';
 
 export interface VerseCardVerse {
   verse: number;
@@ -33,8 +33,6 @@ export interface VerseCardProps {
   /** Where the reference and the Read button go. */
   readHref: string;
   translation?: string;
-  /** Small section label above the header (hero only), e.g. "Verse of the Day". */
-  eyebrow?: ReactNode;
   /** Right side of the header: review status, chat pager… */
   aside?: ReactNode;
   /** One block of text… */
@@ -54,7 +52,6 @@ export interface VerseCardProps {
 }
 
 const SCRIPTURE_SIZE: Record<VerseCardVariant, string> = {
-  hero: 'text-xl sm:text-[1.5rem] leading-[1.55]',
   list: 'text-[1.09rem] sm:text-[1.16rem] leading-[1.62]',
   cited: 'text-[1.09rem] sm:text-[1.16rem] leading-[1.62]',
 };
@@ -64,7 +61,6 @@ export default function VerseCard({
   reference,
   readHref,
   translation = 'WEB',
-  eyebrow,
   aside,
   text,
   verses,
@@ -100,23 +96,13 @@ export default function VerseCard({
   return (
     <article
       aria-labelledby={headingId}
-      className={`group/card relative rounded-2xl border border-gold-500/10 bg-navy-800 transition-[border-color,box-shadow] duration-200 hover:border-gold-500/25 hover:shadow-[0_8px_28px_-18px_rgba(0,0,0,0.6)] ${
-        variant === 'hero' ? 'p-5 sm:p-8' : 'px-[18px] pt-[18px] pb-3.5 sm:px-7 sm:pt-[22px] sm:pb-[18px]'
-      } ${className}`}
+      className={`group/card relative rounded-2xl border border-gold-500/10 bg-navy-800 transition-[border-color,box-shadow] duration-200 hover:border-gold-500/25 hover:shadow-[0_8px_28px_-18px_rgba(0,0,0,0.6)] px-[18px] pt-[18px] pb-3.5 sm:px-7 sm:pt-[22px] sm:pb-[18px] ${className}`}
     >
-      {eyebrow && (
-        <p className="mb-4 font-sans text-gold-500 text-[11px] font-medium uppercase tracking-[0.2em]">
-          {eyebrow}
-        </p>
-      )}
-
       <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1.5">
         <h3 id={headingId} className="m-0 leading-tight">
           <Link
             to={readHref}
-            className={`font-serif font-semibold text-gold-400 underline-offset-4 decoration-1 hover:underline ${
-              variant === 'hero' ? 'text-lg sm:text-xl' : 'text-[1.19rem]'
-            }`}
+            className="font-serif text-[1.19rem] font-semibold text-gold-400 underline-offset-4 decoration-1 hover:underline"
           >
             {reference}
           </Link>
