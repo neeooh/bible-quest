@@ -7,6 +7,7 @@ import { joinVerses, usePassageVerses } from '../hooks/usePassageVerses';
 import { toCollectionSlug } from '../lib/collections';
 import { getBookBySlug } from '../lib/book-metadata';
 import { getPassageStage, type LearningStage } from '../lib/learning-stage';
+import { rangeEnd } from '../lib/practice-queue';
 import { copyVerse, memorisePath, practiseLabel, readVersePath, shareVerse } from '../lib/verse-actions';
 import {
   BookOpen,
@@ -37,14 +38,6 @@ function timeAgo(timestamp: number): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
-}
-
-/** End verse of a stored reference like "Psalm 34:17–18"; `start` if it is a single verse. */
-function rangeEnd(reference: string, start: number): number {
-  const m = reference.match(/:(\d+)\s*[–-]\s*(\d+)\s*$/);
-  if (!m || Number(m[1]) !== start) return start;
-  const end = Number(m[2]);
-  return end > start ? end : start;
 }
 
 type StageFilter = 'all' | 'not-started' | 'learning' | 'memorising' | 'retention' | 'due-for-review';

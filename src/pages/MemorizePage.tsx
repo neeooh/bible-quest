@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { getPracticeItems, practiceQueue } from '../lib/practice-queue';
+import PracticeList from '../components/memorize/PracticeList';
 import { Puzzle, Layers, AlignLeft, Loader2, Brain, ChevronDown, ChevronUp, CaseSensitive, Shuffle, Volume2, VolumeX } from 'lucide-react';
 import { loadBook, formatReference } from '../lib/bible';
 import {
@@ -29,10 +31,19 @@ const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'recitation', label: 'Full Recitation', icon: <AlignLeft className="w-4 h-4" /> },
 ];
 
-export default function MemorizePage() {
+/**
+ * The page reads its passage from the URL only when it mounts, so remount it
+ * whenever the URL changes (e.g. picking from "Your practice" while here).
+ */
+export default function MemorizeRoute() {
+  const [searchParams] = useSearchParams();
+  return <MemorizePage key={searchParams.toString()} />;
+}
+
+function MemorizePage() {
   const [searchParams] = useSearchParams();
   const { progress, recordExercise } = useProgress();
-  const { addVerses } = useSavedVerses();
+  const { addVerses, savedVerses } = useSavedVerses();
 
   const paramBook = searchParams.get('book');
   const paramChapter = searchParams.get('chapter');
@@ -120,6 +131,11 @@ export default function MemorizePage() {
   }, [chapter, startVerse, endVerse]);
 
   const passageSelected = selectedBook && selectedChapter > 0 && verses.length > 0;
+
+  const practiceQueueItems = useMemo(
+    () => practiceQueue(getPracticeItems(progress.exerciseHistory, savedVerses, progress.hiddenPassages)),
+    [progress.exerciseHistory, progress.hiddenPassages, savedVerses],
+  );
 
   // Auto-save verses to My Verses when a passage is loaded for memorisation
   useEffect(() => {
@@ -212,6 +228,9 @@ export default function MemorizePage() {
         <Brain className="w-6 h-6 text-gold-500" />
         <h1 className="text-3xl font-serif font-bold text-cream">Memorise</h1>
       </div>
+
+      {/* What to practise next (only before a passage is chosen) */}
+      {!passageSelected && !selectedBook && <PracticeList queue={practiceQueueItems} />}
 
       {/* Passage Selector */}
       <section className="card space-y-4">

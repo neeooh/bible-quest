@@ -128,3 +128,12 @@ What changed and why:
 - **Way-finding** — "Continue reading …" and "Explore the Bible" as one quiet row under progress; "About BibleQuest" last. The page is no longer vertically centred, so nothing jumps when "Continue reading" appears.
 
 Follow-up spotted: `updateStreak()` in `src/lib/progress.ts` leaves the streak at 0 on the first day of practice and resets a broken streak to 0 instead of 1, so "Day N" reads one day short.
+
+### Follow-up: a clean Home (2026-11-20)
+
+Home was still a set of shortcuts to other pages. Decision: **Home shows today, not a dashboard.**
+
+- **Home** keeps only the AI ask box, the Verse of the Day, and one quiet "Pick up where you left off" line (`src/components/home/PickUpLine.tsx`), shown only when there is something to pick up. It shows the single most useful step: verses due for review, else the passage you're memorising, else your reading. The progress block, the first-run block and the "Continue reading / Explore the Bible / About" links are gone. Library already has "Continue reading" and topics, and the nav has About.
+- **My Progress** now opens with the progress widget, labelled "Your verses" (`src/components/progress/ProgressSummary.tsx`).
+- **Memorise** now opens with a "Your practice" list (`src/components/memorize/PracticeList.tsx`): due reviews, then passages in progress, then saved verses not started yet, with Review / Practise / Start. The page now remounts when its URL changes, so choosing from the list (or clicking Memorise in the nav mid-exercise) loads the right state.
+- Shared logic: `src/lib/practice-queue.ts` (one entry per practised or saved passage, stage counts, practice order; tested).

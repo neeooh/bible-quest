@@ -1,15 +1,8 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Clock, Sparkles } from 'lucide-react';
 import type { DailyVerse } from '../../lib/types';
+import type { StageCounts } from '../../lib/practice-queue';
 import { memorisePath } from '../../lib/verse-actions';
-
-export interface StageCounts {
-  learning: number;
-  memorising: number;
-  retention: number;
-  notPractised: number;
-  dueForReview: number;
-}
 
 const STAGES = [
   { key: 'retention', label: 'Retention', filter: 'retention', swatch: 'bg-gold-500' },
@@ -21,18 +14,19 @@ const STAGES = [
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 /**
- * Home page progress: one bar in shades of gold (most mature first), counts
+ * My Progress summary: one bar in shades of gold (most mature first), counts
  * that link to My Verses, and one clear next step. A brand-new user gets an
  * invitation instead of a row of zeros.
  */
 export default function ProgressSummary({ counts, daily }: { counts: StageCounts; daily: DailyVerse | null }) {
+  const frame = 'rounded-2xl border border-gold-500/10 bg-navy-800 px-[18px] py-6 sm:px-7';
   const total = counts.learning + counts.memorising + counts.retention + counts.notPractised;
 
   if (total === 0) {
     return (
-      <section aria-labelledby="progress-label" className="border-t border-cream/8 pt-7">
+      <section aria-labelledby="progress-label" className={frame}>
         <h2 id="progress-label" className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-gold-500">
-          Your progress
+          Your verses
         </h2>
         <p className="mt-3.5 font-scripture text-[1.19rem] leading-normal text-cream">
           Hide God’s word in your heart, one verse at a time.
@@ -64,14 +58,12 @@ export default function ProgressSummary({ counts, daily }: { counts: StageCounts
   const barLabel = STAGES.map((s) => `${counts[s.key]} ${s.label.toLowerCase()}`).join(', ');
 
   return (
-    <section aria-labelledby="progress-label" className="border-t border-cream/8 pt-7">
+    <section aria-labelledby="progress-label" className={frame}>
       <div className="flex items-baseline justify-between gap-3">
         <h2 id="progress-label" className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-gold-500">
-          Your progress
+          Your verses
         </h2>
-        <Link to="/progress" className="text-[0.8rem] text-cream/60 transition-colors hover:text-cream">
-          See details
-        </Link>
+        <span className="text-[0.8rem] text-cream/60">{plural(total, 'passage')}</span>
       </div>
 
       <div role="img" aria-label={barLabel} className="mt-[18px] flex h-2 gap-[3px] overflow-hidden rounded-full">
@@ -108,11 +100,11 @@ function NextStep({ counts }: { counts: StageCounts }) {
   if (counts.dueForReview > 0) {
     icon = <Clock className="h-4 w-4 text-gold-500" aria-hidden="true" />;
     message = `${plural(counts.dueForReview, 'verse is', 'verses are')} due for review today`;
-    action = { label: 'Review now', to: '/my-verses?stage=due-for-review' };
+    action = { label: 'Review now', to: '/memorize' };
   } else if (counts.notPractised > 0) {
     icon = <Sparkles className="h-4 w-4 text-gold-500" aria-hidden="true" />;
     message = `${plural(counts.notPractised, 'saved verse')} ready to start`;
-    action = { label: 'Start learning', to: '/my-verses?stage=not-started' };
+    action = { label: 'Start learning', to: '/memorize' };
   }
 
   return (
